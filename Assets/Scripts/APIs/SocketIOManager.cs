@@ -620,7 +620,7 @@ public class SocketIOManager : MonoBehaviour
 
     void ManageOtherPlayerbets(string data)
     {
-        Debug.Log("Bet Placed $$$$$$$$$$$$$$\n" + data);
+        // Debug.Log("Bet Placed $$$$$$$$$$$$$$\n" + data);
         OtherChipData = JsonUtility.FromJson<Root>(data);
         gameManager.ManageBrodcastBetsOtherPlayers(OtherChipData);
 

@@ -388,6 +388,7 @@ public class GameManager : MonoBehaviour
         }
         MoveAllChipstohome();
         yield return new WaitForSeconds(1f);
+        UpdatePlayerbalance(socketManager.gameLoopData.amount.ToString());
         DistributeAllPayout();
         yield return null;
     }
@@ -886,9 +887,9 @@ public class GameManager : MonoBehaviour
                 Debug.LogError("Invalid Suit: " + suit);
                 break;
         }
-        Debug.Log("#----------------------------------------------------_# ");   // <== ADD
-        Debug.Log("##SUIT = " + suit);     // <== ADD
-        Debug.Log("##VALUE = " + value);   // <== ADD
+        //  Debug.Log("#----------------------------------------------------_# ");   // <== ADD
+        //   Debug.Log("##SUIT = " + suit);     // <== ADD
+        //   Debug.Log("##VALUE = " + value);   // <== ADD
 
         return tempSprite;
     }
@@ -904,8 +905,8 @@ public class GameManager : MonoBehaviour
             case "J": return spriteList[10];
             default:
                 int myval = int.Parse(value);
-                Debug.Log("##index = " + (myval - 1));   // <== ADD
-                Debug.Log("#----------------------------------------------------_# ");   // <== ADD
+                //      Debug.Log("##index = " + (myval - 1));   // <== ADD
+                //  Debug.Log("#----------------------------------------------------_# ");   // <== ADD
                 return spriteList[myval - 1];
         }
     }
@@ -915,6 +916,11 @@ public class GameManager : MonoBehaviour
 
 
     #region helper
+
+    internal void UpdatePlayerbalance(string balance)
+    {
+        uiManager.MainPlayers.playerBalence.text = balance;
+    }
     Sprite findChipSprite(int amount, List<int> betOptions)
     {
         for (int i = 0; i < betOptions.Count; i++)

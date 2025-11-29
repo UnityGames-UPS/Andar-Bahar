@@ -596,10 +596,10 @@ public class UiManager : MonoBehaviour
     public void OnCoinSelected(Button selectedCoin)
     {
         SetChipoption(false);
+
         var tempImage = coinSelector.chipImage.sprite;
         coinSelector.chipImage.sprite = selectedCoin.image.sprite;
         selectedCoin.image.sprite = tempImage;
-
 
         TMP_Text selectorText = coinSelector.GetComponentInChildren<TMP_Text>();
         TMP_Text selectedText = selectedCoin.GetComponentInChildren<TMP_Text>();
@@ -608,6 +608,12 @@ public class UiManager : MonoBehaviour
         selectorText.text = selectedText.text;
         selectedText.text = tempText;
 
+        Chip selectorChip = coinSelector.GetComponent<Chip>();
+        Chip selectedChip = selectedCoin.GetComponent<Chip>();
+
+        int tempIndex = selectorChip.chipIndex;
+        selectorChip.chipIndex = selectedChip.chipIndex;
+        selectedChip.chipIndex = tempIndex;
 
         RetractCoins();
     }
