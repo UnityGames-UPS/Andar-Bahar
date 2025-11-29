@@ -388,7 +388,7 @@ public class GameManager : MonoBehaviour
         }
         MoveAllChipstohome();
         yield return new WaitForSeconds(1f);
-        UpdatePlayerbalance(socketManager.gameLoopData.amount.ToString());
+
         DistributeAllPayout();
         yield return null;
     }

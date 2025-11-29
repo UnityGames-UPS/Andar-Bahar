@@ -597,10 +597,13 @@ public class SocketIOManager : MonoBehaviour
         Debug.Log(json);
         doubleBetData = JsonUtility.FromJson<Root>(json);
         gameManager.DoubleBets(doubleBetData.payload.bets);
+        gameManager.UpdatePlayerbalance(doubleBetData.amount.ToString());
     }
     void OnCancle(string json)
     {
+        doubleBetData = JsonUtility.FromJson<Root>(json);
         gameManager.CancleBets();
+        gameManager.UpdatePlayerbalance(doubleBetData.amount.ToString());
     }
     void OnUndo(string json)
     {
@@ -608,6 +611,7 @@ public class SocketIOManager : MonoBehaviour
         Debug.Log(json);
         doubleBetData = JsonUtility.FromJson<Root>(json);
         gameManager.UnduBets(doubleBetData.payload.bet.betId);
+        gameManager.UpdatePlayerbalance(doubleBetData.amount.ToString());
     }
     void OnRoomEnter(string json)
     {
@@ -663,6 +667,7 @@ public class SocketIOManager : MonoBehaviour
     {
         Debug.Log("CashOut\n" + data);
         CashoutData = JsonUtility.FromJson<Root>(data);
+
 
     }
     private void OnBetAcknowledged(string data)
