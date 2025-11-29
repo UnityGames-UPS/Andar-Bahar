@@ -9,6 +9,8 @@ using UnityEngine.Networking;
 public class UiManager : MonoBehaviour
 {
     [SerializeField]
+    private AudioManager audioController;
+    [SerializeField]
     private SocketIOManager socketManager;
 
     [Header("Screens UI")]
@@ -149,18 +151,55 @@ public class UiManager : MonoBehaviour
     [SerializeField]
     private GameManager gameManager;
 
-    [SerializeField]
-    private AudioManager audioController;
     bool isExit;
     bool isMusic;
     bool isSound;
 
+    private bool isExpanded = false;
+    public float duration = 0.5f;
 
 
+
+    [Header("stats")]
+    [SerializeField] private List<StatsPrefab> LineStats;
+    [SerializeField] private GameObject StatsPref;
+    [SerializeField] private Transform StatsParent;
+    [SerializeField] private Image FillAb;
+    [SerializeField] private TMP_Text AndarPercentage;
+    [SerializeField] private TMP_Text BaharPercentage;
+    [SerializeField] private Image Fillprobability;
+    [SerializeField] private TMP_Text AndarProb;
+    [SerializeField] private TMP_Text BaharProbab;
+    [SerializeField] private TMP_Text cardProb;
+
+    private List<StatsPrefab> gridStats = new List<StatsPrefab>();
+    private const int MAX_GRID = 26;
+
+
+    [Header("coins")]
+    [SerializeField] internal GameObject chipPanel;
+    [SerializeField] internal Chip coinSelector;
+    [SerializeField] internal Button coinSelectorBtn;
+    [SerializeField] internal List<Chip> Coins;
+
+    [Header("Chipoptions")]
+    [SerializeField] internal GameObject chiOptionpanel;
+    [SerializeField] internal Button Undubtn;
+    [SerializeField] internal Button Canclebtn;
+    [SerializeField] internal Button Doublebtn;
+    [SerializeField] internal GameObject NetBetPanel;
+    [SerializeField] internal TMP_Text NetBet;
+    [Header("player data")]
+    [SerializeField] internal PlayerData MainPlayers;
+    [SerializeField] internal List<PlayerData> RichestPlayers;
+    [SerializeField] internal List<PlayerData> WinnerPlayers;
+    [SerializeField] internal List<Sprite> UserIcons;
 
     private void Start()
     {
-
+        RetractCoins();
+        if (coinSelectorBtn) coinSelectorBtn.onClick.RemoveAllListeners();
+        if (coinSelectorBtn) coinSelectorBtn.onClick.AddListener(delegate { ToggleCoins(); });
 
         if (Paytable_Button) Paytable_Button.onClick.RemoveAllListeners();
         if (Paytable_Button) Paytable_Button.onClick.AddListener(delegate { OpenPopup(PaytablePopup_Object); });
@@ -245,10 +284,10 @@ public class UiManager : MonoBehaviour
         if (HistoryMain_button) HistoryMain_button.onClick.AddListener(delegate { OpenPopup(HistoryPopup_Object); });
 
         if (MenuMain_button) MenuMain_button.onClick.RemoveAllListeners();
-        if (MenuMain_button) MenuMain_button.onClick.AddListener(delegate { ResetMenuPanel(false);ToggleMenuPanel(); });
+        if (MenuMain_button) MenuMain_button.onClick.AddListener(delegate { ResetMenuPanel(false); ToggleMenuPanel(); });
 
         if (MenuInGame_button) MenuInGame_button.onClick.RemoveAllListeners();
-        if (MenuInGame_button) MenuInGame_button.onClick.AddListener(delegate { ResetMenuPanel(true);ToggleMenuPanel(); });
+        if (MenuInGame_button) MenuInGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); ToggleMenuPanel(); });
 
         if (CasualGame_button) CasualGame_button.onClick.RemoveAllListeners();
         if (CasualGame_button) CasualGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); GameScreen_Object.SetActive(true); });
@@ -266,7 +305,7 @@ public class UiManager : MonoBehaviour
         if (Info_button) Info_button.onClick.AddListener(delegate { OpenPopup(InfoPopup_Object); MenuPanel_Object.SetActive(false); });
 
         if (History_button) History_button.onClick.RemoveAllListeners();
-        if (History_button) History_button.onClick.AddListener(delegate { OpenPopup(HistoryPopup_Object);MenuPanel_Object.SetActive(false); });
+        if (History_button) History_button.onClick.AddListener(delegate { OpenPopup(HistoryPopup_Object); MenuPanel_Object.SetActive(false); });
 
         if (Sound_button) Sound_button.onClick.RemoveAllListeners();
         if (Sound_button) Sound_button.onClick.AddListener(delegate { ToggleSound(); });
@@ -302,20 +341,21 @@ public class UiManager : MonoBehaviour
         if (HistoryClose_button) HistoryClose_button.onClick.AddListener(delegate { ClosePopup(HistoryPopup_Object); });
 
 
+        Undubtn.onClick.RemoveAllListeners();
+        Undubtn.onClick.AddListener(delegate { socketManager.SendUndo(); });
 
+        Canclebtn.onClick.RemoveAllListeners();
+        Canclebtn.onClick.AddListener(delegate { socketManager.SendCancle(); });
 
-
+        Doublebtn.onClick.RemoveAllListeners();
+        Doublebtn.onClick.AddListener(delegate { socketManager.SendDouble(); });
 
     }
 
 
 
 
-
-    private void UpdateFrequency(float value)
-    {
-        Mathf.Clamp(value, 0.2f, 2);
-    }
+    #region Everytheing else
 
     private void ResetMenuPanel(bool IsGameScreen)
     {
@@ -496,6 +536,262 @@ public class UiManager : MonoBehaviour
 
         UpdateInfoUI();
     }
+
+    private void ToggleCoins()
+    {
+        if (isExpanded)
+            RetractCoins();
+        else
+            ExpandCoins();
+    }
+
+    private void ExpandCoins()
+    {
+        if (audioController) audioController.PlayWLAudio("coinSelect");
+        SetChipoption(false);
+        float spacing = 90f; // distance between coins
+        Vector3 center = coinSelector.transform.localPosition;
+
+        for (int i = 0; i < Coins.Count; i++)
+        {
+            var coin = Coins[i];
+
+            coin.gameObject.SetActive(true);
+
+            // Each coin moves left by (i + 1) * spacing
+            float offset = (i + 1) * spacing;
+
+            Vector3 targetPos = center + new Vector3(-offset, 0, 0);
+
+            coin.transform.DOLocalMove(targetPos, duration)
+                .SetEase(Ease.OutBack);
+        }
+
+        isExpanded = true;
+    }
+
+    private void RetractCoins()
+    {
+        Vector3 center = coinSelector.transform.localPosition;
+        if (audioController) audioController.PlayWLAudio("coinSelect");
+        for (int i = 0; i < Coins.Count; i++)
+        {
+            var coin = Coins[i];
+
+            coin.transform.DOLocalMove(center, duration)
+                .SetEase(Ease.InBack)
+                .OnComplete(() =>
+                {
+                    coin.gameObject.SetActive(false);
+                });
+        }
+
+        SetChipoption(true);
+        isExpanded = false;
+    }
+
+
+
+
+    public void OnCoinSelected(Button selectedCoin)
+    {
+        SetChipoption(false);
+        var tempImage = coinSelector.chipImage.sprite;
+        coinSelector.chipImage.sprite = selectedCoin.image.sprite;
+        selectedCoin.image.sprite = tempImage;
+
+
+        TMP_Text selectorText = coinSelector.GetComponentInChildren<TMP_Text>();
+        TMP_Text selectedText = selectedCoin.GetComponentInChildren<TMP_Text>();
+
+        string tempText = selectorText.text;
+        selectorText.text = selectedText.text;
+        selectedText.text = tempText;
+
+
+        RetractCoins();
+    }
+
+    #endregion
+
+
+
+
+    #region Stats Panel
+
+
+
+
+
+    internal void UpdateStats(string cardNo, bool isBlue, string countNo)
+    {
+        UpdateLineStats(cardNo, isBlue);
+        UpdateGridStats(cardNo, isBlue, countNo);
+    }
+
+    private void UpdateLineStats(string cardNo, bool isBlue)
+    {
+        int activeCount = 0;
+
+        for (int i = 0; i < LineStats.Count; i++)
+            if (LineStats[i].gameObject.activeSelf)
+                activeCount++;
+
+        if (activeCount < LineStats.Count)
+        {
+            activeCount++;
+            LineStats[activeCount - 1].gameObject.SetActive(true);
+        }
+
+        for (int i = activeCount - 1; i > 0; i--)
+            LineStats[i].CopyFrom(LineStats[i - 1]);
+
+        LineStats[0].SetData(cardNo, isBlue, true);
+
+        for (int i = 1; i < activeCount; i++)
+            LineStats[i].HighBg.SetActive(false);
+    }
+
+
+
+    private void UpdateGridStats(string cardNo, bool isBlue, string countNo)
+    {
+        if (gridStats.Count >= MAX_GRID)
+        {
+            Destroy(gridStats[0].gameObject);
+            gridStats.RemoveAt(0);
+        }
+
+        StatsPrefab stat = Instantiate(StatsPref, StatsParent).GetComponent<StatsPrefab>();
+        stat.SetData(cardNo, isBlue, true, countNo);
+
+        if (gridStats.Count > 0)
+        {
+            StatsPrefab last = gridStats[gridStats.Count - 1];
+            last.SetData(last.cardnumber.text,
+                         last.BlueBg.activeSelf,
+                         false,
+                         last.countNumber.text);
+        }
+
+        gridStats.Add(stat);
+    }
+
+
+
+    internal void CalculateAndShowPercentage()
+    {
+        var stats = GetStats();
+        int total = stats.Count;
+
+        //  Debug.Log($"[Percentage] Total Stats = {total}");
+        if (total == 0) return;
+
+        int andarCount = 0;
+        int baharCount = 0;
+
+        foreach (var s in stats)
+        {
+            //  Debug.Log($"[Percentage] Card={s.cardnumber.text}, winner={s.winner}");
+
+            if (s.winner == "andar")
+                andarCount++;
+
+            else if (s.winner == "bahar")
+                baharCount++;
+        }
+
+        //  Debug.Log($"[Percentage] Andar={andarCount}, Bahar={baharCount}");
+
+        float andarPercent = (andarCount * 100f) / total;
+        float baharPercent = (baharCount * 100f) / total;
+
+        AndarPercentage.text = andarPercent.ToString("0") + "%";
+        BaharPercentage.text = baharPercent.ToString("0") + "%";
+
+        FillAb.fillAmount = baharPercent / 100f;
+    }
+
+
+
+
+    internal void CalculateStringProbability(string card)
+    {
+        //  Debug.Log($"[Probability] Checking for card = {card}");
+        cardProb.text = card;
+
+        var stats = GetStats();
+        int total = stats.Count;
+
+        if (total == 0)
+        {
+            //    Debug.Log("[Probability] No stats found.");
+            return;
+        }
+
+        int andarMatch = 0;
+        int baharMatch = 0;
+
+        foreach (var s in stats)
+        {
+            //  Debug.Log($"[Probability] Card={s.cardnumber.text}, Winner={s.winner}");
+
+            if (s.cardnumber.text == card)
+            {
+                //    Debug.Log("[Probability] -> Card matched!");
+
+                if (s.winner == "andar")
+                    andarMatch++;
+
+                else if (s.winner == "bahar")
+                    baharMatch++;
+            }
+        }
+
+        //   Debug.Log($"[Probability] Matches: Andar={andarMatch}, Bahar={baharMatch}");
+
+        float andarProbVal = (andarMatch * 100f) / total;
+        float baharProbVal = (baharMatch * 100f) / total;
+
+        AndarProb.text = andarProbVal.ToString("0") + "%";
+        BaharProbab.text = baharProbVal.ToString("0") + "%";
+
+        Fillprobability.fillAmount = (andarProbVal + baharProbVal) / 100f;
+    }
+
+
+    private List<StatsPrefab> GetStats()
+    {
+        List<StatsPrefab> list = new List<StatsPrefab>();
+
+        for (int i = 0; i < StatsParent.childCount; i++)
+        {
+            var s = StatsParent.GetChild(i).GetComponent<StatsPrefab>();
+            if (s != null && s.gameObject.activeSelf)
+                list.Add(s);
+        }
+
+        return list;
+    }
+
+    internal void setCoins(bool istrue)
+    {
+        chipPanel.SetActive(istrue);
+    }
+    internal void SetNetBetPanel(bool istrue, string totalbet = "-1")
+    {
+        if (totalbet != "-1") NetBet.text = totalbet;
+        NetBetPanel.SetActive(istrue);
+    }
+    internal void SetChipoption(bool istrue, bool db = true, bool canc = true, bool undo = true)
+    {
+        chiOptionpanel.SetActive(istrue);
+        Doublebtn.gameObject.SetActive(db);
+        Canclebtn.gameObject.SetActive(canc);
+        Undubtn.gameObject.SetActive(undo);
+    }
+    #endregion
+
 
 
 

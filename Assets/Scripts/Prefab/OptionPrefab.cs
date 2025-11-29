@@ -1,0 +1,46 @@
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class OptionPrefab : MonoBehaviour
+{
+    [SerializeField] private GameManager gameManager;
+    [SerializeField] private Button btn;
+    [SerializeField] internal GameObject HighlightedBG;
+    [SerializeField] internal GameObject BG;
+    [SerializeField] private TMP_Text Name;
+    [SerializeField] private TMP_Text Text;
+    [SerializeField] internal RectTransform chiparea;
+    [SerializeField] internal ImageAnimation winAnimation;
+
+    internal int Optionindex;
+    internal string VaridontWant;
+
+    internal string NameT;
+    void Start()
+    {
+        if (btn)
+        {
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(OnClickBtn);
+        }
+    }
+
+    internal void OnClickBtn()
+    {
+        gameManager.onClickOption(gameObject);
+    }
+
+    internal void SetData(int index, string name, string ratio, string OptionType)
+    {
+        if (Name) Name.text = name;
+        Text.text = "1 : " + ratio;
+
+        Optionindex = index;
+        VaridontWant = OptionType;
+    }
+
+
+}

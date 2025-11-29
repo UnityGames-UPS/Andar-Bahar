@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 using System;
 
@@ -13,6 +12,7 @@ public class AudioManager : MonoBehaviour
 
 
     [SerializeField] private AudioClip[] clips;
+    [SerializeField] private AudioClip[] Voiceclips;
 
     private void Start()
     {
@@ -30,21 +30,27 @@ public class AudioManager : MonoBehaviour
         int index = 0;
         switch (type)
         {
-            // case "bet":
-            //     index = 0;
-            //     audioPlayer_wl.loop = true;
-            //     break;
-            case "car":
+            case "betDone":
+                index = 0;
+                audioPlayer_wl.loop = true;
+                break;
+            case "betSelect":
                 index = 1;
                 break;
             case "numberchange":
                 index = 2;
                 break;
-            case "bet":
+            case "coinSelect":
                 index = 3;
                 break;
-            case "win":
+            case "double":
                 index = 4;
+                break;
+            case "cards":
+                index = 5;
+                break;
+            case "midCard":
+                index = 6;
                 break;
 
         }
@@ -65,9 +71,40 @@ public class AudioManager : MonoBehaviour
         audioBet_button.Play();
     }
 
-    internal void PlayWinAudio()
+    internal void PlayGirlAudio(string type)
     {
-        audioWin.Play();
+        // audioWin.Play();
+        audioWin.loop = false;
+        int index = 0;
+        switch (type)
+        {
+            case "timeisrunning":
+                index = 0;
+                audioPlayer_wl.loop = true;
+                break;
+            case "betSelect":
+                index = 1;
+                break;
+            case "placeyourbet":
+                index = 2;
+                break;
+            case "nomorebets":
+                index = 3;
+                break;
+            case "newround":
+                index = 4;
+                break;
+            case "cards":
+                index = 5;
+                break;
+            case "midCard":
+                index = 6;
+                break;
+
+        }
+        StopWLAaudio();
+        audioPlayer_wl.clip = Voiceclips[index];
+        audioPlayer_wl.Play();
     }
 
 
