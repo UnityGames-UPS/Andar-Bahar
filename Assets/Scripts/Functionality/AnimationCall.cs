@@ -74,6 +74,7 @@ public class AnimationCall : MonoBehaviour
     }
     public void CenterHandAnim()
     {
+        MiddleEffect.StopAnimation();
         MiddleCard.sprite = MiddleSprite;
 
         MiddleCard.gameObject.SetActive(true);

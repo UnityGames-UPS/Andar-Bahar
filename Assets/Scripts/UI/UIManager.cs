@@ -5,6 +5,7 @@ using DG.Tweening;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Networking;
+using Unity.VisualScripting;
 
 public class UiManager : MonoBehaviour
 {
@@ -35,6 +36,7 @@ public class UiManager : MonoBehaviour
     [SerializeField] private Button SoundMute_button;
     [SerializeField] private Button MusicMute_button;
     [SerializeField] private Button Home_button;
+    [SerializeField] private Button Exit_Button;
     [SerializeField] private Button YesHome_button;
     [SerializeField] private Button NoHome_button;
 
@@ -57,13 +59,8 @@ public class UiManager : MonoBehaviour
     private bool IsMenuPanelOpen = false;
 
 
-    //  [Header("Andar Bahar Menu Buttons")]
-    // [SerializeField] private Button MenuInGame_button;
-    // [SerializeField] private Button InfoInGame_button;
-    // [SerializeField] private Button SoundInGame_button;
-    // [SerializeField] private Button MusicInGame_button;
-    // [SerializeField] private Button HomeInGame_button;
-
+    [Header("Game Rules")]
+    [SerializeField] private List<TMP_Text> PayoutText;
 
 
 
@@ -127,6 +124,16 @@ public class UiManager : MonoBehaviour
     private Button LBExit_Button;
     [SerializeField]
     private GameObject LBPopup_Object;
+    [Header("History Popup")]
+    [SerializeField]
+    private GameObject Pageparent;
+
+    [SerializeField] private GameObject HistoryPrefab;
+    [SerializeField] private TMP_Text HistoryNav;
+    [SerializeField] private int CurrentHistoryPage;
+    [SerializeField] private int MaxHistoryPage;
+    [SerializeField] private Button HistoryLeft;
+    [SerializeField] private Button HistoryRight;
 
     [Header("Quit Popup")]
     [SerializeField]
@@ -305,7 +312,7 @@ public class UiManager : MonoBehaviour
         if (Info_button) Info_button.onClick.AddListener(delegate { OpenPopup(InfoPopup_Object); MenuPanel_Object.SetActive(false); });
 
         if (History_button) History_button.onClick.RemoveAllListeners();
-        if (History_button) History_button.onClick.AddListener(delegate { OpenPopup(HistoryPopup_Object); MenuPanel_Object.SetActive(false); });
+        if (History_button) History_button.onClick.AddListener(delegate { OpenPopup(HistoryPopup_Object); HistorypageOpen(); MenuPanel_Object.SetActive(false); });
 
         if (Sound_button) Sound_button.onClick.RemoveAllListeners();
         if (Sound_button) Sound_button.onClick.AddListener(delegate { ToggleSound(); });
@@ -323,7 +330,7 @@ public class UiManager : MonoBehaviour
         if (Home_button) Home_button.onClick.AddListener(delegate { OpenPopup(GameQuitPopup); });
 
         if (YesHome_button) YesHome_button.onClick.RemoveAllListeners();
-        if (YesHome_button) YesHome_button.onClick.AddListener(delegate { ClosePopup(GameQuitPopup); HomeScreen_Object.SetActive(true); GameScreen_Object.SetActive(false); ResetMenuPanel(false); });
+        if (YesHome_button) YesHome_button.onClick.AddListener(delegate { ClosePopup(GameQuitPopup); HomeScreen_Object.SetActive(true); socketManager.SendHome(); GameScreen_Object.SetActive(false); ResetMenuPanel(false); });
 
         if (NoHome_button) NoHome_button.onClick.RemoveAllListeners();
         if (NoHome_button) NoHome_button.onClick.AddListener(delegate { ClosePopup(GameQuitPopup); });
@@ -350,6 +357,12 @@ public class UiManager : MonoBehaviour
         Doublebtn.onClick.RemoveAllListeners();
         Doublebtn.onClick.AddListener(delegate { socketManager.SendDouble(); });
 
+        HistoryLeft.onClick.RemoveAllListeners();
+        HistoryLeft.onClick.AddListener(delegate { if (CurrentHistoryPage - 1 > 0) socketManager.SendHistory(CurrentHistoryPage - 1); });
+
+        HistoryRight.onClick.RemoveAllListeners();
+        HistoryRight.onClick.AddListener(delegate { if (CurrentHistoryPage + 1 < MaxHistoryPage) socketManager.SendHistory(CurrentHistoryPage + 1); });
+
     }
 
 
@@ -357,7 +370,7 @@ public class UiManager : MonoBehaviour
 
     #region Everytheing else
 
-    private void ResetMenuPanel(bool IsGameScreen)
+    public void ResetMenuPanel(bool IsGameScreen)
     {
         MenuPanel_Object.SetActive(false);
         if (IsGameScreen)
@@ -382,7 +395,7 @@ public class UiManager : MonoBehaviour
         }
     }
 
-    private void ToggleMenuPanel()
+    public void ToggleMenuPanel()
     {
         if (IsMenuPanelOpen)
         {
@@ -396,7 +409,34 @@ public class UiManager : MonoBehaviour
         }
     }
 
+    internal void SetgameRulePanel()
+    {
+        float bet = 1;
+        if (float.TryParse(coinSelector.Chiptext.text, out bet))
+        {
+            // Debug.Log("Parsed float: " + value);
+        }
+        PayoutText[0].text = (socketManager.initialData.wagers.op_bets.first_3.payout.flush * bet).ToString();
+        PayoutText[1].text = (socketManager.initialData.wagers.op_bets.first_3.payout.straight * bet).ToString();
+        PayoutText[2].text = (socketManager.initialData.wagers.op_bets.first_3.payout.straight_flush * bet).ToString();
 
+        PayoutText[3].text = (socketManager.initialData.wagers.op_bets.first_1_andar.payout[0] * bet).ToString();
+        PayoutText[4].text = (socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0] * bet).ToString();
+
+        PayoutText[5].text = (socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0] * bet).ToString();
+        PayoutText[6].text = (socketManager.initialData.wagers.op_bets.first_1_andar.payout[0] * bet).ToString();
+
+        PayoutText[7].text = (socketManager.initialData.wagers.side_bets.s_1_5.payout * bet).ToString();
+        PayoutText[8].text = (socketManager.initialData.wagers.side_bets.s_6_10.payout * bet).ToString();
+        PayoutText[9].text = (socketManager.initialData.wagers.side_bets.s_11_15.payout * bet).ToString();
+        PayoutText[10].text = (socketManager.initialData.wagers.side_bets.s_16_20.payout * bet).ToString();
+        PayoutText[11].text = (socketManager.initialData.wagers.side_bets.s_21_25.payout * bet).ToString();
+        PayoutText[12].text = (socketManager.initialData.wagers.side_bets.s_26_30.payout * bet).ToString();
+        PayoutText[13].text = (socketManager.initialData.wagers.side_bets.s_31_35.payout * bet).ToString();
+        PayoutText[14].text = (socketManager.initialData.wagers.side_bets.s_36_40.payout * bet).ToString();
+        PayoutText[15].text = (socketManager.initialData.wagers.side_bets.s_41_53.payout * bet).ToString();
+
+    }
 
     internal void LowBalPopup()
     {
@@ -445,7 +485,10 @@ public class UiManager : MonoBehaviour
     }
 
 
-
+    internal void HistorypageOpen()
+    {
+        socketManager.SendHistory(1);
+    }
 
     internal void OpenPopup(GameObject Popup)
     {
@@ -614,8 +657,9 @@ public class UiManager : MonoBehaviour
         int tempIndex = selectorChip.chipIndex;
         selectorChip.chipIndex = selectedChip.chipIndex;
         selectedChip.chipIndex = tempIndex;
-
+        // Debug.Log("mmmmmmmmmmmmmmmmm" + selectorChip.chipIndex);
         RetractCoins();
+        SetgameRulePanel();
     }
 
     #endregion
@@ -715,7 +759,7 @@ public class UiManager : MonoBehaviour
         AndarPercentage.text = andarPercent.ToString("0") + "%";
         BaharPercentage.text = baharPercent.ToString("0") + "%";
 
-        FillAb.fillAmount = baharPercent / 100f;
+        FillAb.fillAmount = andarPercent / 100f;
     }
 
 
@@ -762,7 +806,7 @@ public class UiManager : MonoBehaviour
         AndarProb.text = andarProbVal.ToString("0") + "%";
         BaharProbab.text = baharProbVal.ToString("0") + "%";
 
-        Fillprobability.fillAmount = (andarProbVal + baharProbVal) / 100f;
+        //  Fillprobability.fillAmount = 1 - ((andarProbVal + baharProbVal) / 100f);
     }
 
 
@@ -799,6 +843,37 @@ public class UiManager : MonoBehaviour
     #endregion
 
 
+    #region History Setup
 
+    internal void SetHistoryPage(Payload payload)
+    {
+        CurrentHistoryPage = payload.meta.page;
+        MaxHistoryPage = payload.meta.pages;
+        HistoryNav.text = payload.meta.page.ToString() + "/" + payload.meta.pages.ToString();
+        // 1. Remove old items
+        foreach (Transform child in Pageparent.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        // 2. Spawn new items
+        for (int i = 0; i < payload.history.Count; i++)
+        {
+            GameObject obj = Instantiate(HistoryPrefab, Pageparent.transform);
+            HistoryPrefab script = obj.GetComponent<HistoryPrefab>();
+            payload.history[i].middleCardParsed = JsonUtility.FromJson<Card>(payload.history[i].middle_card);
+            payload.history[i].matchingCardParsed = JsonUtility.FromJson<Card>(payload.history[i].matching_card);
+
+
+
+            Sprite middleCard = gameManager.CardSet(payload.history[i].middleCardParsed.suit, payload.history[i].middleCardParsed.rank);
+            Sprite sideCard = gameManager.CardSet(payload.history[i].matchingCardParsed.suit, payload.history[i].matchingCardParsed.rank);
+            script.SetData(i + 1, payload.history[i], middleCard, sideCard);
+        }
+    }
+
+
+
+    #endregion
 
 }

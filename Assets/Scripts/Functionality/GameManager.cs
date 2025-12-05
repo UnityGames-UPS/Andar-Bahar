@@ -61,6 +61,17 @@ public class GameManager : MonoBehaviour
     private int AndarIndex;
     private int BaharIndex;
 
+    [Header("Flush Animation")]
+    [SerializeField] private List<Sprite> FlushSprite;
+    [SerializeField] private List<Sprite> StraightFlushSprite;
+    [SerializeField] private List<Sprite> StraightSprite;
+    [SerializeField] private GameObject MainFlushObj;
+    [SerializeField] private ImageAnimation FlushImageAnim;
+    [SerializeField] private Image FlushCardOne;
+    [SerializeField] private Image FlushCardTwo;
+    [SerializeField] private Image FlushCardThree;
+    [SerializeField] private Animator FlushCard;
+
     [Header("Chip")]
     [SerializeField] private List<Sprite> PlayerChipSprite;
     [SerializeField] private List<Sprite> otherChipSprite;
@@ -72,7 +83,8 @@ public class GameManager : MonoBehaviour
 
     [Header("popup")]
     [SerializeField] private Button BetBlocker;
-    [SerializeField] private GameObject BlockerText;
+    [SerializeField] private GameObject BlockerObj;
+    [SerializeField] private TMP_Text BlockerText;
     [SerializeField] private Transform popStart;
     [SerializeField] private Transform popCenter;
     [SerializeField] private Transform popEnd;
@@ -92,7 +104,7 @@ public class GameManager : MonoBehaviour
     internal int BetCounter;
     internal int MultiplierCounter;
     internal string currentRoom;
-    private double currentTotalBet = 0;
+    internal double currentTotalBet = 0;
     private double currentBalance;
     private double animationduration = 2f;
 
@@ -115,13 +127,14 @@ public class GameManager : MonoBehaviour
     }
     private void Start()
     {
-        Handanimator.Play("MiddleCard");
+        //  Handanimator.Play("MiddleCard");
         BetCounter = 0;
         HomePage.SetActive(true);
         LoadingPage.SetActive(false);
         GamePage.SetActive(false);
 
-        BetBlocker.onClick.AddListener(PlayPopup);
+        BetBlocker.onClick.RemoveAllListeners();
+        BetBlocker.onClick.AddListener(() => PlayPopup("This Round is alredy closed.\nPlease wait for next round."));
 
     }
 
@@ -129,22 +142,26 @@ public class GameManager : MonoBehaviour
     #region  DataSetup
     internal void SetInitialData()
     {
-
+        uiManager.SetgameRulePanel();
         homepage.SetInitHomedata(socketManager.initialData);
         SetPlayerData(socketManager.playerdata);
     }
 
     internal void SetLoadingPage(bool isActive)
     {
+        ImageAnimation anim = LoadingPage.GetComponentInChildren<ImageAnimation>();
+        anim.StopAnimation();
+        anim.StartAnimation();
+
         LoadingPage.SetActive(isActive);
         if (isActive) StartCoroutine(ManageloadingPageText());
     }
     IEnumerator ManageloadingPageText()
     {
-        for (int i = 0; i < 25; i++)
+        for (int i = 0; i < 10; i++)
         {
             if (i < 8) LoadingPage_text.text = "Joining A Room.....";
-            else LoadingPage_text.text = "Waition For New Round To Start.....";
+            else LoadingPage_text.text = "Waiting For New Round To Start.....";
 
             yield return new WaitForSeconds(1f);
         }
@@ -160,8 +177,8 @@ public class GameManager : MonoBehaviour
     }
     internal void SetOptionData()
     {
-        AndarTxt.SetData(0, "andar", socketManager.initialData.wagers.main_bets.andar.payout[0].ToString(), "main_bets");
-        BaharTxt.SetData(1, "bahar", socketManager.initialData.wagers.main_bets.bahar.payout[0].ToString(), "main_bets");
+        AndarTxt.SetData(0, "andar", "", "main_bets");
+        BaharTxt.SetData(1, "bahar", "", "main_bets");
 
         FirstAndarTxt.SetData(2, "firstOneAndar", socketManager.initialData.wagers.op_bets.first_1_andar.payout[0].ToString(), "op_bets");
         FirstBaharTxt.SetData(3, "firstOneBahar", socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0].ToString(), "op_bets");
@@ -206,9 +223,13 @@ public class GameManager : MonoBehaviour
         if (data == null) return;
 
         uiManager.coinSelector.Chiptext.text = data[0].ToString();
+        uiManager.coinSelector.chipIndex = 0;
 
         for (int i = 0; i < uiManager.Coins.Count; i++)
+        {
             uiManager.Coins[i].Chiptext.text = data[i + 1].ToString();
+            uiManager.Coins[i].chipIndex = i + 1;
+        }
     }
 
 
@@ -221,7 +242,7 @@ public class GameManager : MonoBehaviour
     {
         if (leaderboard == null)
         {
-            Debug.LogError("Leaderboards is NULL");
+            Debug.Log("Leaderboards is NULL");
             return;
         }
 
@@ -292,8 +313,14 @@ public class GameManager : MonoBehaviour
     #region GamePlay
     internal void SetMainCard()
     {
+        if (StartGameCorutine != null)
+        {
+            StopCoroutine(StartGameCorutine);
+            StartGameCorutine = null;
+        }
         if (EndGameCorutine != null)
         {
+            StopCoroutine(EndGameCorutine);
             EndGameCorutine = null;
         }
         StartGameCorutine = StartCoroutine(StartCountdown());
@@ -302,7 +329,13 @@ public class GameManager : MonoBehaviour
     {
         if (StartGameCorutine != null)
         {
+            StopCoroutine(StartGameCorutine);
             StartGameCorutine = null;
+        }
+        if (EndGameCorutine != null)
+        {
+            StopCoroutine(EndGameCorutine);
+            EndGameCorutine = null;
         }
         EndGameCorutine = StartCoroutine(GameLoop());
     }
@@ -310,7 +343,13 @@ public class GameManager : MonoBehaviour
     {
         if (StartGameCorutine != null)
         {
+            StopCoroutine(StartGameCorutine);
             StartGameCorutine = null;
+        }
+        if (EndGameCorutine != null)
+        {
+            StopCoroutine(EndGameCorutine);
+            EndGameCorutine = null;
         }
         animHand.MiddleSprite = CardSet(socketManager.gameLoopData.middleCard.suit, socketManager.gameLoopData.middleCard.rank);
         animHand.MiddleCard.gameObject.SetActive(true);
@@ -327,14 +366,33 @@ public class GameManager : MonoBehaviour
 
         PlayMiddleCardAnim();
         yield return new WaitForSeconds(2f);
+
+        bool startWithAndar = socketManager.gameLoopData.middleCard.color == "black";
+        if (startWithAndar)
+        {
+            AndarTxt.SetData(0, "andar", socketManager.initialData.wagers.main_bets.andar.payout[0].ToString(), "main_bets");
+            BaharTxt.SetData(1, "bahar", "1", "main_bets");
+
+        }
+        else
+        {
+            AndarTxt.SetData(0, "andar", "1", "main_bets");
+            BaharTxt.SetData(1, "bahar", socketManager.initialData.wagers.main_bets.bahar.payout[0].ToString(), "main_bets");
+
+        }
+        TotalCardsCount_text.gameObject.SetActive(true);
         for (int i = 25; i > 0; i--)
         {
-            TotalCardsCount_text.text = "Next Round\n" + i.ToString();
+            TotalCardsCount_text.text = "Place bet Now\n" + i.ToString();
             yield return new WaitForSeconds(1f);
             if (i == 6) audioManager.PlayGirlAudio("timeisrunning");
         }
         BetBlocker.gameObject.SetActive(true);
         audioManager.PlayGirlAudio("nomorebets");
+        TotalCardsCount_text.gameObject.SetActive(false);
+        uiManager.SetChipoption(false);
+        uiManager.setCoins(false);
+        uiManager.SetNetBetPanel(true, currentTotalBet.ToString());
 
     }
     IEnumerator GameLoop()
@@ -342,7 +400,7 @@ public class GameManager : MonoBehaviour
         int a = socketManager.gameLoopData.andarCards.Count;
         int b = socketManager.gameLoopData.baharCards.Count;
 
-        bool startWithAndar = socketManager.gameLoopData.middleCard.color == "blue";
+        bool startWithAndar = socketManager.gameLoopData.middleCard.color == "black";
 
         int max = Mathf.Max(a, b);
         int delivered = 0;
@@ -352,12 +410,21 @@ public class GameManager : MonoBehaviour
             if (startWithAndar)
             {
                 if (i < a) { PlayAndarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); AddAndarCard(animHand.LeftSprite); yield return new WaitForSeconds(0.5f); }
-                if (i < b) { PlayBagarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); AddBaharCard(animHand.RightSprite); yield return new WaitForSeconds(0.5f); }
+                if (i < b) { PlayBagarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); if (i > 0) AddBaharCard(CardSet(socketManager.gameLoopData.baharCards[i - 1].suit, socketManager.gameLoopData.baharCards[i - 1].rank)); yield return new WaitForSeconds(0.5f); }
             }
             else
             {
-                if (i < b) { PlayBagarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); AddBaharCard(animHand.RightSprite); yield return new WaitForSeconds(0.5f); }
+                if (i < b) { PlayBagarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); if (i > 0) AddBaharCard(CardSet(socketManager.gameLoopData.baharCards[i - 1].suit, socketManager.gameLoopData.baharCards[i - 1].rank)); yield return new WaitForSeconds(0.5f); }
                 if (i < a) { PlayAndarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); AddAndarCard(animHand.LeftSprite); yield return new WaitForSeconds(0.5f); }
+            }
+            if (i == 0)
+            {
+                if (socketManager.gameLoopData.firstThreeResult != 0)
+                {
+                    PlayFlushAnim(socketManager.gameLoopData.firstThreeResult, animHand.LeftSprite, animHand.MiddleSprite, animHand.RightSprite);
+                    yield return new WaitForSeconds(5f);
+                    MainFlushObj.SetActive(false);
+                }
             }
         }
         if (socketManager.gameLoopData.matchSide == "andar") uiManager.UpdateStats(socketManager.gameLoopData.middleCard.rank, true, delivered.ToString());
@@ -390,6 +457,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         DistributeAllPayout();
+        SetOtherplayerData(socketManager.CashoutData.payload.leaderboards);
         yield return null;
     }
     void MoveAllChipstohome()
@@ -505,11 +573,8 @@ public class GameManager : MonoBehaviour
     }
     internal void ManageBrodcastBetsPlayer()
     {
-        if (socketManager == null)
-        {
-            Debug.LogError("socketManager is NULL");
-            return;
-        }
+
+
 
         if (socketManager.BetChipData == null)
         {
@@ -535,11 +600,9 @@ public class GameManager : MonoBehaviour
     }
     internal void ManageBrodcastBetsOtherPlayers(Root chipdata)
     {
-        bool existsAnywhere =
-    PlayerChips.Exists(x => x.betId == chipdata.betId) ||
-    OtherPlayerChips.Exists(x => x.betId == chipdata.betId);
 
-        if (existsAnywhere)
+
+        if (chipdata.username == uiManager.MainPlayers.playername.text)
         {
             return;
         }
@@ -548,9 +611,9 @@ public class GameManager : MonoBehaviour
         data.betId = chipdata.betId;
         data.amount = chipdata.amount;
 
-        string val = FindRoom()[chipdata.amount].ToString(); ;
-        int index = chipdata.amount;
-        data.chip = SpawnChip(findChipSprite(chipdata.amount, FindRoom()), val, index, TotalPlayer_text.transform, FindOption(chipdata.betOption));
+        int index = findChipindex(chipdata.amount, FindRoom());
+        string val = FindRoom()[index].ToString(); ;
+        data.chip = SpawnChip(findOtherPlayerChipSprite(chipdata.amount, FindRoom()), val, index, TotalPlayer_text.transform, FindOption(chipdata.betOption));
 
         OtherPlayerChips.Add(data);
 
@@ -560,6 +623,7 @@ public class GameManager : MonoBehaviour
 
     GameObject SpawnChip(Sprite sprite, string amount, int chipindex, Transform startPoint, OptionPrefab op, float moveTime = 0.4f)
     {
+
         Chip chip = GetChip();
         chip.SetData(sprite, amount, chipindex);
 
@@ -575,6 +639,7 @@ public class GameManager : MonoBehaviour
 
         chipRT.position = startPoint.position;
         chipRT.DOMove(op.chiparea.TransformPoint(randomPos), moveTime);
+
         return chip.gameObject;
     }
 
@@ -591,11 +656,14 @@ public class GameManager : MonoBehaviour
     #region Manage Result and reset
     void PlayWinAnimations()
     {
+        AndarTxt.winAnimation.StopAnimation();
+        BaharTxt.winAnimation.StopAnimation();
         if (socketManager.gameLoopData.matchSide == "andar") AndarTxt.winAnimation.StartAnimation();
         else BaharTxt.winAnimation.StartAnimation();
 
         foreach (var item in AllOptions)
         {
+            item.winAnimation.StopAnimation();
             if (item.HighlightedBG.activeInHierarchy)
             {
                 item.winAnimation.StartAnimation();
@@ -633,6 +701,8 @@ public class GameManager : MonoBehaviour
            {
                NextRoundCount_text.text = "";
                TotalCardsCount_text.text = "";
+               AndarTxt.SetData(0, "andar", "", "main_bets");
+               BaharTxt.SetData(1, "bahar", "", "main_bets");
            })
 
 
@@ -661,28 +731,69 @@ public class GameManager : MonoBehaviour
             });
     }
 
-
     private Transform FindPlayerTransform(string playerId)
     {
-        if (uiManager.MainPlayers.PlayerId == playerId)
-            return uiManager.MainPlayers.transform;
+        Debug.Log($"[FindPlayerTransform] Searching for PlayerId: {playerId}");
 
+        // --- Check Main Player ---
+        if (uiManager.MainPlayers != null)
+        {
+            Debug.Log($"[MainPlayer] ID: {uiManager.MainPlayers.playername.text}");
+            if (uiManager.MainPlayers.playername.text == playerId)
+            {
+                Debug.Log("[RESULT] Found in MainPlayers");
+                return uiManager.MainPlayers.transform;
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[FindPlayerTransform] MainPlayers is NULL!");
+        }
+
+        // --- Check Richest Players ---
         foreach (var p in uiManager.RichestPlayers)
-            if (p.PlayerId == playerId)
-                return p.transform;
+        {
+            if (p == null)
+            {
+                Debug.LogWarning("[RichestPlayers] One entry is NULL!");
+                continue;
+            }
 
+            Debug.Log($"[Richest] ID: {p.PlayerId}");
+            if (p.playername.text == playerId)
+            {
+                Debug.Log("[RESULT] Found in RichestPlayers");
+                return p.transform;
+            }
+        }
+
+        // --- Check Winner Players ---
         foreach (var p in uiManager.WinnerPlayers)
-            if (p.PlayerId == playerId)
-                return p.transform;
+        {
+            if (p == null)
+            {
+                Debug.LogWarning("[WinnerPlayers] One entry is NULL!");
+                continue;
+            }
 
+            Debug.Log($"[Winners] ID: {p.PlayerId}");
+            if (p.playername.text == playerId)
+            {
+                Debug.Log("[RESULT] Found in WinnerPlayers");
+                return p.transform;
+            }
+        }
+
+        Debug.LogWarning($"[FindPlayerTransform] PlayerId {playerId} NOT FOUND!");
         return null;
     }
+
 
     public void DistributePayouts(List<Payout> payouts)
     {
         foreach (var payout in payouts)
         {
-            Transform target = FindPlayerTransform(payout.userId);
+            Transform target = FindPlayerTransform(payout.username);
 
             if (target == null)
                 target = TotalPlayer_text.transform;
@@ -732,6 +843,17 @@ public class GameManager : MonoBehaviour
             PlayerChips.Add(data);
         }
 
+    }
+    internal void ClearAllBets()
+    {
+        CancleBets();
+        foreach (var chips in OtherPlayerChips)
+        {
+            Chip c = chips.chip.GetComponent<Chip>();
+            if (chips != null)
+                ReturnChip(c);
+        }
+        OtherPlayerChips.Clear();
     }
     internal void CancleBets()
     {
@@ -865,7 +987,7 @@ public class GameManager : MonoBehaviour
 
 
     #region cardSelection
-    private Sprite CardSet(string suit, string value)
+    internal Sprite CardSet(string suit, string value)
     {
 
         Sprite tempSprite = null;
@@ -913,7 +1035,49 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
+    #region Flush Animation
 
+    void PlayFlushAnim(int type, Sprite fCard, Sprite sCard, Sprite tCard)
+    {
+        FlushImageAnim.StopAnimation();
+        FlushImageAnim.textureArray.Clear();
+        FlushImageAnim.textureArray.TrimExcess();
+        if (type == 9)
+        {
+            for (int i = 0; i < StraightFlushSprite.Count; i++)
+            {
+
+                FlushImageAnim.textureArray.Add(StraightFlushSprite[i]);
+            }
+        }
+        else if (type == 6)
+        {
+            for (int i = 0; i < FlushSprite.Count; i++)
+            {
+
+                FlushImageAnim.textureArray.Add(FlushSprite[i]);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < FlushSprite.Count; i++)
+            {
+
+                FlushImageAnim.textureArray.Add(StraightSprite[i]);
+            }
+        }
+        FlushCardOne.sprite = fCard;
+        FlushCardTwo.sprite = sCard;
+        FlushCardThree.sprite = tCard;
+        MainFlushObj.SetActive(true);
+        FlushImageAnim.StartAnimation();
+        FlushCard.Play("CardDown");
+
+    }
+
+
+
+    #endregion
 
     #region helper
 
@@ -928,6 +1092,18 @@ public class GameManager : MonoBehaviour
             if (betOptions[i] == amount)
             {
                 return PlayerChipSprite[i];
+            }
+        }
+        return null;
+
+    }
+    Sprite findOtherPlayerChipSprite(int amount, List<int> betOptions)
+    {
+        for (int i = 0; i < betOptions.Count; i++)
+        {
+            if (betOptions[i] == amount)
+            {
+                return otherChipSprite[i];
             }
         }
         return null;
@@ -973,7 +1149,7 @@ public class GameManager : MonoBehaviour
 
     OptionPrefab FindOption(string opt)
     {
-        //  Debug.Log("789 _____________" + opt);
+        // Debug.Log("789 _____________" + opt);
         switch (opt)
         {
             case "s_1_5":
@@ -1025,8 +1201,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void PlayPopup()
+    internal void PlayPopup(string popupText)
     {
+        BlockerText.text = popupText;
+
         if (animRoutine != null)
             StopCoroutine(animRoutine);
 
@@ -1035,12 +1213,12 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator PopupRoutine()
     {
-        BlockerText.transform.position = popStart.position;
-        yield return Move(BlockerText.transform, popCenter.position, moveDuration);
+        BlockerObj.transform.position = popStart.position;
+        yield return Move(BlockerObj.transform, popCenter.position, moveDuration);
 
         yield return new WaitForSeconds(holdDuration);
 
-        yield return Move(BlockerText.transform, popEnd.position, moveDuration);
+        yield return Move(BlockerObj.transform, popEnd.position, moveDuration);
     }
 
     private IEnumerator Move(Transform target, Vector3 toPos, float duration)

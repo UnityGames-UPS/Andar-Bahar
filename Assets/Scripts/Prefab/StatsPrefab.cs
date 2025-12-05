@@ -40,6 +40,7 @@ public class StatsPrefab : MonoBehaviour
         }
         else
         {
+            countNumber.text = countNO;
             if (isBlue) winner = "andar";
             else winner = "bahar";
             BlueBg.SetActive(isBlue);
