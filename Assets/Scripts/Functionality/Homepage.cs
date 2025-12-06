@@ -20,25 +20,25 @@ public class Homepage : MonoBehaviour
     [SerializeField] Button Casualbutton;
     [SerializeField] private TMP_Text CMinBet;
     [SerializeField] private TMP_Text CMaxBet;
-    [SerializeField] private TMP_Text CPlayerCount;
+    [SerializeField] internal TMP_Text CPlayerCount;
 
     [Header("Novice Room")]
     [SerializeField] Button Novicebutton;
     [SerializeField] private TMP_Text NMinBet;
     [SerializeField] private TMP_Text NMaxBet;
-    [SerializeField] private TMP_Text NPlayerCount;
+    [SerializeField] internal TMP_Text NPlayerCount;
 
     [Header("Expert Room")]
     [SerializeField] Button Expertbutton;
     [SerializeField] private TMP_Text EMinBet;
     [SerializeField] private TMP_Text EMaxBet;
-    [SerializeField] private TMP_Text EPlayerCount;
+    [SerializeField] internal TMP_Text EPlayerCount;
 
     [Header("HighRoller Room")]
     [SerializeField] Button HighRollerbutton;
     [SerializeField] private TMP_Text HMinBet;
     [SerializeField] private TMP_Text HMaxBet;
-    [SerializeField] private TMP_Text HPlayerCount;
+    [SerializeField] internal TMP_Text HPlayerCount;
 
     internal void SetInitHomedata(GameData gameData)
     {

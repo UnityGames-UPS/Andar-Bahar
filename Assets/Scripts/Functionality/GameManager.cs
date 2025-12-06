@@ -224,6 +224,8 @@ public class GameManager : MonoBehaviour
 
         uiManager.coinSelector.Chiptext.text = data[0].ToString();
         uiManager.coinSelector.chipIndex = 0;
+        minBet_text.text = data[0].ToString();
+        maxBet_text.text = data[uiManager.Coins.Count - 1].ToString();
 
         for (int i = 0; i < uiManager.Coins.Count; i++)
         {
@@ -357,11 +359,13 @@ public class GameManager : MonoBehaviour
     }
     IEnumerator StartCountdown()
     {
+        currentTotalBet = 0;
         audioManager.PlayGirlAudio("placeyourbet");
         BetBlocker.gameObject.SetActive(false);
         uiManager.setCoins(true);
-        uiManager.SetChipoption(true);
+
         uiManager.SetNetBetPanel(false);
+        MainFlushObj.SetActive(false);
 
 
         PlayMiddleCardAnim();
@@ -409,13 +413,13 @@ public class GameManager : MonoBehaviour
         {
             if (startWithAndar)
             {
-                if (i < a) { PlayAndarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); AddAndarCard(animHand.LeftSprite); yield return new WaitForSeconds(0.5f); }
+                if (i < a) { PlayAndarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); if (i > 0) AddAndarCard(CardSet(socketManager.gameLoopData.andarCards[i - 1].suit, socketManager.gameLoopData.andarCards[i - 1].rank)); yield return new WaitForSeconds(0.5f); }
                 if (i < b) { PlayBagarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); if (i > 0) AddBaharCard(CardSet(socketManager.gameLoopData.baharCards[i - 1].suit, socketManager.gameLoopData.baharCards[i - 1].rank)); yield return new WaitForSeconds(0.5f); }
             }
             else
             {
                 if (i < b) { PlayBagarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); if (i > 0) AddBaharCard(CardSet(socketManager.gameLoopData.baharCards[i - 1].suit, socketManager.gameLoopData.baharCards[i - 1].rank)); yield return new WaitForSeconds(0.5f); }
-                if (i < a) { PlayAndarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); AddAndarCard(animHand.LeftSprite); yield return new WaitForSeconds(0.5f); }
+                if (i < a) { PlayAndarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); if (i > 0) AddAndarCard(CardSet(socketManager.gameLoopData.andarCards[i - 1].suit, socketManager.gameLoopData.andarCards[i - 1].rank)); yield return new WaitForSeconds(0.5f); }
             }
             if (i == 0)
             {
@@ -574,7 +578,7 @@ public class GameManager : MonoBehaviour
     internal void ManageBrodcastBetsPlayer()
     {
 
-
+        uiManager.SetChipoption(true);
 
         if (socketManager.BetChipData == null)
         {
@@ -1239,7 +1243,21 @@ public class GameManager : MonoBehaviour
 
 
     #endregion
-
+    internal void SetPlayerCountOnReturn()
+    {
+        if (homepage.CPlayerCount == null)
+        {
+            Debug.Log("Returnhome is null");
+        }
+        if (socketManager.ReturnHome.payload.lobby == null)
+        {
+            Debug.Log("casual is null");
+        }
+        homepage.CPlayerCount.text = socketManager.ReturnHome.payload.lobby.casual.ToString() + "Players";
+        homepage.NPlayerCount.text = socketManager.ReturnHome.payload.lobby.novice.ToString() + "Players";
+        homepage.EPlayerCount.text = socketManager.ReturnHome.payload.lobby.expert.ToString() + "Players";
+        homepage.HPlayerCount.text = socketManager.ReturnHome.payload.lobby.high_roller.ToString() + "Players";
+    }
 
 }
 

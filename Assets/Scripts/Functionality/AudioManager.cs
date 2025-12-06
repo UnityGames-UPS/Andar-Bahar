@@ -17,7 +17,7 @@ public class AudioManager : MonoBehaviour
     private void Start()
     {
         if (bg_adudio) bg_adudio.Play();
-        audioPlayer_button.clip = clips[0];
+        //  audioPlayer_button.clip = clips[0];
         audioBet_button.clip = clips[3];
         audioWin.clip = clips[4];
 

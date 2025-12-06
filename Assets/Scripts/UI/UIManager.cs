@@ -137,6 +137,8 @@ public class UiManager : MonoBehaviour
 
     [Header("Quit Popup")]
     [SerializeField]
+    private GameObject ExitButton;
+    [SerializeField]
     private GameObject QuitPopup_Object;
     [SerializeField]
     private Button YesQuit_Button;
@@ -201,6 +203,14 @@ public class UiManager : MonoBehaviour
     [SerializeField] internal List<PlayerData> RichestPlayers;
     [SerializeField] internal List<PlayerData> WinnerPlayers;
     [SerializeField] internal List<Sprite> UserIcons;
+    [Header("SetBetLimit  data")]
+    [SerializeField] internal GameObject BetLimitPanel;
+    [SerializeField] internal Button betBtnQ;
+    [SerializeField] internal Button betBtnW;
+    [SerializeField] internal Button betBtnE;
+    [SerializeField] internal Button betBtnR;
+    [SerializeField] internal List<TMP_Text> BetLimitdata;
+    [SerializeField] internal Button ConfirmBtn;
 
     private void Start()
     {
@@ -263,7 +273,7 @@ public class UiManager : MonoBehaviour
         {
             CallOnExitFunction();
             Debug.Log("quit event: pressed YES Button ");
-
+            socketManager.ReactNativeCallOnFailedToConnect();
         });
 
         if (CloseDisconnect_Button) CloseDisconnect_Button.onClick.RemoveAllListeners();
@@ -328,6 +338,8 @@ public class UiManager : MonoBehaviour
 
         if (Home_button) Home_button.onClick.RemoveAllListeners();
         if (Home_button) Home_button.onClick.AddListener(delegate { OpenPopup(GameQuitPopup); });
+        if (Exit_Button) Exit_Button.onClick.RemoveAllListeners();
+        if (Exit_Button) Exit_Button.onClick.AddListener(delegate { OpenPopup(QuitPopup_Object); });
 
         if (YesHome_button) YesHome_button.onClick.RemoveAllListeners();
         if (YesHome_button) YesHome_button.onClick.AddListener(delegate { ClosePopup(GameQuitPopup); HomeScreen_Object.SetActive(true); socketManager.SendHome(); GameScreen_Object.SetActive(false); ResetMenuPanel(false); });
@@ -629,7 +641,7 @@ public class UiManager : MonoBehaviour
                 });
         }
 
-        SetChipoption(true);
+        if (gameManager.currentTotalBet > 0) SetChipoption(true);
         isExpanded = false;
     }
 
@@ -660,6 +672,7 @@ public class UiManager : MonoBehaviour
         // Debug.Log("mmmmmmmmmmmmmmmmm" + selectorChip.chipIndex);
         RetractCoins();
         SetgameRulePanel();
+
     }
 
     #endregion
@@ -831,6 +844,7 @@ public class UiManager : MonoBehaviour
     internal void SetNetBetPanel(bool istrue, string totalbet = "-1")
     {
         if (totalbet != "-1") NetBet.text = totalbet;
+        else NetBet.text = "0";
         NetBetPanel.SetActive(istrue);
     }
     internal void SetChipoption(bool istrue, bool db = true, bool canc = true, bool undo = true)

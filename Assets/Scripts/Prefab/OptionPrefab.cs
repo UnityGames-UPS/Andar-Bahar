@@ -36,7 +36,8 @@ public class OptionPrefab : MonoBehaviour
     internal void SetData(int index, string name, string ratio, string OptionType)
     {
         if (Name) Name.text = name;
-        Text.text = "1 : " + ratio;
+        if (ratio == "") Text.text = "";
+        else Text.text = "1 : " + ratio;
 
         Optionindex = index;
         VaridontWant = OptionType;

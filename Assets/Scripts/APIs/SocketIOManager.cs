@@ -29,6 +29,7 @@ public class SocketIOManager : MonoBehaviour
     internal Root CashoutData;
     internal Root doubleBetData;
     internal Root HistoryPageData;
+    internal Root ReturnHome;
     internal GameData initialData = null;
     // internal Payload resultData = null;
     internal Player playerdata = null;
@@ -81,6 +82,7 @@ public class SocketIOManager : MonoBehaviour
 
     private void Awake()
     {
+        Application.runInBackground = true;
         //Debug.unityLogger.logEnabled = false;
         isLoaded = false;
         SetInit = false;
@@ -232,19 +234,19 @@ public class SocketIOManager : MonoBehaviour
 
     private void OnPongReceived(string data) //Back2 Start
     {
-        //  Debug.Log("✅ Received pong from server.");
+        Debug.Log("✅ Received pong from server.");
         waitingForPong = false;
         missedPongs = 0;
         lastPongTime = Time.time;
-        //   Debug.Log($"⏱️ Updated last pong time: {lastPongTime}");
-        //  Debug.Log($"📦 Pong payload: {data}");
+        Debug.Log($"⏱️ Updated last pong time: {lastPongTime}");
+        Debug.Log($"📦 Pong payload: {data}");
     } //Back2 end
 
     private void OnDisconnected() //Back2 Start
     {
         Debug.LogWarning("⚠️ Disconnected from server.");
         isConnected = false;
-        if (!DontDisplayDisconected) uiManager.DisconnectionPopup();
+        uiManager.DisconnectionPopup();
         ResetPingRoutine();
     } //Back2 end
     private void OnError(Error err)
@@ -279,7 +281,45 @@ public class SocketIOManager : MonoBehaviour
     {
         //        Debug.Log("Received alert with data: " + data);
     }
+    private bool isFocused = true;
+    private Coroutine focusCheckCoroutine;
 
+    void OnApplicationFocus(bool focus)
+    {
+        Debug.Log("Focus: " + focus);
+        isFocused = focus;
+
+        if (!focus)
+        {
+            // Start checking after losing focus
+            if (focusCheckCoroutine == null)
+                focusCheckCoroutine = StartCoroutine(IsNotInFocus());
+        }
+        else
+        {
+            // Cancel coroutine when focus returns
+            if (focusCheckCoroutine != null)
+            {
+                StopCoroutine(focusCheckCoroutine);
+                focusCheckCoroutine = null;
+            }
+        }
+    }
+
+    IEnumerator IsNotInFocus()
+    {
+        yield return new WaitForSeconds(120f);
+
+
+        // If still not focused after 2 seconds
+        if (!isFocused)
+        {
+            uiManager.DisconnectionPopup();
+            Debug.Log("Disconnected: No Focus for 2 seconds");
+        }
+
+        focusCheckCoroutine = null;
+    }
     private void OnSocketOtherDevice(string data)
     {
         Debug.Log("Received Device Error with data: " + data);
@@ -305,7 +345,7 @@ public class SocketIOManager : MonoBehaviour
     {
         while (true)
         {
-            //    Debug.Log($"🟡 PingCheck | waitingForPong: {waitingForPong}, missedPongs: {missedPongs}, timeSinceLastPong: {Time.time - lastPongTime}");
+            Debug.Log($"🟡 PingCheck | waitingForPong: {waitingForPong}, missedPongs: {missedPongs}, timeSinceLastPong: {Time.time - lastPongTime}");
 
             if (missedPongs == 0)
             {
@@ -334,7 +374,7 @@ public class SocketIOManager : MonoBehaviour
             // Send next ping
             waitingForPong = true;
             lastPongTime = Time.time;
-            //            Debug.Log("📤 Sending ping...");
+            Debug.Log("📤 Sending ping...");
             SendDataWithNamespace("ping");
             yield return new WaitForSeconds(pingInterval);
         }
@@ -665,6 +705,8 @@ public class SocketIOManager : MonoBehaviour
     {
         gameManager.ClearAllBets();
         Debug.Log("Home Receved: " + json);
+        ReturnHome = JsonUtility.FromJson<Root>(json);
+        gameManager.SetPlayerCountOnReturn();
         //  Invoke(nameof(Reconnect), 0.2f);
 
     }
@@ -681,7 +723,7 @@ public class SocketIOManager : MonoBehaviour
         doubleBetData = JsonUtility.FromJson<Root>(json);
         gameManager.DoubleBets(doubleBetData.payload.bets);
         gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
-        gameManager.currentTotalBet = BetChipData.payload.totalBet;
+        gameManager.currentTotalBet = doubleBetData.payload.totalBet;
     }
     void OnCancle(string json)
     {
@@ -689,6 +731,7 @@ public class SocketIOManager : MonoBehaviour
         gameManager.CancleBets();
         gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
         gameManager.currentTotalBet = 0;
+        uiManager.SetChipoption(false);
     }
     void OnUndo(string json)
     {
@@ -697,7 +740,8 @@ public class SocketIOManager : MonoBehaviour
         doubleBetData = JsonUtility.FromJson<Root>(json);
         gameManager.UnduBets(doubleBetData.payload.bet.betId);
         gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
-        gameManager.currentTotalBet = BetChipData.payload.totalBet;
+        gameManager.currentTotalBet = doubleBetData.payload.totalBet;
+        if (doubleBetData.payload.totalBet == 0) uiManager.SetChipoption(false);
     }
     void OnRoomEnter(string json)
     {
@@ -820,6 +864,8 @@ public class Payload
 
     public List<History> history;
     public Meta meta;
+
+    public Lobby lobby;
 
 
 }
@@ -1029,13 +1075,13 @@ public class HandCode
 }
 
 
-
+[Serializable]
 public class Lobby
 {
-    public int casual { get; set; }
-    public int novice { get; set; }
-    public int expert { get; set; }
-    public int high_roller { get; set; }
+    public int casual;
+    public int novice;
+    public int expert;
+    public int high_roller;
 }
 
 public class MainBets
