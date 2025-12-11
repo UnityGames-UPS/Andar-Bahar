@@ -30,6 +30,7 @@ public class SocketIOManager : MonoBehaviour
     internal Root doubleBetData;
     internal Root HistoryPageData;
     internal Root ReturnHome;
+    internal Root TotalPlayerCountData;
     internal GameData initialData = null;
     // internal Payload resultData = null;
     internal Player playerdata = null;
@@ -205,6 +206,7 @@ public class SocketIOManager : MonoBehaviour
         gameSocket.On<string>("game:round_start", OnGameLoopStarted);
         gameSocket.On<string>("game:round_end", OnGameLoopEnd);
         gameSocket.On<string>("game:cashout", OnCashout);
+        gameSocket.On<string>("game:lobby_count", OnLobbyCount);
         gameSocket.On<string>("result", OnListenEvent);
         gameSocket.On<bool>("socketState", OnSocketState);
         gameSocket.On<string>("internalError", OnSocketError);
@@ -647,6 +649,18 @@ public class SocketIOManager : MonoBehaviour
         //  SendDataWithNamespace("request", json);
         gameSocket.ExpectAcknowledgement<string>(OnUndo).Emit("request", json);
     }
+    internal void SendRepeat()
+    {
+        SendRoom message = new SendRoom();
+        message.payload = new Payload();
+        message.type = "REPEAT_BET";
+        // message.payload.level = Room;
+
+        string json = JsonUtility.ToJson(message);
+
+        //  SendDataWithNamespace("request", json);
+        gameSocket.ExpectAcknowledgement<string>(OnRepeat).Emit("request", json);
+    }
     internal void SendCancle()
     {
 
@@ -706,7 +720,7 @@ public class SocketIOManager : MonoBehaviour
         gameManager.ClearAllBets();
         Debug.Log("Home Receved: " + json);
         ReturnHome = JsonUtility.FromJson<Root>(json);
-        gameManager.SetPlayerCountOnReturn();
+        gameManager.SetPlayerCountOnReturn(ReturnHome.payload.lobby);
         //  Invoke(nameof(Reconnect), 0.2f);
 
     }
@@ -721,9 +735,31 @@ public class SocketIOManager : MonoBehaviour
     {
         Debug.Log(json);
         doubleBetData = JsonUtility.FromJson<Root>(json);
-        gameManager.DoubleBets(doubleBetData.payload.bets);
-        gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
-        gameManager.currentTotalBet = doubleBetData.payload.totalBet;
+        if (doubleBetData.success)
+        {
+            gameManager.DoubleBets(doubleBetData.payload.bets);
+            gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
+            gameManager.currentTotalBet = doubleBetData.payload.totalBet;
+        }
+        else
+        {
+            gameManager.PlayPopup(doubleBetData.payload.message);
+        }
+    }
+    void OnRepeat(string json)
+    {
+        Debug.Log("RepeatBet" + json);
+        doubleBetData = JsonUtility.FromJson<Root>(json);
+        if (doubleBetData.success)
+        {
+            gameManager.RepeAtBet(doubleBetData.payload.bets);
+            gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
+            gameManager.currentTotalBet = doubleBetData.payload.totalBet;
+        }
+        else
+        {
+            gameManager.PlayPopup(doubleBetData.payload.message);
+        }
     }
     void OnCancle(string json)
     {
@@ -798,6 +834,13 @@ public class SocketIOManager : MonoBehaviour
         Debug.Log("CashOut\n" + data);
         CashoutData = JsonUtility.FromJson<Root>(data);
 
+
+    }
+    void OnLobbyCount(string data)
+    {
+        Debug.Log("playerount\n" + data);
+        TotalPlayerCountData = JsonUtility.FromJson<Root>(data);
+        gameManager.SetPlayerCountOnReturn(TotalPlayerCountData.lobby);
 
     }
     private void OnBetAcknowledged(string data)
@@ -878,6 +921,7 @@ public class Bet
     public string betType;
     public string betOption;
     public int delta;
+    public int amount;
 }
 
 
@@ -1140,6 +1184,7 @@ public class Root
 
     public bool success;
     public Payload payload;
+    public int playerCount;
 
     public long startedAt;
 
@@ -1150,6 +1195,8 @@ public class Root
     public string betOption;
     public int amount;
     public List<Payout> payouts;
+
+    public Lobby lobby;
 
 
 }

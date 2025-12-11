@@ -14,7 +14,7 @@ public class Homepage : MonoBehaviour
     [SerializeField] private TMP_Text PlayerBalance;
     [SerializeField] private Image PlayerImage;
     [Header("top Panel Details")]
-    [SerializeField] private TMP_Text TotalPlayerCount;
+    [SerializeField] internal TMP_Text TotalPlayerCount;
 
     [Header("Casual Room")]
     [SerializeField] Button Casualbutton;

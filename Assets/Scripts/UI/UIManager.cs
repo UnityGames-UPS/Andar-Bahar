@@ -192,6 +192,8 @@ public class UiManager : MonoBehaviour
     [SerializeField] internal List<Chip> Coins;
 
     [Header("Chipoptions")]
+    [SerializeField] internal GameObject Repeatpanel;
+    [SerializeField] internal Button Repeatbtn;
     [SerializeField] internal GameObject chiOptionpanel;
     [SerializeField] internal Button Undubtn;
     [SerializeField] internal Button Canclebtn;
@@ -359,6 +361,9 @@ public class UiManager : MonoBehaviour
         if (HistoryClose_button) HistoryClose_button.onClick.RemoveAllListeners();
         if (HistoryClose_button) HistoryClose_button.onClick.AddListener(delegate { ClosePopup(HistoryPopup_Object); });
 
+
+        Repeatbtn.onClick.RemoveAllListeners();
+        Repeatbtn.onClick.AddListener(delegate { socketManager.SendRepeat(); Repeatpanel.SetActive(false); });
 
         Undubtn.onClick.RemoveAllListeners();
         Undubtn.onClick.AddListener(delegate { socketManager.SendUndo(); });
@@ -641,7 +646,13 @@ public class UiManager : MonoBehaviour
                 });
         }
 
-        if (gameManager.currentTotalBet > 0) SetChipoption(true);
+        if (gameManager.currentTotalBet > 0)
+        {
+            Repeatpanel.SetActive(false);
+            SetChipoption(true);
+
+        }
+        else Repeatpanel.SetActive(true);
         isExpanded = false;
     }
 

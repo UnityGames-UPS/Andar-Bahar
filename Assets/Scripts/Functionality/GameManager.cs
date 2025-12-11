@@ -105,7 +105,7 @@ public class GameManager : MonoBehaviour
     internal int MultiplierCounter;
     internal string currentRoom;
     internal double currentTotalBet = 0;
-    private double currentBalance;
+    private double currentWin;
     private double animationduration = 2f;
 
     private Coroutine StartGameCorutine;
@@ -225,7 +225,7 @@ public class GameManager : MonoBehaviour
         uiManager.coinSelector.Chiptext.text = data[0].ToString();
         uiManager.coinSelector.chipIndex = 0;
         minBet_text.text = data[0].ToString();
-        maxBet_text.text = data[uiManager.Coins.Count - 1].ToString();
+        maxBet_text.text = data[uiManager.Coins.Count].ToString();
 
         for (int i = 0; i < uiManager.Coins.Count; i++)
         {
@@ -248,10 +248,12 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        string mainPlayerName = uiManager.MainPlayers.playername.text;
+        Sprite mainPlayerIcon = uiManager.MainPlayers.PlayerIcon.sprite;
 
+        // ------------------- RICHEST -------------------
         if (leaderboard.richest == null || leaderboard.richest.Count == 0)
         {
-            Debug.Log("No richest players");
             foreach (var item in uiManager.RichestPlayers)
                 item.gameObject.SetActive(false);
 
@@ -265,21 +267,24 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < richestCount; i++)
         {
-            int r = UnityEngine.Random.Range(0, uiManager.UserIcons.Count);
             Richest rich = leaderboard.richest[i];
+
+            // ✔ Use player's own icon if usernames match
+            Sprite iconToUse = (rich.username == mainPlayerName)
+                ? mainPlayerIcon
+                : uiManager.UserIcons[UnityEngine.Random.Range(0, uiManager.UserIcons.Count)];
 
             uiManager.RichestPlayers[i].SetData(
                 rich.username,
                 rich.balance.ToString(),
-                uiManager.UserIcons[r]
+                iconToUse
             );
             uiManager.RichestPlayers[i].gameObject.SetActive(true);
         }
 
-
+        // ------------------- WINNERS -------------------
         if (leaderboard.winners == null || leaderboard.winners.Count == 0)
         {
-            Debug.Log("No winners players");
             foreach (var item in uiManager.WinnerPlayers)
                 item.gameObject.SetActive(false);
 
@@ -293,17 +298,23 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < winnersCount; i++)
         {
-            int r = UnityEngine.Random.Range(0, uiManager.UserIcons.Count);
             Winner win = leaderboard.winners[i];
+
+            // ✔ Same logic here — use player icon if matched
+            Sprite iconToUse = (win.username == mainPlayerName)
+                ? mainPlayerIcon
+                : uiManager.UserIcons[UnityEngine.Random.Range(0, uiManager.UserIcons.Count)];
 
             uiManager.WinnerPlayers[i].SetData(
                 win.username,
                 win.totalWins.ToString(),
-                uiManager.UserIcons[r]
+                iconToUse
             );
+
             uiManager.WinnerPlayers[i].gameObject.SetActive(true);
         }
     }
+
 
 
 
@@ -325,6 +336,8 @@ public class GameManager : MonoBehaviour
             StopCoroutine(EndGameCorutine);
             EndGameCorutine = null;
         }
+
+        TotalPlayer_text.text = socketManager.gameLoopData.playerCount.ToString();
         StartGameCorutine = StartCoroutine(StartCountdown());
     }
     internal void StartGame()
@@ -363,7 +376,7 @@ public class GameManager : MonoBehaviour
         audioManager.PlayGirlAudio("placeyourbet");
         BetBlocker.gameObject.SetActive(false);
         uiManager.setCoins(true);
-
+        uiManager.Repeatpanel.SetActive(true);
         uiManager.SetNetBetPanel(false);
         MainFlushObj.SetActive(false);
 
@@ -396,6 +409,7 @@ public class GameManager : MonoBehaviour
         TotalCardsCount_text.gameObject.SetActive(false);
         uiManager.SetChipoption(false);
         uiManager.setCoins(false);
+        uiManager.Repeatpanel.SetActive(false);
         uiManager.SetNetBetPanel(true, currentTotalBet.ToString());
 
     }
@@ -448,6 +462,9 @@ public class GameManager : MonoBehaviour
         BaharHighLight.SetActive(false);
         yield return new WaitForSeconds(1f);
         PlayResetAnimation();
+        if (currentWin >= 1) PlayPopup("You Won\n" + currentWin.ToString());
+        currentWin = 0;
+
     }
 
     IEnumerator ManagePayout()
@@ -567,6 +584,7 @@ public class GameManager : MonoBehaviour
     #region  beting
     internal void onClickOption(GameObject option)
     {
+
         OptionPrefab optionprefab = option.GetComponent<OptionPrefab>();
 
 
@@ -577,56 +595,80 @@ public class GameManager : MonoBehaviour
     }
     internal void ManageBrodcastBetsPlayer()
     {
-
         uiManager.SetChipoption(true);
+        uiManager.Repeatpanel.SetActive(false);
+        int totalAmount = socketManager.BetChipData.payload.amount;
 
-        if (socketManager.BetChipData == null)
+        // Get chip denominations for current room
+        List<int> roomChips = FindRoom();
+
+        // Break into multiple chips
+        List<int> chipPieces = BreakAmountIntoChips(totalAmount, roomChips);
+
+        foreach (int chipAmount in chipPieces)
         {
-            Debug.LogError("BetChipData is NULL (server not sent or not deserialized)");
-            return;
+            ChipData data = new ChipData();
+            data.betId = socketManager.BetChipData.payload.betId;
+            data.amount = chipAmount;
+
+            int index = findChipindex(chipAmount, roomChips);
+            string val = chipAmount.ToString();
+
+            Debug.Log("Spawning Chip index=" + index + " amount=" + val);
+
+            data.chip = SpawnChip(
+                findChipSprite(chipAmount, roomChips),
+                val,
+                index,
+                uiManager.coinSelector.transform,
+                FindOption(socketManager.BetChipData.payload.betOption)
+            );
+
+            PlayerChips.Add(data);
         }
 
-        if (socketManager.BetChipData.payload.betOption == null)
-        {
-            Debug.LogError("payload is NULL (JSON missing payload field)");
-            return;
-        }
-        ChipData data = new ChipData();
-        data.betId = socketManager.BetChipData.payload.betId;
-        data.amount = socketManager.BetChipData.payload.amount;
-
-        string val = uiManager.coinSelector.Chiptext.text;
-        int index = uiManager.coinSelector.chipIndex;
-        data.chip = SpawnChip(uiManager.coinSelector.chipImage.sprite, val, index, uiManager.coinSelector.transform, FindOption(socketManager.BetChipData.payload.betOption));
-
-        PlayerChips.Add(data);
-
+        audioManager.PlayWLAudio("double");
     }
     internal void ManageBrodcastBetsOtherPlayers(Root chipdata)
     {
-
-
+        // Do not show own chip here
         if (chipdata.username == uiManager.MainPlayers.playername.text)
-        {
             return;
+
+        List<int> roomChips = FindRoom();
+        int totalAmount = chipdata.amount;
+
+        // Break large amount into individual chips
+        List<int> chipPieces = BreakAmountIntoChips(totalAmount, roomChips);
+
+        foreach (int piece in chipPieces)
+        {
+            int index = findChipindex(piece, roomChips);
+
+            string val = piece.ToString();
+
+            ChipData data = new ChipData();
+            data.betId = chipdata.betId;
+            data.amount = piece;
+
+            data.chip = SpawnChip(
+                findOtherPlayerChipSprite(piece, roomChips),
+                val,
+                index,
+                TotalPlayer_text.transform,
+                FindOption(chipdata.betOption)
+            );
+
+            OtherPlayerChips.Add(data);
         }
-
-        ChipData data = new ChipData();
-        data.betId = chipdata.betId;
-        data.amount = chipdata.amount;
-
-        int index = findChipindex(chipdata.amount, FindRoom());
-        string val = FindRoom()[index].ToString(); ;
-        data.chip = SpawnChip(findOtherPlayerChipSprite(chipdata.amount, FindRoom()), val, index, TotalPlayer_text.transform, FindOption(chipdata.betOption));
-
-        OtherPlayerChips.Add(data);
-
     }
+
 
 
 
     GameObject SpawnChip(Sprite sprite, string amount, int chipindex, Transform startPoint, OptionPrefab op, float moveTime = 0.4f)
     {
+
 
         Chip chip = GetChip();
         chip.SetData(sprite, amount, chipindex);
@@ -798,7 +840,15 @@ public class GameManager : MonoBehaviour
         foreach (var payout in payouts)
         {
             Transform target = FindPlayerTransform(payout.username);
+            if (uiManager.MainPlayers.playername.text == payout.username)
+            {
+                int oldBalance = int.Parse(uiManager.MainPlayers.playerBalence.text);
+                double newBalance = payout.balance;
 
+                currentWin = newBalance - oldBalance;
+                uiManager.MainPlayers.playerBalence.text = payout.balance.ToString();
+                Debug.Log("Managing playerBet" + payout.balance);
+            }
             if (target == null)
                 target = TotalPlayer_text.transform;
 
@@ -831,23 +881,88 @@ public class GameManager : MonoBehaviour
 
 
     #region  manage BEt Double bet cancle &&& undo
-
-    internal void DoubleBets(List<Bet> bets)
+    internal void RepeAtBet(List<Bet> bets)
     {
+        audioManager.PlayWLAudio("double");
+        Debug.Log("RepeatBet started");
+
+        List<int> roomChips = FindRoom(); // chip denominations
+
         foreach (var bet in bets)
         {
-            ChipData data = new ChipData();
-            data.betId = bet.betId;
-            data.amount = bet.oldAmount;
 
-            string val = bet.oldAmount.ToString();
-            int index = findChipindex(bet.oldAmount, FindRoom());
-            data.chip = SpawnChip(findChipSprite(bet.oldAmount, FindRoom()), val, index, uiManager.coinSelector.transform, FindOption(bet.betOption));
+            int amount = bet.amount;
 
-            PlayerChips.Add(data);
+            // Break amount into multiple chips
+            List<int> chipPieces = BreakAmountIntoChips(amount, roomChips);
+
+            foreach (int piece in chipPieces)
+            {
+                ChipData data = new ChipData();
+                data.betId = bet.betId;
+                data.amount = piece;
+
+                string val = piece.ToString();
+                int index = findChipindex(piece, roomChips);
+
+                if (index <= 5)   // your existing condition
+                {
+                    data.chip = SpawnChip(
+                        findChipSprite(piece, roomChips),
+                        val,
+                        index,
+                        uiManager.coinSelector.transform,
+                        FindOption(bet.betOption)
+                    );
+
+                    PlayerChips.Add(data);
+                }
+
+            }
         }
-
+        uiManager.SetChipoption(true);
     }
+    internal void DoubleBets(List<Bet> bets)
+    {
+        audioManager.PlayWLAudio("double");
+
+        List<int> roomChips = FindRoom(); // chip denominations
+
+        foreach (var bet in bets)
+        {
+            if (bet.delta > 0)
+            {
+                int amount = bet.oldAmount;
+
+                // Break amount into multiple chips
+                List<int> chipPieces = BreakAmountIntoChips(amount, roomChips);
+
+                foreach (int piece in chipPieces)
+                {
+                    ChipData data = new ChipData();
+                    data.betId = bet.betId;
+                    data.amount = piece;
+
+                    string val = piece.ToString();
+                    int index = findChipindex(piece, roomChips);
+
+                    if (index <= 5)   // your existing condition
+                    {
+                        data.chip = SpawnChip(
+                            findChipSprite(piece, roomChips),
+                            val,
+                            index,
+                            uiManager.coinSelector.transform,
+                            FindOption(bet.betOption)
+                        );
+
+                        PlayerChips.Add(data);
+                    }
+                }
+            }
+        }
+    }
+
     internal void ClearAllBets()
     {
         CancleBets();
@@ -1084,6 +1199,24 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region helper
+    List<int> BreakAmountIntoChips(int amount, List<int> chipOptions)
+    {
+        // Sort descending to use biggest chips first
+        chipOptions.Sort((a, b) => b.CompareTo(a));
+
+        List<int> results = new List<int>();
+
+        foreach (int chip in chipOptions)
+        {
+            while (amount >= chip)
+            {
+                amount -= chip;
+                results.Add(chip);
+            }
+        }
+
+        return results;
+    }
 
     internal void UpdatePlayerbalance(string balance)
     {
@@ -1243,20 +1376,14 @@ public class GameManager : MonoBehaviour
 
 
     #endregion
-    internal void SetPlayerCountOnReturn()
+    internal void SetPlayerCountOnReturn(Lobby lobby)
     {
-        if (homepage.CPlayerCount == null)
-        {
-            Debug.Log("Returnhome is null");
-        }
-        if (socketManager.ReturnHome.payload.lobby == null)
-        {
-            Debug.Log("casual is null");
-        }
-        homepage.CPlayerCount.text = socketManager.ReturnHome.payload.lobby.casual.ToString() + "Players";
-        homepage.NPlayerCount.text = socketManager.ReturnHome.payload.lobby.novice.ToString() + "Players";
-        homepage.EPlayerCount.text = socketManager.ReturnHome.payload.lobby.expert.ToString() + "Players";
-        homepage.HPlayerCount.text = socketManager.ReturnHome.payload.lobby.high_roller.ToString() + "Players";
+
+        homepage.CPlayerCount.text = lobby.casual.ToString() + "Players";
+        homepage.NPlayerCount.text = lobby.novice.ToString() + "Players";
+        homepage.EPlayerCount.text = lobby.expert.ToString() + "Players";
+        homepage.HPlayerCount.text = lobby.high_roller.ToString() + "Players";
+        homepage.TotalPlayerCount.text = (lobby.casual + lobby.novice + lobby.expert + lobby.high_roller).ToString();
     }
 
 }
