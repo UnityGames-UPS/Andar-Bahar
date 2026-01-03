@@ -48,8 +48,8 @@ public class SocketIOManager : MonoBehaviour
 
 
     protected string SocketURI = null;
-    // protected string TestSocketURI = "https://game-crm-rtp-backend.onrender.com/";
-    protected string TestSocketURI = "http://localhost:5000/";
+    protected string TestSocketURI = "https://devrealtime.dingdinghouse.com/";
+    // protected string TestSocketURI = "http://localhost:5000/";
     private string savedToken;
 
     [SerializeField] internal JSFunctCalls JSManager;
@@ -236,12 +236,12 @@ public class SocketIOManager : MonoBehaviour
 
     private void OnPongReceived(string data) //Back2 Start
     {
-        Debug.Log("✅ Received pong from server.");
+        // Debug.Log("✅ Received pong from server.");
         waitingForPong = false;
         missedPongs = 0;
         lastPongTime = Time.time;
-        Debug.Log($"⏱️ Updated last pong time: {lastPongTime}");
-        Debug.Log($"📦 Pong payload: {data}");
+        //  Debug.Log($"⏱️ Updated last pong time: {lastPongTime}");
+        //  Debug.Log($"📦 Pong payload: {data}");
     } //Back2 end
 
     private void OnDisconnected() //Back2 Start
@@ -285,6 +285,7 @@ public class SocketIOManager : MonoBehaviour
     }
     private bool isFocused = true;
     private Coroutine focusCheckCoroutine;
+    private bool disconnectionShown = false;   // <- NEW
 
     void OnApplicationFocus(bool focus)
     {
@@ -294,12 +295,15 @@ public class SocketIOManager : MonoBehaviour
         if (!focus)
         {
             // Start checking after losing focus
-            if (focusCheckCoroutine == null)
+            if (focusCheckCoroutine == null && !disconnectionShown)
                 focusCheckCoroutine = StartCoroutine(IsNotInFocus());
         }
         else
         {
-            // Cancel coroutine when focus returns
+            // If popup already shown, do NOT cancel anything
+            if (disconnectionShown) return;
+
+            // Otherwise cancel coroutine when focus returns
             if (focusCheckCoroutine != null)
             {
                 StopCoroutine(focusCheckCoroutine);
@@ -310,18 +314,19 @@ public class SocketIOManager : MonoBehaviour
 
     IEnumerator IsNotInFocus()
     {
-        yield return new WaitForSeconds(120f);
+        yield return new WaitForSeconds(2f); // 2 seconds, change as required
 
-
-        // If still not focused after 2 seconds
-        if (!isFocused)
+        // If still not focused AND popup not shown
+        if (!isFocused && !disconnectionShown)
         {
+            disconnectionShown = true;  // Prevent future runs
             uiManager.DisconnectionPopup();
             Debug.Log("Disconnected: No Focus for 2 seconds");
         }
 
         focusCheckCoroutine = null;
     }
+
     private void OnSocketOtherDevice(string data)
     {
         Debug.Log("Received Device Error with data: " + data);
@@ -347,7 +352,7 @@ public class SocketIOManager : MonoBehaviour
     {
         while (true)
         {
-            Debug.Log($"🟡 PingCheck | waitingForPong: {waitingForPong}, missedPongs: {missedPongs}, timeSinceLastPong: {Time.time - lastPongTime}");
+            //  Debug.Log($"🟡 PingCheck | waitingForPong: {waitingForPong}, missedPongs: {missedPongs}, timeSinceLastPong: {Time.time - lastPongTime}");
 
             if (missedPongs == 0)
             {
@@ -362,11 +367,11 @@ public class SocketIOManager : MonoBehaviour
                     uiManager.ReconnectionPopup();
                 }
                 missedPongs++;
-                Debug.LogWarning($"⚠️ Pong missed #{missedPongs}/{MaxMissedPongs}");
+                //  Debug.LogWarning($"⚠️ Pong missed #{missedPongs}/{MaxMissedPongs}");
 
                 if (missedPongs >= MaxMissedPongs)
                 {
-                    Debug.LogError("❌ Unable to connect to server — 5 consecutive pongs missed.");
+                    //  Debug.LogError("❌ Unable to connect to server — 5 consecutive pongs missed.");
                     isConnected = false;
                     uiManager.DisconnectionPopup();
                     yield break;
@@ -376,7 +381,7 @@ public class SocketIOManager : MonoBehaviour
             // Send next ping
             waitingForPong = true;
             lastPongTime = Time.time;
-            Debug.Log("📤 Sending ping...");
+            //  Debug.Log("📤 Sending ping...");
             SendDataWithNamespace("ping");
             yield return new WaitForSeconds(pingInterval);
         }
@@ -720,7 +725,7 @@ public class SocketIOManager : MonoBehaviour
         gameManager.ClearAllBets();
         Debug.Log("Home Receved: " + json);
         ReturnHome = JsonUtility.FromJson<Root>(json);
-        gameManager.SetPlayerCountOnReturn(ReturnHome.payload.lobby);
+        gameManager.SetPlayerCountOnReturn(ReturnHome.payload.lobby, ReturnHome.payload.balance);
         //  Invoke(nameof(Reconnect), 0.2f);
 
     }
@@ -840,7 +845,7 @@ public class SocketIOManager : MonoBehaviour
     {
         Debug.Log("playerount\n" + data);
         TotalPlayerCountData = JsonUtility.FromJson<Root>(data);
-        gameManager.SetPlayerCountOnReturn(TotalPlayerCountData.lobby);
+        gameManager.SetPlayerCountOnReturn(TotalPlayerCountData.lobby, playerdata.balance);
 
     }
     private void OnBetAcknowledged(string data)

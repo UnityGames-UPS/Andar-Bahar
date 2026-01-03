@@ -14,6 +14,10 @@ public class OptionPrefab : MonoBehaviour
     [SerializeField] private TMP_Text Text;
     [SerializeField] internal RectTransform chiparea;
     [SerializeField] internal ImageAnimation winAnimation;
+    [SerializeField] internal GameObject MyBetObj;
+    [SerializeField] internal TMP_Text MyBetText;
+    [SerializeField] internal GameObject TotalBetObj;
+    [SerializeField] internal TMP_Text TotalBetText;
 
     internal int Optionindex;
     internal string VaridontWant;
@@ -42,6 +46,12 @@ public class OptionPrefab : MonoBehaviour
         Optionindex = index;
         VaridontWant = OptionType;
     }
-
+    internal void DontShowText()
+    {
+        TotalBetText.text = "";
+        MyBetText.text = "";
+        TotalBetObj.SetActive(false);
+        MyBetObj.SetActive(false);
+    }
 
 }
