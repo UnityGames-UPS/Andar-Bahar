@@ -6,6 +6,7 @@ using TMPro;
 using DG.Tweening;
 
 
+
 public class GameManager : MonoBehaviour
 {
     [Header("Pages")]
@@ -447,6 +448,12 @@ public class GameManager : MonoBehaviour
     }
     IEnumerator GameLoop()
     {
+        if (StartGameCorutine != null)
+        {
+            StopCoroutine(StartGameCorutine);
+            StartGameCorutine = null;
+        }
+        ResetCardHistory();
         int a = socketManager.gameLoopData.andarCards.Count;
         int b = socketManager.gameLoopData.baharCards.Count;
 
@@ -646,6 +653,18 @@ public class GameManager : MonoBehaviour
 
 
         int index = uiManager.coinSelector.chipIndex;
+        double chipValue;
+        if (double.TryParse(uiManager.coinSelector.Chiptext.text, out chipValue))
+        {
+            if (chipValue >= socketManager.playerdata.balance)
+            {
+                PlayPopup("Low Balance");
+                // Low balance logic here
+                Debug.Log("Insufficient balance");
+
+                return;
+            }
+        }
         socketManager.BetPlaced(index, optionprefab.VaridontWant, socketManager.initialData.betOptions[optionprefab.Optionindex]);
 
 

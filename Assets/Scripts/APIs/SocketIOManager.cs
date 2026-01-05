@@ -314,7 +314,7 @@ public class SocketIOManager : MonoBehaviour
 
     IEnumerator IsNotInFocus()
     {
-        yield return new WaitForSeconds(2f); // 2 seconds, change as required
+        yield return new WaitForSeconds(20f); // 2 seconds, change as required
 
         // If still not focused AND popup not shown
         if (!isFocused && !disconnectionShown)
@@ -795,7 +795,7 @@ public class SocketIOManager : MonoBehaviour
 
     void ManageOtherPlayerbets(string data)
     {
-        // Debug.Log("Bet Placed $$$$$$$$$$$$$$\n" + data);
+        Debug.Log("Bet Placed OtherPlayer\n" + data);
         OtherChipData = JsonUtility.FromJson<Root>(data);
         gameManager.ManageBrodcastBetsOtherPlayers(OtherChipData);
 
