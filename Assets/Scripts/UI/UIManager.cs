@@ -344,7 +344,7 @@ public class UiManager : MonoBehaviour
         if (Exit_Button) Exit_Button.onClick.AddListener(delegate { OpenPopup(QuitPopup_Object); });
 
         if (YesHome_button) YesHome_button.onClick.RemoveAllListeners();
-        if (YesHome_button) YesHome_button.onClick.AddListener(delegate { ClosePopup(GameQuitPopup); HomeScreen_Object.SetActive(true); socketManager.SendHome(); GameScreen_Object.SetActive(false); ResetMenuPanel(false); });
+        if (YesHome_button) YesHome_button.onClick.AddListener(delegate { ClosePopup(GameQuitPopup); IsMenuPanelOpen = false; socketManager.SendHome(); ResetMenuPanel(false); });
 
         if (NoHome_button) NoHome_button.onClick.RemoveAllListeners();
         if (NoHome_button) NoHome_button.onClick.AddListener(delegate { ClosePopup(GameQuitPopup); });
@@ -356,10 +356,10 @@ public class UiManager : MonoBehaviour
         if (InfoRight_button) InfoRight_button.onClick.AddListener(delegate { GoToNextInfoPage(); });
 
         if (InfoClose_button) InfoClose_button.onClick.RemoveAllListeners();
-        if (InfoClose_button) InfoClose_button.onClick.AddListener(delegate { ClosePopup(InfoPopup_Object); });
+        if (InfoClose_button) InfoClose_button.onClick.AddListener(delegate { ClosePopup(InfoPopup_Object); IsMenuPanelOpen = false; });
 
         if (HistoryClose_button) HistoryClose_button.onClick.RemoveAllListeners();
-        if (HistoryClose_button) HistoryClose_button.onClick.AddListener(delegate { ClosePopup(HistoryPopup_Object); });
+        if (HistoryClose_button) HistoryClose_button.onClick.AddListener(delegate { ClosePopup(HistoryPopup_Object); IsMenuPanelOpen = false; });
 
 
         Repeatbtn.onClick.RemoveAllListeners();
@@ -395,9 +395,9 @@ public class UiManager : MonoBehaviour
             Homebutton_Object.SetActive(true);
             //  MenuPanelContainer_Object.transform.localPosition = new Vector2(56, 394);
             MenuPanelContainer_Object.GetComponent<RectTransform>().anchoredPosition = new Vector2(56, 394);
-            MenuPanel_Object.transform.SetParent(GameScreen_Object.transform, true);
-            int lastIndex = GameScreen_Object.transform.childCount - 1;
-            MenuPanel_Object.transform.SetSiblingIndex(lastIndex - 1);
+            //  MenuPanel_Object.transform.SetParent(GameScreen_Object.transform, true);
+            // int lastIndex = GameScreen_Object.transform.childCount - 1;
+            // MenuPanel_Object.transform.SetSiblingIndex(lastIndex - 1);
 
         }
         else
@@ -405,10 +405,10 @@ public class UiManager : MonoBehaviour
             Homebutton_Object.SetActive(false);
             // MenuPanelContainer_Object.transform.localPosition = new Vector2(56, 221);
             MenuPanelContainer_Object.GetComponent<RectTransform>().anchoredPosition = new Vector2(56, 221);
-            MenuPanel_Object.transform.SetParent(HomeScreen_Object.transform, true);
-            int lastIndex = HomeScreen_Object.transform.childCount - 1;
-            MenuPanel_Object.transform.SetSiblingIndex(lastIndex - 1);
-
+            //  MenuPanel_Object.transform.SetParent(HomeScreen_Object.transform, true);
+            //   int lastIndex = HomeScreen_Object.transform.childCount - 1;
+            // MenuPanel_Object.transform.SetSiblingIndex(lastIndex - 1);
+            //
         }
     }
 

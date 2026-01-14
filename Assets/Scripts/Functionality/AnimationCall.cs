@@ -7,6 +7,8 @@ using DG.Tweening;
 public class AnimationCall : MonoBehaviour
 {
 
+    [SerializeField] internal AudioManager audioManager;
+
     [Header("Right Card")]
     [SerializeField] internal Sprite RightSprite;
     [SerializeField] internal Image RightCard;
@@ -38,6 +40,7 @@ public class AnimationCall : MonoBehaviour
 
     public void LeftHandAnim()
     {
+        if (audioManager) audioManager.PlayWLAudio("cards");
         LeftCard.sprite = LeftSprite;
         LeftCard.gameObject.SetActive(true);
 
@@ -56,6 +59,7 @@ public class AnimationCall : MonoBehaviour
     }
     public void RightHandAnim()
     {
+        if (audioManager) audioManager.PlayWLAudio("cards");
         RightCard.sprite = RightSprite;
         RightCard.gameObject.SetActive(true);
 
@@ -94,7 +98,7 @@ public class AnimationCall : MonoBehaviour
 
         MiddleCard.sprite = MiddleSprite;
 
-
+        if (audioManager) audioManager.PlayWLAudio("cards");
         seq.AppendInterval(2f);
         seq.Append(MiddleCard.transform.DOScale(1.2f, 0.25f).SetEase(Ease.OutBack));
         MiddleEffect.StartAnimation();

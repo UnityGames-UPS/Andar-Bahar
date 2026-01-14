@@ -31,6 +31,9 @@ public class SocketIOManager : MonoBehaviour
     internal Root HistoryPageData;
     internal Root ReturnHome;
     internal Root TotalPlayerCountData;
+    internal Root TimeRemaining;
+    internal Root CardDelt;
+    internal Root FlushData;
     internal GameData initialData = null;
     // internal Payload resultData = null;
     internal Player playerdata = null;
@@ -207,7 +210,9 @@ public class SocketIOManager : MonoBehaviour
         gameSocket.On<string>("game:round_end", OnGameLoopEnd);
         gameSocket.On<string>("game:cashout", OnCashout);
         gameSocket.On<string>("game:lobby_count", OnLobbyCount);
-        gameSocket.On<string>("result", OnListenEvent);
+        gameSocket.On<string>("game:betting_timer", OnListenTimeEvent);
+        gameSocket.On<string>("game:flush_result", OnListenFlush);
+        gameSocket.On<string>("game:card_dealt", OnListenCardEvent);
         gameSocket.On<bool>("socketState", OnSocketState);
         gameSocket.On<string>("internalError", OnSocketError);
         gameSocket.On<string>("alert", OnSocketAlert);
@@ -258,10 +263,28 @@ public class SocketIOManager : MonoBehaviour
     JSManager.SendCustomMessage("error");
 #endif
     }
-    private void OnListenEvent(string data)
+    private void OnListenTimeEvent(string data)
     {
-        // Debug.Log("Received some_event with data: " + data);
-        ParseResponse(data);
+        gameManager.OnGameLoaded();
+        Debug.Log("Received timer:/n " + data);
+        //  ParseResponse(data);
+        TimeRemaining = JsonUtility.FromJson<Root>(data);
+        gameManager.SetBetTimer();
+    }
+    private void OnListenCardEvent(string data)
+    {
+        gameManager.OnGameLoaded();
+        Debug.Log("Received Card:/n " + data);
+        //  ParseResponse(data);
+        CardDelt = JsonUtility.FromJson<Root>(data);
+        gameManager.ManageCardDelt(CardDelt);
+    }
+    private void OnListenFlush(string data)
+    {
+        Debug.Log("Received flush:/n " + data);
+        FlushData = JsonUtility.FromJson<Root>(data);
+        StartCoroutine(gameManager.ManageFlushAnimation());
+        //  ParseResponse(data);
     }
 
     private void OnSocketState(bool state)
@@ -320,7 +343,7 @@ public class SocketIOManager : MonoBehaviour
         if (!isFocused && !disconnectionShown)
         {
             disconnectionShown = true;  // Prevent future runs
-            uiManager.DisconnectionPopup();
+                                        //  uiManager.DisconnectionPopup();
             Debug.Log("Disconnected: No Focus for 2 seconds");
         }
 
@@ -629,6 +652,20 @@ public class SocketIOManager : MonoBehaviour
     }
     internal void BetPlaced(int amountIndex, string betType, string betOption)
     {
+        double chipValue;
+
+        if (double.TryParse(uiManager.coinSelector.Chiptext.text, out chipValue))
+        {
+            Debug.Log("XXXXXXXX" + chipValue + "    " + playerdata.balance);
+            if (chipValue > playerdata.balance)
+            {
+                gameManager.PlayPopup("Low Balance");
+                // Low balance logic here
+                Debug.Log("Insufficient balance");
+
+                return;
+            }
+        }
         BetMessage message = new BetMessage();
         message.type = "PLACE_BET";
         message.payload = new BetPayload();
@@ -726,6 +763,10 @@ public class SocketIOManager : MonoBehaviour
         Debug.Log("Home Receved: " + json);
         ReturnHome = JsonUtility.FromJson<Root>(json);
         gameManager.SetPlayerCountOnReturn(ReturnHome.payload.lobby, ReturnHome.payload.balance);
+        playerdata.balance = ReturnHome.payload.balance;
+        StartCoroutine(gameManager.ShowLoadingPage("Loading...."));
+        gameManager.GamePage.SetActive(false);
+        gameManager.HomePage.SetActive(true);
         //  Invoke(nameof(Reconnect), 0.2f);
 
     }
@@ -744,6 +785,7 @@ public class SocketIOManager : MonoBehaviour
         {
             gameManager.DoubleBets(doubleBetData.payload.bets);
             gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
+            playerdata.balance = doubleBetData.payload.balance;
             gameManager.currentTotalBet = doubleBetData.payload.totalBet;
         }
         else
@@ -759,6 +801,7 @@ public class SocketIOManager : MonoBehaviour
         {
             gameManager.RepeAtBet(doubleBetData.payload.bets);
             gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
+            playerdata.balance = doubleBetData.payload.balance;
             gameManager.currentTotalBet = doubleBetData.payload.totalBet;
         }
         else
@@ -771,6 +814,7 @@ public class SocketIOManager : MonoBehaviour
         doubleBetData = JsonUtility.FromJson<Root>(json);
         gameManager.CancleBets();
         gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
+        playerdata.balance = doubleBetData.payload.balance;
         gameManager.currentTotalBet = 0;
         uiManager.SetChipoption(false);
     }
@@ -781,6 +825,7 @@ public class SocketIOManager : MonoBehaviour
         doubleBetData = JsonUtility.FromJson<Root>(json);
         gameManager.UnduBets(doubleBetData.payload.bet.betId);
         gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
+        playerdata.balance = doubleBetData.payload.balance;
         gameManager.currentTotalBet = doubleBetData.payload.totalBet;
         if (doubleBetData.payload.totalBet == 0) uiManager.SetChipoption(false);
     }
@@ -788,6 +833,15 @@ public class SocketIOManager : MonoBehaviour
     {
         Debug.Log(json);
         roomData = JsonUtility.FromJson<Root>(json);
+        if (roomData.success == false)
+        {
+            StartCoroutine(gameManager.ShowLoadingPage("Loading...."));
+            gameManager.HomePage.SetActive(true);
+            // gameManager.LoadingPage.SetActive(false);
+            gameManager.GamePage.SetActive(false);
+            return;
+
+        }
         gameManager.SetCoinData();
         gameManager.SetOptionData();
         gameManager.SetOtherplayerData(roomData.payload.leaderboards);
@@ -819,18 +873,17 @@ public class SocketIOManager : MonoBehaviour
         Debug.Log("Loop end\n" + data);
 
 
-        if (!NormalStart)
-        {
-            gameManager.GamePage.SetActive(true);
-            gameManager.SetLoadingPage(false);
-            gameManager.HomePage.SetActive(false);
-            gameManager.StartGameMidway();
-        }
-        else
-        {
-            gameManager.StartGame();
+        // if (!NormalStart)
+        // {
+        //     gameManager.GamePage.SetActive(true);
+        //     gameManager.SetLoadingPage(false);
+        //     gameManager.HomePage.SetActive(false);
+        //     gameManager.StartGameMidway();
+        // }
 
-        }
+        gameManager.EndLoop();
+
+
 
         // Only start game AFTER validating
     }
@@ -839,6 +892,7 @@ public class SocketIOManager : MonoBehaviour
         Debug.Log("CashOut\n" + data);
         CashoutData = JsonUtility.FromJson<Root>(data);
 
+        gameManager.ManagePayouts();
 
     }
     void OnLobbyCount(string data)
@@ -858,6 +912,7 @@ public class SocketIOManager : MonoBehaviour
             gameManager.ManageBrodcastBetsPlayer();
             gameManager.UpdatePlayerbalance(BetChipData.payload.balance.ToString());
             gameManager.currentTotalBet = BetChipData.payload.totalBet;
+            playerdata.balance = BetChipData.payload.balance;
         }
         else
         {
@@ -1203,6 +1258,21 @@ public class Root
 
     public Lobby lobby;
 
+
+    //new
+
+    public long serverTime;
+    public long bettingEndTime;
+    public int timeRemaining;
+
+
+
+    public Card card;
+    public string side;
+    public int cardsDealt;
+
+
+    public List<Card> cards;
 
 }
 

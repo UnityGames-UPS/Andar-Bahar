@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using Best.SocketIO;
 
 
 
@@ -110,6 +111,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject AndarHighLight;
     [SerializeField] private GameObject BaharHighLight;
     [SerializeField] private GameObject AndarbaharBetReset;
+    [SerializeField] private Sprite HandResetSprite;
 
     public float popScale = 1.15f;
     public float animTime = 0.15f;
@@ -162,7 +164,17 @@ public class GameManager : MonoBehaviour
         homepage.SetInitHomedata(socketManager.initialData);
         SetPlayerData(socketManager.playerdata);
     }
+    internal IEnumerator ShowLoadingPage(string loadingPageText, int activeTime = 6)
+    {
+        ImageAnimation anim = LoadingPage.GetComponentInChildren<ImageAnimation>();
+        anim.StopAnimation();
+        anim.StartAnimation();
+        LoadingPage_text.text = loadingPageText;
+        LoadingPage.SetActive(true);
+        yield return new WaitForSeconds(activeTime);
+        LoadingPage.SetActive(false);
 
+    }
     internal void SetLoadingPage(bool isActive)
     {
         ImageAnimation anim = LoadingPage.GetComponentInChildren<ImageAnimation>();
@@ -256,11 +268,11 @@ public class GameManager : MonoBehaviour
         uiManager.coinSelector.chipImage.sprite = PlayerChipSprite[0];
 
         // Reset all coins visuals
-        for (int i = 1; i < uiManager.Coins.Count; i++)
+        for (int i = 0; i < uiManager.Coins.Count; i++)
         {
-            uiManager.Coins[i - 1].chipImage.sprite = PlayerChipSprite[i];
-
+            uiManager.Coins[i].chipImage.sprite = PlayerChipSprite[i + 1];
         }
+
     }
 
 
@@ -367,40 +379,8 @@ public class GameManager : MonoBehaviour
         }
 
         TotalPlayer_text.text = socketManager.gameLoopData.playerCount.ToString();
-        StartGameCorutine = StartCoroutine(StartCountdown());
-    }
-    internal void StartGame()
-    {
-        if (StartGameCorutine != null)
-        {
-            StopCoroutine(StartGameCorutine);
-            StartGameCorutine = null;
-        }
-        if (EndGameCorutine != null)
-        {
-            StopCoroutine(EndGameCorutine);
-            EndGameCorutine = null;
-        }
-        EndGameCorutine = StartCoroutine(GameLoop());
-    }
-    internal void StartGameMidway()
-    {
-        if (StartGameCorutine != null)
-        {
-            StopCoroutine(StartGameCorutine);
-            StartGameCorutine = null;
-        }
-        if (EndGameCorutine != null)
-        {
-            StopCoroutine(EndGameCorutine);
-            EndGameCorutine = null;
-        }
-        animHand.MiddleSprite = CardSet(socketManager.gameLoopData.middleCard.suit, socketManager.gameLoopData.middleCard.rank);
-        animHand.MiddleCard.gameObject.SetActive(true);
-        EndGameCorutine = StartCoroutine(GameLoop());
-    }
-    IEnumerator StartCountdown()
-    {
+
+
         currentTotalBet = 0;
         audioManager.PlayGirlAudio("placeyourbet");
         BetBlocker.gameObject.SetActive(false);
@@ -415,7 +395,7 @@ public class GameManager : MonoBehaviour
 
 
         PlayMiddleCardAnim();
-        yield return new WaitForSeconds(2f);
+        // yield return new WaitForSeconds(2f);
 
         bool startWithAndar = socketManager.gameLoopData.middleCard.color == "black";
         if (startWithAndar)
@@ -430,62 +410,119 @@ public class GameManager : MonoBehaviour
             BaharTxt.SetData(1, "bahar", socketManager.initialData.wagers.main_bets.bahar.payout[0].ToString(), "main_bets");
 
         }
+
+    }
+
+    internal void SetBetTimer()
+    {
+        ResetCardHistory();
+        BetBlocker.gameObject.SetActive(false);
         TotalCardsCount_text.gameObject.SetActive(true);
-        for (int i = 25; i > 0; i--)
+        animHand.MiddleCard.sprite = CardSet(socketManager.TimeRemaining.middleCard.suit, socketManager.TimeRemaining.middleCard.rank);
+        animHand.MiddleCard.gameObject.SetActive(true);
+        animHand.LeftCard.gameObject.SetActive(false);
+        animHand.RightCard.gameObject.SetActive(false);
+
+        int time = socketManager.TimeRemaining.timeRemaining / 1000;
+
+        TotalCardsCount_text.text = "Place bet Now\n" + time;
+        if (time == 5)
         {
-            TotalCardsCount_text.text = "Place bet Now\n" + i.ToString();
-            yield return new WaitForSeconds(1f);
-            if (i == 6) audioManager.PlayGirlAudio("timeisrunning");
+            audioManager.PlayGirlAudio("timeisrunning");
         }
+        else if (time == 0)
+        {
+            BetBlocker.gameObject.SetActive(true);
+            audioManager.PlayGirlAudio("nomorebets");
+            TotalCardsCount_text.gameObject.SetActive(false);
+            uiManager.SetChipoption(false);
+            uiManager.setCoins(false);
+            uiManager.Repeatpanel.SetActive(false);
+            uiManager.SetNetBetPanel(true, currentTotalBet.ToString());
+            TotalCardsCount_text.text = "Good Luck!";
+            BetBlocker.gameObject.SetActive(true);
+        }
+        if (time % 5 == 4)
+        {
+            Handanimator.Play("NoHand");
+
+        }
+    }
+
+    internal void ManageCardDelt(Root cardDelt)
+    {
+
+
         BetBlocker.gameObject.SetActive(true);
-        audioManager.PlayGirlAudio("nomorebets");
-        TotalCardsCount_text.gameObject.SetActive(false);
         uiManager.SetChipoption(false);
         uiManager.setCoins(false);
         uiManager.Repeatpanel.SetActive(false);
         uiManager.SetNetBetPanel(true, currentTotalBet.ToString());
+        TotalCardsCount_text.text = "Good Luck!";
+
+        ManageCardCounts(cardDelt.cardsDealt);
+        animHand.MiddleCard.sprite = CardSet(cardDelt.middleCard.suit, cardDelt.middleCard.rank);
+        animHand.MiddleCard.gameObject.SetActive(true);
+
+        if (cardDelt.side == "andar")
+        {
+            PlayAndarCardAnim();
+
+        }
+        else
+        {
+            PlayBagarCardAnim();
+
+        }
+
+        StartCoroutine(SetHistory(cardDelt));
 
     }
+    IEnumerator SetHistory(Root cardDelt)
+    {
+        yield return new WaitForSeconds(0.5f);
+        List<Sprite> andarSpriteList = new List<Sprite>();
+        List<Sprite> baharSpriteList = new List<Sprite>();
+
+        int andarCount = Mathf.Max(0, cardDelt.andarCards.Count - 1);
+        int baharCount = Mathf.Max(0, cardDelt.baharCards.Count - 1);
+
+        // ANDAR history
+        for (int i = 0; i < andarCount; i++)
+        {
+            andarSpriteList.Add(
+                CardSet(cardDelt.andarCards[i].suit, cardDelt.andarCards[i].rank)
+            );
+        }
+
+        // BAHAR history
+        for (int i = 0; i < baharCount; i++)
+        {
+            baharSpriteList.Add(
+                CardSet(cardDelt.baharCards[i].suit, cardDelt.baharCards[i].rank)
+            );
+        }
+
+        SetHistoryCards(andarSpriteList, baharSpriteList);
+
+    }
+    internal void EndLoop()
+    {
+
+        EndGameCorutine = StartCoroutine(GameLoop());
+    }
+
     IEnumerator GameLoop()
     {
+        uiManager.Repeatpanel.SetActive(false);
+        TotalCardsCount_text.text = "Good Luck";
         if (StartGameCorutine != null)
         {
             StopCoroutine(StartGameCorutine);
             StartGameCorutine = null;
         }
-        ResetCardHistory();
-        int a = socketManager.gameLoopData.andarCards.Count;
-        int b = socketManager.gameLoopData.baharCards.Count;
+        int delivered = socketManager.CardDelt.cardsDealt;
 
-        bool startWithAndar = socketManager.gameLoopData.middleCard.color == "black";
-
-        int max = Mathf.Max(a, b);
-        int delivered = 0;
-
-        for (int i = 0; i < max; i++)
-        {
-            if (startWithAndar)
-            {
-                if (i < a) { PlayAndarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); if (i > 0) AddAndarCard(CardSet(socketManager.gameLoopData.andarCards[i - 1].suit, socketManager.gameLoopData.andarCards[i - 1].rank)); yield return new WaitForSeconds(0.5f); }
-                if (i < b) { PlayBagarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); if (i > 0) AddBaharCard(CardSet(socketManager.gameLoopData.baharCards[i - 1].suit, socketManager.gameLoopData.baharCards[i - 1].rank)); yield return new WaitForSeconds(0.5f); }
-            }
-            else
-            {
-                if (i < b) { PlayBagarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); if (i > 0) AddBaharCard(CardSet(socketManager.gameLoopData.baharCards[i - 1].suit, socketManager.gameLoopData.baharCards[i - 1].rank)); yield return new WaitForSeconds(0.5f); }
-                if (i < a) { PlayAndarCardAnim(i); delivered++; ManageCardCounts(delivered); yield return new WaitForSeconds(0.5f); if (i > 0) AddAndarCard(CardSet(socketManager.gameLoopData.andarCards[i - 1].suit, socketManager.gameLoopData.andarCards[i - 1].rank)); yield return new WaitForSeconds(0.5f); }
-            }
-            if (i == 0)
-            {
-                if (socketManager.gameLoopData.firstThreeResult != 0)
-                {
-                    PlayFlushAnim(socketManager.gameLoopData.firstThreeResult, animHand.LeftSprite, animHand.MiddleSprite, animHand.RightSprite);
-                    yield return new WaitForSeconds(1f);
-                    FirstThreeTxt.HighlightedBG.SetActive(true);
-                    yield return new WaitForSeconds(4f);
-                    MainFlushObj.SetActive(false);
-                }
-            }
-        }
         if (socketManager.gameLoopData.matchSide == "andar")
         {
             uiManager.UpdateStats(socketManager.gameLoopData.middleCard.rank, true, delivered.ToString());
@@ -507,8 +544,6 @@ public class GameManager : MonoBehaviour
         uiManager.CalculateAndShowPercentage();
         PlayWinAnimations();
 
-        yield return new WaitForSeconds(1f);
-        StartCoroutine(ManagePayout());
 
         yield return new WaitForSeconds(1f);
 
@@ -529,8 +564,20 @@ public class GameManager : MonoBehaviour
 
         currentWin = 0;
         ResetAllBetUI();
+        animHand.MiddleCard.gameObject.SetActive(false);
     }
-
+    internal IEnumerator ManageFlushAnimation()
+    {
+        PlayFlushAnim(socketManager.FlushData.firstThreeResult, animHand.LeftSprite, animHand.MiddleSprite, animHand.RightSprite);
+        yield return new WaitForSeconds(1f);
+        FirstThreeTxt.HighlightedBG.SetActive(true);
+        yield return new WaitForSeconds(4f);
+        MainFlushObj.SetActive(false);
+    }
+    internal void ManagePayouts()
+    {
+        StartCoroutine(ManagePayout());
+    }
     IEnumerator ManagePayout()
     {
         foreach (var item in AllOptions)
@@ -605,18 +652,18 @@ public class GameManager : MonoBehaviour
         uiManager.CalculateStringProbability(socketManager.gameLoopData.middleCard.rank);
         // Debug.Log(socketManager.gameLoopData.middleCard.suit);
     }
-    void PlayAndarCardAnim(int index)
+    void PlayAndarCardAnim()
     {
         AndarHighLight.SetActive(true);
         BaharHighLight.SetActive(false);
-        animHand.LeftSprite = CardSet(socketManager.gameLoopData.andarCards[index].suit, socketManager.gameLoopData.andarCards[index].rank);
+        animHand.LeftSprite = CardSet(socketManager.CardDelt.card.suit, socketManager.CardDelt.card.rank);
         Handanimator.Play("LeftCard");
     }
-    void PlayBagarCardAnim(int index)
+    void PlayBagarCardAnim()
     {
         AndarHighLight.SetActive(false);
         BaharHighLight.SetActive(true);
-        animHand.RightSprite = CardSet(socketManager.gameLoopData.baharCards[index].suit, socketManager.gameLoopData.baharCards[index].rank);
+        animHand.RightSprite = CardSet(socketManager.CardDelt.card.suit, socketManager.CardDelt.card.rank);
         Handanimator.Play("RightCard");
     }
 
@@ -656,7 +703,7 @@ public class GameManager : MonoBehaviour
         double chipValue;
         if (double.TryParse(uiManager.coinSelector.Chiptext.text, out chipValue))
         {
-            if (chipValue >= socketManager.playerdata.balance)
+            if (chipValue > socketManager.playerdata.balance)
             {
                 PlayPopup("Low Balance");
                 // Low balance logic here
@@ -709,6 +756,12 @@ public class GameManager : MonoBehaviour
     }
     internal void ManageBrodcastBetsOtherPlayers(Root chipdata)
     {
+        if (chipdata.amount < 0)
+        {
+            ClearOtherPlayerbets(chipdata);
+
+            return;
+        }
         // Do not show own chip here
         if (chipdata.username == uiManager.MainPlayers.playername.text)
             return;
@@ -742,7 +795,27 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void ClearOtherPlayerbets(Root chipdata)
+    {
 
+
+        foreach (var chips in OtherPlayerChips)
+        {
+            if (chips.betId == chipdata.betId)
+            {
+                if (chips.chip != null)
+                {
+                    Chip c = chips.chip.GetComponent<Chip>();
+                    ReturnChip(c);
+                    UpdateTotalBetOnOption(chipdata.betOption, chipdata.amount);
+                    break;
+                }
+            }
+        }
+        // PlayerChips.Clear();
+        //  ResetAllBetUI();
+
+    }
 
 
     GameObject SpawnChip(Sprite sprite, string amount, int chipindex, Transform startPoint, OptionPrefab op, float moveTime = 0.4f)
@@ -929,6 +1002,7 @@ public class GameManager : MonoBehaviour
                 currentWin = newBalance - oldBalance;
                 uiManager.MainPlayers.playerBalence.text = payout.balance.ToString();
                 Debug.Log("Managing playerBet" + payout.balance);
+                socketManager.playerdata.balance = payout.balance;
             }
             if (target == null)
                 target = TotalPlayer_text.transform;
@@ -1104,6 +1178,30 @@ public class GameManager : MonoBehaviour
 
 
     #region add a card in list
+    public void SetHistoryCards(
+    List<Sprite> andarSprites,
+    List<Sprite> baharSprites)
+    {
+        PopulateCardList(AndarCardparent, ref AndarIndex, andarSprites);
+        PopulateCardList(BaharCardparent, ref BaharIndex, baharSprites);
+    }
+    private void PopulateCardList(
+        List<Image> list,
+        ref int index,
+        List<Sprite> spritesFromServer)
+    {
+        ResetCardList(list, ref index);
+
+        int count = Mathf.Min(list.Count, spritesFromServer.Count);
+
+        for (int i = 0; i < count; i++)
+        {
+            list[i].sprite = spritesFromServer[i];
+            list[i].gameObject.SetActive(true);
+        }
+
+        index = count;
+    }
 
     public void AddAndarCard(Sprite newSprite)
     {
@@ -1148,6 +1246,16 @@ public class GameManager : MonoBehaviour
 
 
 
+    private void ResetCardList(List<Image> list, ref int index)
+    {
+        foreach (var img in list)
+        {
+            img.sprite = null;
+            img.gameObject.SetActive(false);
+            img.transform.localScale = Vector3.one;
+        }
+        index = 0;
+    }
 
 
 
@@ -1360,12 +1468,15 @@ public class GameManager : MonoBehaviour
     #region helper
     List<int> BreakAmountIntoChips(int amount, List<int> chipOptions)
     {
-        // Sort descending to use biggest chips first
-        chipOptions.Sort((a, b) => b.CompareTo(a));
+        // ✅ Make a COPY so original list is not modified
+        List<int> sortedChips = new List<int>(chipOptions);
+
+        // Sort descending
+        sortedChips.Sort((a, b) => b.CompareTo(a));
 
         List<int> results = new List<int>();
 
-        foreach (int chip in chipOptions)
+        foreach (int chip in sortedChips)
         {
             while (amount >= chip)
             {
@@ -1377,6 +1488,7 @@ public class GameManager : MonoBehaviour
         return results;
     }
 
+
     internal void UpdatePlayerbalance(string balance)
     {
         uiManager.MainPlayers.playerBalence.text = balance;
@@ -1387,9 +1499,7 @@ public class GameManager : MonoBehaviour
         {
             if (betOptions[i] == amount)
             {
-                // return PlayerChipSprite[i];
-                int reversedIndex = PlayerChipSprite.Count - 1 - i;
-                return PlayerChipSprite[reversedIndex];
+                return PlayerChipSprite[i];
             }
         }
         return null;
