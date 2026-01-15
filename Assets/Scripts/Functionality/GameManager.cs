@@ -388,6 +388,7 @@ public class GameManager : MonoBehaviour
         audioManager.PlayGirlAudio("placeyourbet");
         BetBlocker.gameObject.SetActive(false);
         uiManager.setCoins(true);
+        uiManager.SetChipoption(false);
         uiManager.Repeatpanel.SetActive(true);
         uiManager.SetNetBetPanel(false);
         MainFlushObj.SetActive(false);
@@ -518,7 +519,7 @@ public class GameManager : MonoBehaviour
     IEnumerator GameLoop()
     {
         uiManager.Repeatpanel.SetActive(false);
-        TotalCardsCount_text.text = "Good Luck";
+        TotalCardsCount_text.text = "Good Luck!";
         if (StartGameCorutine != null)
         {
             StopCoroutine(StartGameCorutine);
