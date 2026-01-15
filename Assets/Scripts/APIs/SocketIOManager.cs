@@ -337,14 +337,14 @@ public class SocketIOManager : MonoBehaviour
 
     IEnumerator IsNotInFocus()
     {
-        yield return new WaitForSeconds(20f); // 2 seconds, change as required
+        yield return new WaitForSeconds(120f); // 2 seconds, change as required
 
         // If still not focused AND popup not shown
         if (!isFocused && !disconnectionShown)
         {
-            disconnectionShown = true;  // Prevent future runs
-                                        //  uiManager.DisconnectionPopup();
-            Debug.Log("Disconnected: No Focus for 2 seconds");
+            // disconnectionShown = true;  // Prevent future runs
+            //  uiManager.DisconnectionPopup();
+            Debug.Log("Disconnected: No Focus for 120 seconds");
         }
 
         focusCheckCoroutine = null;
@@ -1273,6 +1273,7 @@ public class Root
 
 
     public List<Card> cards;
+    public Leaderboards leaderboards;
 
 }
 

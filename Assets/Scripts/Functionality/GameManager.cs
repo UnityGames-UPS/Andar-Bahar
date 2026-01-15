@@ -283,6 +283,7 @@ public class GameManager : MonoBehaviour
     }
     internal void SetOtherplayerData(Leaderboards leaderboard)
     {
+        Debug.Log("Setting Leaderboard");
         if (leaderboard == null)
         {
             Debug.Log("Leaderboards is NULL");
@@ -295,6 +296,7 @@ public class GameManager : MonoBehaviour
         // ------------------- RICHEST -------------------
         if (leaderboard.richest == null || leaderboard.richest.Count == 0)
         {
+            Debug.Log("richest is null");
             foreach (var item in uiManager.RichestPlayers)
                 item.gameObject.SetActive(false);
 
@@ -326,6 +328,7 @@ public class GameManager : MonoBehaviour
         // ------------------- WINNERS -------------------
         if (leaderboard.winners == null || leaderboard.winners.Count == 0)
         {
+            Debug.Log("winner is null");
             foreach (var item in uiManager.WinnerPlayers)
                 item.gameObject.SetActive(false);
 
@@ -589,7 +592,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         DistributeAllPayout();
-        SetOtherplayerData(socketManager.CashoutData.payload.leaderboards);
+        SetOtherplayerData(socketManager.CashoutData.leaderboards);
         yield return null;
     }
     void MoveAllChipstohome()
