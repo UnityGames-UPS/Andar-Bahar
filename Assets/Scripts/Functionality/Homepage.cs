@@ -2,6 +2,9 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
+
+using System.Collections.Generic;
 
 public class Homepage : MonoBehaviour
 {
@@ -39,7 +42,40 @@ public class Homepage : MonoBehaviour
     [SerializeField] private TMP_Text HMinBet;
     [SerializeField] private TMP_Text HMaxBet;
     [SerializeField] internal TMP_Text HPlayerCount;
+    [Header("anouncement panel")]
+    [SerializeField] private GameObject textAnnouncement;
+    [SerializeField] private Transform AnnouncementStartpos;
+    [SerializeField] private Transform AnnouncementEndPos;
+    private float scrollDuration = 10f;
 
+    [Header("Bottom panel")]
+    [SerializeField] private List<Button> CommingSoonBtn;
+
+    [SerializeField] private Image ComingSoonImage;
+
+    [SerializeField] private float moveY = 60f;
+    [SerializeField] private float duration = 0.6f;
+
+    private RectTransform imgRect;
+    private CanvasGroup cg;
+    void Start()
+    {
+        AnnouncementScrollAnim();
+
+
+
+
+        imgRect = ComingSoonImage.rectTransform;
+
+        cg = ComingSoonImage.GetComponent<CanvasGroup>();
+        if (cg == null)
+            cg = ComingSoonImage.gameObject.AddComponent<CanvasGroup>();
+
+        foreach (Button btn in CommingSoonBtn)
+        {
+            btn.onClick.AddListener(() => ShowComingSoon(btn));
+        }
+    }
     internal void SetInitHomedata(GameData gameData)
     {
 
@@ -70,22 +106,22 @@ public class Homepage : MonoBehaviour
 
         CMinBet.text = gameData.bets.casual[0].ToString();
         CMaxBet.text = gameData.bets.casual[gameData.bets.casual.Count - 1].ToString();
-        CPlayerCount.text = gameData.lobby.casual.ToString() + "Players";
+        CPlayerCount.text = "<size=40>" + gameData.lobby.casual.ToString() + "</size>" + "<size=25> Players</size>";
 
 
         NMinBet.text = gameData.bets.novice[0].ToString();
         NMaxBet.text = gameData.bets.novice[gameData.bets.novice.Count - 1].ToString();
-        NPlayerCount.text = gameData.lobby.novice.ToString() + "Players";
+        NPlayerCount.text = "<size=40>" + gameData.lobby.novice.ToString() + "</size>" + "<size=25> Players</size>";
 
 
         EMinBet.text = gameData.bets.expert[0].ToString();
         EMaxBet.text = gameData.bets.expert[gameData.bets.expert.Count - 1].ToString();
-        EPlayerCount.text = gameData.lobby.expert.ToString() + "Players";
+        EPlayerCount.text = "<size=40>" + gameData.lobby.expert.ToString() + "</size>" + "<size=25> Players</size>";
 
 
         HMinBet.text = gameData.bets.high_roller[0].ToString();
         HMaxBet.text = gameData.bets.high_roller[gameData.bets.high_roller.Count - 1].ToString();
-        HPlayerCount.text = gameData.lobby.high_roller.ToString() + "Players";
+        HPlayerCount.text = "<size=40>" + gameData.lobby.high_roller.ToString() + "</size>" + "<size=25> Players</size>";
 
         TotalPlayerCount.text = (gameData.lobby.casual + gameData.lobby.novice + gameData.lobby.expert + gameData.lobby.high_roller).ToString();
 
@@ -108,4 +144,40 @@ public class Homepage : MonoBehaviour
     }
 
 
+
+
+
+    void AnnouncementScrollAnim()
+    {
+        textAnnouncement.transform.localPosition =
+            AnnouncementStartpos.localPosition;
+
+
+        textAnnouncement.transform
+            .DOLocalMove(AnnouncementEndPos.localPosition, scrollDuration)
+            .SetEase(Ease.Linear)
+            .SetLoops(-1, LoopType.Restart);
+    }
+
+
+    void ShowComingSoon(Button btn)
+    {
+        imgRect.DOKill();
+        ComingSoonImage.DOKill();
+
+        // place image on button
+        imgRect.position = btn.transform.position;
+
+        // reset alpha
+        Color c = ComingSoonImage.color;
+        c.a = 1f;
+        ComingSoonImage.color = c;
+
+        // move up
+        imgRect.DOMoveY(imgRect.position.y + moveY, duration)
+               .SetEase(Ease.OutQuad);
+
+        // fade out using color alpha
+        ComingSoonImage.DOFade(0f, duration);
+    }
 }

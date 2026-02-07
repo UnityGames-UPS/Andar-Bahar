@@ -1,0 +1,754 @@
+fileFormatVersion: 2
+guid: 310682d88becd4d17a1248c7b5e1df83
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8111349327073341150
+    second: Join_A_Table_Animation_29FPS_06_0
+  - first:
+      213: -6166666165302697227
+    second: Join_A_Table_Animation_29FPS_06_1
+  - first:
+      213: -9104370689724474817
+    second: Join_A_Table_Animation_29FPS_06_2
+  - first:
+      213: -2319292441621175617
+    second: Join_A_Table_Animation_29FPS_06_3
+  - first:
+      213: -1303770784341518793
+    second: Join_A_Table_Animation_29FPS_06_4
+  - first:
+      213: 2212678787117402960
+    second: Join_A_Table_Animation_29FPS_06_5
+  - first:
+      213: 3798425569354805484
+    second: Join_A_Table_Animation_29FPS_06_6
+  - first:
+      213: 646374506396831587
+    second: Join_A_Table_Animation_29FPS_06_7
+  - first:
+      213: 4005547275841303807
+    second: Join_A_Table_Animation_29FPS_06_8
+  - first:
+      213: 8874224635037300958
+    second: Join_A_Table_Animation_29FPS_06_9
+  - first:
+      213: 6142783938914522639
+    second: Join_A_Table_Animation_29FPS_06_10
+  - first:
+      213: 1129917981667490176
+    second: Join_A_Table_Animation_29FPS_06_11
+  - first:
+      213: -5436713826281622005
+    second: Join_A_Table_Animation_29FPS_06_12
+  - first:
+      213: 7934222577525621348
+    second: Join_A_Table_Animation_29FPS_06_13
+  - first:
+      213: -1443991687314455916
+    second: Join_A_Table_Animation_29FPS_06_14
+  - first:
+      213: -7065326926894510271
+    second: Join_A_Table_Animation_29FPS_06_15
+  - first:
+      213: -1626839671950282720
+    second: Join_A_Table_Animation_29FPS_06_16
+  - first:
+      213: 5269666184523617503
+    second: Join_A_Table_Animation_29FPS_06_17
+  - first:
+      213: -3021055651909220448
+    second: Join_A_Table_Animation_29FPS_06_18
+  - first:
+      213: -4378029331462667465
+    second: Join_A_Table_Animation_29FPS_06_19
+  - first:
+      213: 1656026073726985298
+    second: Join_A_Table_Animation_29FPS_06_20
+  - first:
+      213: 3603265269496274902
+    second: Join_A_Table_Animation_29FPS_06_21
+  - first:
+      213: -6275548241199450567
+    second: Join_A_Table_Animation_29FPS_06_22
+  - first:
+      213: 6554627620213978303
+    second: Join_A_Table_Animation_29FPS_06_23
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_0
+      rect:
+        serializedVersion: 2
+        x: 258
+        y: 780
+        width: 21
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ede6f49bc3d419070800000000000000
+      internalID: 8111349327073341150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_1
+      rect:
+        serializedVersion: 2
+        x: 447
+        y: 776
+        width: 16
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f266b88bc99b6aa0800000000000000
+      internalID: -6166666165302697227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_2
+      rect:
+        serializedVersion: 2
+        x: 241
+        y: 720
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3a9e7f3817c6a180800000000000000
+      internalID: -9104370689724474817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_3
+      rect:
+        serializedVersion: 2
+        x: 259
+        y: 719
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb2ebeeffc730dfd0800000000000000
+      internalID: -2319292441621175617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_4
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 730
+        width: 21
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7369aca116318ede0800000000000000
+      internalID: -1303770784341518793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_5
+      rect:
+        serializedVersion: 2
+        x: 422
+        y: 731
+        width: 18
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05bcc2432a305be10800000000000000
+      internalID: 2212678787117402960
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_6
+      rect:
+        serializedVersion: 2
+        x: 193
+        y: 712
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce0772f2ee7b6b430800000000000000
+      internalID: 3798425569354805484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_7
+      rect:
+        serializedVersion: 2
+        x: 235
+        y: 703
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36fc6ad503268f800800000000000000
+      internalID: 646374506396831587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_8
+      rect:
+        serializedVersion: 2
+        x: 290
+        y: 687
+        width: 23
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff4fd8b6600969730800000000000000
+      internalID: 4005547275841303807
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_9
+      rect:
+        serializedVersion: 2
+        x: 379
+        y: 707
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed83b64b944972b70800000000000000
+      internalID: 8874224635037300958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_10
+      rect:
+        serializedVersion: 2
+        x: 518
+        y: 705
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0699f2527d8f3550800000000000000
+      internalID: 6142783938914522639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_11
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 621
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 089fd92fa664eaf00800000000000000
+      internalID: 1129917981667490176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_12
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 117
+        width: 690
+        height: 592
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0677077499ec84b0800000000000000
+      internalID: -5436713826281622005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_13
+      rect:
+        serializedVersion: 2
+        x: 85
+        y: 587
+        width: 21
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4628c4e95650c1e60800000000000000
+      internalID: 7934222577525621348
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_14
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 517
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49241030639e5fbe0800000000000000
+      internalID: -1443991687314455916
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_15
+      rect:
+        serializedVersion: 2
+        x: 59
+        y: 462
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14f437cf79ae2fd90800000000000000
+      internalID: -7065326926894510271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_16
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 440
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 020f3ee00fd4c69e0800000000000000
+      internalID: -1626839671950282720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_17
+      rect:
+        serializedVersion: 2
+        x: 85
+        y: 420
+        width: 14
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd41b65997d912940800000000000000
+      internalID: 5269666184523617503
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_18
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 380
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a7c34d04ed0316d0800000000000000
+      internalID: -3021055651909220448
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_19
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 395
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7334de1d48d1e33c0800000000000000
+      internalID: -4378029331462667465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 366
+        width: 15
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2542847a0f26bf610800000000000000
+      internalID: 1656026073726985298
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_21
+      rect:
+        serializedVersion: 2
+        x: 67
+        y: 366
+        width: 19
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6dfd3d3fbae510230800000000000000
+      internalID: 3603265269496274902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_22
+      rect:
+        serializedVersion: 2
+        x: 49
+        y: 318
+        width: 23
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 936ba78bf16c8e8a0800000000000000
+      internalID: -6275548241199450567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Join_A_Table_Animation_29FPS_06_23
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 256
+        width: 18
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb471d9b717b6fa50800000000000000
+      internalID: 6554627620213978303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Join_A_Table_Animation_29FPS_06_0: 8111349327073341150
+      Join_A_Table_Animation_29FPS_06_1: -6166666165302697227
+      Join_A_Table_Animation_29FPS_06_10: 6142783938914522639
+      Join_A_Table_Animation_29FPS_06_11: 1129917981667490176
+      Join_A_Table_Animation_29FPS_06_12: -5436713826281622005
+      Join_A_Table_Animation_29FPS_06_13: 7934222577525621348
+      Join_A_Table_Animation_29FPS_06_14: -1443991687314455916
+      Join_A_Table_Animation_29FPS_06_15: -7065326926894510271
+      Join_A_Table_Animation_29FPS_06_16: -1626839671950282720
+      Join_A_Table_Animation_29FPS_06_17: 5269666184523617503
+      Join_A_Table_Animation_29FPS_06_18: -3021055651909220448
+      Join_A_Table_Animation_29FPS_06_19: -4378029331462667465
+      Join_A_Table_Animation_29FPS_06_2: -9104370689724474817
+      Join_A_Table_Animation_29FPS_06_20: 1656026073726985298
+      Join_A_Table_Animation_29FPS_06_21: 3603265269496274902
+      Join_A_Table_Animation_29FPS_06_22: -6275548241199450567
+      Join_A_Table_Animation_29FPS_06_23: 6554627620213978303
+      Join_A_Table_Animation_29FPS_06_3: -2319292441621175617
+      Join_A_Table_Animation_29FPS_06_4: -1303770784341518793
+      Join_A_Table_Animation_29FPS_06_5: 2212678787117402960
+      Join_A_Table_Animation_29FPS_06_6: 3798425569354805484
+      Join_A_Table_Animation_29FPS_06_7: 646374506396831587
+      Join_A_Table_Animation_29FPS_06_8: 4005547275841303807
+      Join_A_Table_Animation_29FPS_06_9: 8874224635037300958
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

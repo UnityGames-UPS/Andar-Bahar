@@ -18,10 +18,10 @@ public class HistoryPrefab : MonoBehaviour
     {
         Index.text = index.ToString();
         RoundId.text = item.round_id;
-        Stake.text = item.bet_amount;
-        Win.text = item.win_amount;
+        Stake.text = item.bet_amount.ToString();
+        Win.text = item.win_amount.ToString();
 
-        int pl = int.Parse(item.win_amount) - int.Parse(item.bet_amount);
+        double pl = item.win_amount - item.bet_amount;
         PL.text = pl.ToString();
 
         Middlecard.sprite = middle;

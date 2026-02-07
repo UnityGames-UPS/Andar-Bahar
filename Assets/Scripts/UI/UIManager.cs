@@ -163,6 +163,7 @@ public class UiManager : MonoBehaviour
     bool isExit;
     bool isMusic;
     bool isSound;
+    bool homepopup;
 
     private bool isExpanded = false;
     public float duration = 0.5f;
@@ -213,6 +214,20 @@ public class UiManager : MonoBehaviour
     [SerializeField] internal Button betBtnR;
     [SerializeField] internal List<TMP_Text> BetLimitdata;
     [SerializeField] internal Button ConfirmBtn;
+    [Header("Intro page")]
+    [SerializeField] internal GameObject Intropage;
+    [SerializeField] private Button CloseIntroPage;
+    [SerializeField] private Button ReadmoreBtn;
+    [SerializeField] private Button DontShowBtn;
+    [SerializeField] private GameObject tick;
+
+    [Header("Quit Popup Animation ")]
+    [SerializeField] private ImageAnimation QuitpopupAnim;
+    [SerializeField] private ImageAnimation YesBtnParticles;
+    [SerializeField] private ImageAnimation NoBtnParticles;
+    [SerializeField] private List<Sprite> QuitStartSprits;
+    [SerializeField] private List<Sprite> QuitEndSprits;
+    [SerializeField] private Button HomePageHistoryBtn;
 
     private void Start()
     {
@@ -241,7 +256,8 @@ public class UiManager : MonoBehaviour
         if (GameExit_Button) GameExit_Button.onClick.RemoveAllListeners();
         if (GameExit_Button) GameExit_Button.onClick.AddListener(delegate
         {
-            OpenPopup(QuitPopup_Object);
+            // OpenPopup(QuitPopup_Object);
+            SetQuitPopupAnimation(true);
             Debug.Log("Quit event: pressed Big_X button");
 
         });
@@ -251,7 +267,8 @@ public class UiManager : MonoBehaviour
         {
             if (!isExit)
             {
-                ClosePopup(QuitPopup_Object);
+                //ClosePopup(QuitPopup_Object);
+                StartCoroutine(OnCliqQuitBtn(false));
                 Debug.Log("quit event: pressed NO Button ");
             }
         });
@@ -273,9 +290,10 @@ public class UiManager : MonoBehaviour
         if (YesQuit_Button) YesQuit_Button.onClick.RemoveAllListeners();
         if (YesQuit_Button) YesQuit_Button.onClick.AddListener(delegate
         {
-            CallOnExitFunction();
-            Debug.Log("quit event: pressed YES Button ");
-            socketManager.ReactNativeCallOnFailedToConnect();
+            StartCoroutine(OnCliqQuitBtn(true));
+            // CallOnExitFunction();
+            // Debug.Log("quit event: pressed YES Button ");
+            // socketManager.ReactNativeCallOnFailedToConnect();
         });
 
         if (CloseDisconnect_Button) CloseDisconnect_Button.onClick.RemoveAllListeners();
@@ -301,6 +319,8 @@ public class UiManager : MonoBehaviour
         // Andar Bahar 
         if (HistoryMain_button) HistoryMain_button.onClick.RemoveAllListeners();
         if (HistoryMain_button) HistoryMain_button.onClick.AddListener(delegate { OpenPopup(HistoryPopup_Object); });
+        if (HomePageHistoryBtn) HistoryMain_button.onClick.RemoveAllListeners();
+        if (HomePageHistoryBtn) HistoryMain_button.onClick.AddListener(delegate { OpenPopup(HistoryPopup_Object); HistorypageOpen(); });
 
         if (MenuMain_button) MenuMain_button.onClick.RemoveAllListeners();
         if (MenuMain_button) MenuMain_button.onClick.AddListener(delegate { ResetMenuPanel(false); ToggleMenuPanel(); });
@@ -339,15 +359,15 @@ public class UiManager : MonoBehaviour
         if (MusicMute_button) MusicMute_button.onClick.AddListener(delegate { ToggleMusic(); });
 
         if (Home_button) Home_button.onClick.RemoveAllListeners();
-        if (Home_button) Home_button.onClick.AddListener(delegate { OpenPopup(GameQuitPopup); });
+        if (Home_button) Home_button.onClick.AddListener(delegate { homepopup = true; OpenPopup(QuitPopup_Object); SetQuitPopupAnimation(true); });
         if (Exit_Button) Exit_Button.onClick.RemoveAllListeners();
-        if (Exit_Button) Exit_Button.onClick.AddListener(delegate { OpenPopup(QuitPopup_Object); });
+        if (Exit_Button) Exit_Button.onClick.AddListener(delegate { homepopup = false; OpenPopup(QuitPopup_Object); SetQuitPopupAnimation(true); });
 
         if (YesHome_button) YesHome_button.onClick.RemoveAllListeners();
-        if (YesHome_button) YesHome_button.onClick.AddListener(delegate { ClosePopup(GameQuitPopup); IsMenuPanelOpen = false; socketManager.SendHome(); ResetMenuPanel(false); });
+        if (YesHome_button) YesHome_button.onClick.AddListener(delegate { homepopup = true; StartCoroutine(OnCliqQuitBtn(true)); });
 
         if (NoHome_button) NoHome_button.onClick.RemoveAllListeners();
-        if (NoHome_button) NoHome_button.onClick.AddListener(delegate { ClosePopup(GameQuitPopup); });
+        if (NoHome_button) NoHome_button.onClick.AddListener(delegate { StartCoroutine(OnCliqQuitBtn(false)); });
 
         if (InfoLeft_button) InfoLeft_button.onClick.RemoveAllListeners();
         if (InfoLeft_button) InfoLeft_button.onClick.AddListener(delegate { GoToPreviousInfoPage(); });
@@ -378,7 +398,18 @@ public class UiManager : MonoBehaviour
         HistoryLeft.onClick.AddListener(delegate { if (CurrentHistoryPage - 1 > 0) socketManager.SendHistory(CurrentHistoryPage - 1); });
 
         HistoryRight.onClick.RemoveAllListeners();
-        HistoryRight.onClick.AddListener(delegate { if (CurrentHistoryPage + 1 < MaxHistoryPage) socketManager.SendHistory(CurrentHistoryPage + 1); });
+        HistoryRight.onClick.AddListener(delegate { if (CurrentHistoryPage + 1 <= MaxHistoryPage) socketManager.SendHistory(CurrentHistoryPage + 1); });
+
+        DontShowBtn.onClick.RemoveAllListeners();
+        DontShowBtn.onClick.AddListener(delegate { OnClickDontShow(); });
+
+        CloseIntroPage.onClick.RemoveAllListeners();
+        CloseIntroPage.onClick.AddListener(delegate { ClosePopup(Intropage); });
+
+        ReadmoreBtn.onClick.RemoveAllListeners();
+        ReadmoreBtn.onClick.AddListener(delegate { ClosePopup(Intropage); OpenPopup(InfoPopup_Object); });
+        // OnClickDontShow();
+        ShowIntroPage();
 
     }
 
@@ -900,5 +931,118 @@ public class UiManager : MonoBehaviour
 
 
     #endregion
+    #region Intro Page Setup
+    void OnClickDontShow()
+    {
+        int show = PlayerPrefs.GetInt("CanShow");
+        if (show == 0)
+        {
+            show = 1;
+            tick.SetActive(true);
+        }
+        else
+        {
+            show = 0;
+            tick.SetActive(false);
 
+        }
+        PlayerPrefs.SetInt("CanShow", show);
+    }
+    void ShowIntroPage()
+    {
+        int show = PlayerPrefs.GetInt("CanShow");
+        if (show == 0)
+        {
+            OpenPopup(Intropage);
+        }
+
+    }
+
+    #endregion
+
+
+    void SetQuitPopupAnimation(bool isShowing)
+    {
+        Debug.Log("_________________OOOOOOOOOOOOO");
+        QuitpopupAnim.StopAnimation();
+        QuitpopupAnim.textureArray.Clear();
+        QuitpopupAnim.textureArray.TrimExcess();
+        if (isShowing)
+        {
+            for (int i = 0; i < QuitStartSprits.Count; i++)
+            {
+                QuitpopupAnim.textureArray.Add(QuitStartSprits[i]);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < QuitEndSprits.Count; i++)
+            {
+                QuitpopupAnim.textureArray.Add(QuitEndSprits[i]);
+            }
+        }
+        QuitpopupAnim.StartAnimation();
+        FadeQuitButtons(isShowing);
+    }
+    void FadeQuitButtons(bool fadeIn)
+    {
+        float targetAlpha = fadeIn ? 1f : 0f;
+        float duration = 0.1f;
+
+        // YES button
+        YesQuit_Button.image.DOKill();
+        YesQuit_Button.image.DOFade(targetAlpha, duration);
+
+        // NO button
+        NoQuit_Button.image.DOKill();
+        NoQuit_Button.image.DOFade(targetAlpha, 0.1f);
+
+        YesQuit_Button.interactable = fadeIn;
+        NoQuit_Button.interactable = fadeIn;
+    }
+    IEnumerator OnCliqQuitBtn(bool yesBtnClicked)
+    {
+
+        if (yesBtnClicked)
+        {
+            YesBtnParticles.StartAnimation();
+
+        }
+        else
+        {
+            NoBtnParticles.StartAnimation();
+            // ClosePopup(QuitPopup_Object);
+        }
+        YesQuit_Button.interactable = false;
+        NoQuit_Button.interactable = false;
+        yield return new WaitForSeconds(1f);
+        SetQuitPopupAnimation(false);
+        yield return new WaitForSeconds(0.5f);
+        QuitpopupAnim.StopAnimation();
+
+        if (yesBtnClicked)
+        {
+            YesBtnParticles.StopAnimation();
+            if (!homepopup)
+            {
+                CallOnExitFunction();
+                Debug.Log("quit event: pressed YES Button ");
+                socketManager.ReactNativeCallOnFailedToConnect();
+            }
+            else
+            {
+                ClosePopup(QuitPopup_Object);
+                IsMenuPanelOpen = false; socketManager.SendHome(); ResetMenuPanel(false);
+            }
+
+
+        }
+        else
+        {
+            NoBtnParticles.StopAnimation();
+            ClosePopup(QuitPopup_Object);
+        }
+
+
+    }
 }

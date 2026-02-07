@@ -1329,8 +1329,8 @@ public class MiddleCard
 public class History
 {
     public string user_id;
-    public string bet_amount;
-    public string win_amount;
+    public int bet_amount;
+    public double win_amount;
     public string bet_type;
     public string bet_option;
     public string round_id;
