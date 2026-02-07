@@ -10,9 +10,14 @@ public class PlayerData : MonoBehaviour
     [SerializeField] internal TMP_Text playerBalence;
     [SerializeField] internal string PlayerId;
     [Header("Anim Settings")]
-    [SerializeField] private float moveY = 15f;
-    [SerializeField] private float duration = 0.4f;
-    [SerializeField] private float delayBetween = 0.1f;
+    private float moveY = 20f;
+    private float duration = 0.7f;
+    private float delayBetween = 0.3f;
+    [SerializeField] private bool isAnimationNeeded = true;
+    private Vector3 nameOriginalPos;
+    private Vector3 balOriginalPos;
+    private bool positionsCached = false;
+
 
     private Sequence loopSeq;
     internal void SetData(string idz, string balance, Sprite icon)
@@ -22,33 +27,41 @@ public class PlayerData : MonoBehaviour
         PlayerId = idz;
         playername.text = PlayerId;
         playerBalence.text = balance;
+        if (isAnimationNeeded) PlayLoopAnimation();
     }
 
     void PlayLoopAnimation()
     {
-        // kill old animation if any
         loopSeq?.Kill();
 
         RectTransform nameRT = playername.rectTransform;
         RectTransform balRT = playerBalence.rectTransform;
 
-        Vector3 nameStart = nameRT.localPosition;
-        Vector3 balStart = balRT.localPosition;
+        if (!positionsCached)
+        {
+            nameOriginalPos = nameRT.localPosition;
+            balOriginalPos = balRT.localPosition;
+            positionsCached = true;
+        }
+
+
+        nameRT.localPosition = nameOriginalPos;
+        balRT.localPosition = balOriginalPos;
 
         loopSeq = DOTween.Sequence();
 
-        // Player name up & down
-        loopSeq.Append(nameRT.DOLocalMoveY(nameStart.y + moveY, duration).SetEase(Ease.OutQuad));
-        loopSeq.Append(nameRT.DOLocalMoveY(nameStart.y, duration).SetEase(Ease.InQuad));
+        loopSeq.Append(nameRT.DOLocalMoveY(nameOriginalPos.y + moveY, duration).SetEase(Ease.OutQuad));
+        loopSeq.Append(nameRT.DOLocalMoveY(nameOriginalPos.y, duration).SetEase(Ease.InQuad));
         loopSeq.AppendInterval(delayBetween);
 
-        // Balance up & down
-        loopSeq.Append(balRT.DOLocalMoveY(balStart.y + moveY, duration).SetEase(Ease.OutQuad));
-        loopSeq.Append(balRT.DOLocalMoveY(balStart.y, duration).SetEase(Ease.InQuad));
+        loopSeq.Append(balRT.DOLocalMoveY(balOriginalPos.y + moveY, duration).SetEase(Ease.OutQuad));
+        loopSeq.Append(balRT.DOLocalMoveY(balOriginalPos.y, duration).SetEase(Ease.InQuad));
         loopSeq.AppendInterval(delayBetween);
 
         loopSeq.SetLoops(-1);
     }
+
+
 
     private void OnDisable()
     {
