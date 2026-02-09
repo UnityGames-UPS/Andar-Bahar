@@ -240,13 +240,13 @@ public class UiManager : MonoBehaviour
         if (Paytable_Button) Paytable_Button.onClick.AddListener(delegate { OpenPopup(PaytablePopup_Object); });
 
         if (PaytableExit_Button) PaytableExit_Button.onClick.RemoveAllListeners();
-        if (PaytableExit_Button) PaytableExit_Button.onClick.AddListener(delegate { ClosePopup(PaytablePopup_Object); });
+        if (PaytableExit_Button) PaytableExit_Button.onClick.AddListener(delegate { ClosePopup(PaytablePopup_Object); if (audioController) audioController.PlayButtonAudio(); });
 
         if (Settings_Button) Settings_Button.onClick.RemoveAllListeners();
         if (Settings_Button) Settings_Button.onClick.AddListener(delegate { OpenPopup(SettingsPopup_Object); });
 
         if (SettingsExit_Button) SettingsExit_Button.onClick.RemoveAllListeners();
-        if (SettingsExit_Button) SettingsExit_Button.onClick.AddListener(delegate { ClosePopup(SettingsPopup_Object); });
+        if (SettingsExit_Button) SettingsExit_Button.onClick.AddListener(delegate { ClosePopup(SettingsPopup_Object); if (audioController) audioController.PlayButtonAudio(); });
 
         if (MusicOn_Object) MusicOn_Object.SetActive(true);
         if (MusicOff_Object) MusicOff_Object.SetActive(false);
@@ -260,6 +260,7 @@ public class UiManager : MonoBehaviour
             // OpenPopup(QuitPopup_Object);
             SetQuitPopupAnimation(true);
             Debug.Log("Quit event: pressed Big_X button");
+            if (audioController) audioController.PlayButtonAudio();
 
         });
 
@@ -271,6 +272,7 @@ public class UiManager : MonoBehaviour
                 //ClosePopup(QuitPopup_Object);
                 StartCoroutine(OnCliqQuitBtn(false));
                 Debug.Log("quit event: pressed NO Button ");
+                if (audioController) audioController.PlayButtonAudio();
             }
         });
 
@@ -281,17 +283,18 @@ public class UiManager : MonoBehaviour
             {
                 ClosePopup(QuitPopup_Object);
                 Debug.Log("quit event: pressed Small_X Button ");
-
+                if (audioController) audioController.PlayButtonAudio();
             }
         });
 
         if (LBExit_Button) LBExit_Button.onClick.RemoveAllListeners();
-        if (LBExit_Button) LBExit_Button.onClick.AddListener(delegate { ClosePopup(LBPopup_Object); });
+        if (LBExit_Button) LBExit_Button.onClick.AddListener(delegate { ClosePopup(LBPopup_Object); if (audioController) audioController.PlayButtonAudio(); });
 
         if (YesQuit_Button) YesQuit_Button.onClick.RemoveAllListeners();
         if (YesQuit_Button) YesQuit_Button.onClick.AddListener(delegate
         {
             StartCoroutine(OnCliqQuitBtn(true));
+            if (audioController) audioController.PlayButtonAudio();
             // CallOnExitFunction();
             // Debug.Log("quit event: pressed YES Button ");
             // socketManager.ReactNativeCallOnFailedToConnect();
@@ -324,22 +327,22 @@ public class UiManager : MonoBehaviour
         if (HomePageHistoryBtn) HistoryMain_button.onClick.AddListener(delegate { OpenPopup(HistoryPopup_Object); HistorypageOpen(); });
 
         if (MenuMain_button) MenuMain_button.onClick.RemoveAllListeners();
-        if (MenuMain_button) MenuMain_button.onClick.AddListener(delegate { ResetMenuPanel(false); ToggleMenuPanel(); });
+        if (MenuMain_button) MenuMain_button.onClick.AddListener(delegate { ResetMenuPanel(false); ToggleMenuPanel(); if (audioController) audioController.PlayButtonAudio(); });
 
         if (MenuInGame_button) MenuInGame_button.onClick.RemoveAllListeners();
-        if (MenuInGame_button) MenuInGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); ToggleMenuPanel(); });
+        if (MenuInGame_button) MenuInGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); ToggleMenuPanel(); if (audioController) audioController.PlayButtonAudio(); });
 
         if (CasualGame_button) CasualGame_button.onClick.RemoveAllListeners();
-        if (CasualGame_button) CasualGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); GameScreen_Object.SetActive(true); });
+        if (CasualGame_button) CasualGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); GameScreen_Object.SetActive(true); if (audioController) audioController.PlayButtonAudio(); });
 
         if (NoviceGame_button) NoviceGame_button.onClick.RemoveAllListeners();
-        if (NoviceGame_button) NoviceGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); GameScreen_Object.SetActive(true); });
+        if (NoviceGame_button) NoviceGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); GameScreen_Object.SetActive(true); if (audioController) audioController.PlayButtonAudio(); });
 
         if (ExpertGame_button) ExpertGame_button.onClick.RemoveAllListeners();
-        if (ExpertGame_button) ExpertGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); GameScreen_Object.SetActive(true); });
+        if (ExpertGame_button) ExpertGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); GameScreen_Object.SetActive(true); if (audioController) audioController.PlayButtonAudio(); });
 
         if (HighRollerGame_button) HighRollerGame_button.onClick.RemoveAllListeners();
-        if (HighRollerGame_button) HighRollerGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); GameScreen_Object.SetActive(true); });
+        if (HighRollerGame_button) HighRollerGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); GameScreen_Object.SetActive(true); if (audioController) audioController.PlayButtonAudio(); });
 
         if (Info_button) Info_button.onClick.RemoveAllListeners();
         if (Info_button) Info_button.onClick.AddListener(delegate { OpenPopup(InfoPopup_Object); MenuPanel_Object.SetActive(false); });
@@ -362,13 +365,13 @@ public class UiManager : MonoBehaviour
         if (Home_button) Home_button.onClick.RemoveAllListeners();
         if (Home_button) Home_button.onClick.AddListener(delegate { homepopup = true; OpenPopup(QuitPopup_Object); SetQuitPopupAnimation(true); });
         if (Exit_Button) Exit_Button.onClick.RemoveAllListeners();
-        if (Exit_Button) Exit_Button.onClick.AddListener(delegate { homepopup = false; OpenPopup(QuitPopup_Object); SetQuitPopupAnimation(true); });
+        if (Exit_Button) Exit_Button.onClick.AddListener(delegate { homepopup = false; OpenPopup(QuitPopup_Object); SetQuitPopupAnimation(true); if (audioController) audioController.PlayButtonAudio(); });
 
         if (YesHome_button) YesHome_button.onClick.RemoveAllListeners();
-        if (YesHome_button) YesHome_button.onClick.AddListener(delegate { homepopup = true; StartCoroutine(OnCliqQuitBtn(true)); });
+        if (YesHome_button) YesHome_button.onClick.AddListener(delegate { homepopup = true; StartCoroutine(OnCliqQuitBtn(true)); if (audioController) audioController.PlayButtonAudio(); });
 
         if (NoHome_button) NoHome_button.onClick.RemoveAllListeners();
-        if (NoHome_button) NoHome_button.onClick.AddListener(delegate { StartCoroutine(OnCliqQuitBtn(false)); });
+        if (NoHome_button) NoHome_button.onClick.AddListener(delegate { StartCoroutine(OnCliqQuitBtn(false)); if (audioController) audioController.PlayButtonAudio(); });
 
         if (InfoLeft_button) InfoLeft_button.onClick.RemoveAllListeners();
         if (InfoLeft_button) InfoLeft_button.onClick.AddListener(delegate { GoToPreviousInfoPage(); });
@@ -377,10 +380,10 @@ public class UiManager : MonoBehaviour
         if (InfoRight_button) InfoRight_button.onClick.AddListener(delegate { GoToNextInfoPage(); });
 
         if (InfoClose_button) InfoClose_button.onClick.RemoveAllListeners();
-        if (InfoClose_button) InfoClose_button.onClick.AddListener(delegate { ClosePopup(InfoPopup_Object); IsMenuPanelOpen = false; });
+        if (InfoClose_button) InfoClose_button.onClick.AddListener(delegate { ClosePopup(InfoPopup_Object); IsMenuPanelOpen = false; if (audioController) audioController.PlayButtonAudio(); });
 
         if (HistoryClose_button) HistoryClose_button.onClick.RemoveAllListeners();
-        if (HistoryClose_button) HistoryClose_button.onClick.AddListener(delegate { ClosePopup(HistoryPopup_Object); IsMenuPanelOpen = false; });
+        if (HistoryClose_button) HistoryClose_button.onClick.AddListener(delegate { ClosePopup(HistoryPopup_Object); IsMenuPanelOpen = false; if (audioController) audioController.PlayButtonAudio(); });
 
 
         Repeatbtn.onClick.RemoveAllListeners();
@@ -402,10 +405,10 @@ public class UiManager : MonoBehaviour
         HistoryRight.onClick.AddListener(delegate { if (CurrentHistoryPage + 1 <= MaxHistoryPage) socketManager.SendHistory(CurrentHistoryPage + 1); });
 
         DontShowBtn.onClick.RemoveAllListeners();
-        DontShowBtn.onClick.AddListener(delegate { OnClickDontShow(); });
+        DontShowBtn.onClick.AddListener(delegate { OnClickDontShow(); if (audioController) audioController.PlayButtonAudio(); });
 
         CloseIntroPage.onClick.RemoveAllListeners();
-        CloseIntroPage.onClick.AddListener(delegate { ClosePopup(Intropage); });
+        CloseIntroPage.onClick.AddListener(delegate { ClosePopup(Intropage); if (audioController) audioController.PlayButtonAudio(); });
 
         ReadmoreBtn.onClick.RemoveAllListeners();
         ReadmoreBtn.onClick.AddListener(delegate { ClosePopup(Intropage); OpenPopup(InfoPopup_Object); });
@@ -549,7 +552,7 @@ public class UiManager : MonoBehaviour
 
     internal void ClosePopup(GameObject Popup)
     {
-        if (audioController) audioController.PlayButtonAudio();
+
         if (Popup) Popup.SetActive(false);
         if (MainPopup_Object) MainPopup_Object.SetActive(false);
     }
@@ -559,12 +562,14 @@ public class UiManager : MonoBehaviour
         isMusic = !isMusic;
         if (isMusic)
         {
+            audioController.PlayButtonAudio();
             Music_button.gameObject.SetActive(true);
             MusicMute_button.gameObject.SetActive(false);
             audioController.ToggleMute(false, "bg");
         }
         else
         {
+            audioController.PlayButtonAudio();
             Music_button.gameObject.SetActive(false);
             MusicMute_button.gameObject.SetActive(true);
             audioController.ToggleMute(true, "bg");
@@ -591,6 +596,7 @@ public class UiManager : MonoBehaviour
         }
         else
         {
+            audioController.PlayButtonAudio();
             Sound_button.gameObject.SetActive(false);
             SoundMute_button.gameObject.SetActive(true);
             if (audioController) audioController.ToggleMute(true, "button");

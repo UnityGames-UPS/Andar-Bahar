@@ -911,6 +911,7 @@ public class GameManager : MonoBehaviour
            .AppendInterval(0.4f)
             .AppendCallback(() =>
            {
+               NewRoundAnim.StopAnimation();
                NewRoundAnim.StartAnimation();
            })
            .AppendInterval(1f)
@@ -1220,6 +1221,9 @@ public class GameManager : MonoBehaviour
         {
             list[i].sprite = spritesFromServer[i];
             list[i].gameObject.SetActive(true);
+
+            var outline = list[i].GetComponent<Outline>();
+            if (i == count - 1) outline.enabled = true;
         }
 
         index = count;
@@ -1274,6 +1278,8 @@ public class GameManager : MonoBehaviour
         {
             img.sprite = null;
             img.gameObject.SetActive(false);
+            var outline = img.GetComponent<Outline>();
+            if (outline != null) outline.enabled = false;
             img.transform.localScale = Vector3.one;
         }
         index = 0;
