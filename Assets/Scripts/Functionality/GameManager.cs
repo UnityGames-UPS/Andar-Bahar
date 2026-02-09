@@ -727,6 +727,7 @@ public class GameManager : MonoBehaviour
             }
         }
         socketManager.BetPlaced(index, optionprefab.VaridontWant, socketManager.initialData.betOptions[optionprefab.Optionindex]);
+        uiManager.RetractCoins();
 
 
     }

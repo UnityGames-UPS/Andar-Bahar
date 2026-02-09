@@ -495,6 +495,7 @@ public class UiManager : MonoBehaviour
     {
         if (!isExit)
         {
+            CheckAndClosePopups();
             OpenPopup(DisconnectPopup_Object);
         }
     }
@@ -640,6 +641,7 @@ public class UiManager : MonoBehaviour
     {
         if (audioController) audioController.PlayWLAudio("coinSelect");
         SetChipoption(false);
+        Repeatpanel.SetActive(false);
         float spacing = 90f; // distance between coins
         Vector3 center = coinSelector.transform.localPosition;
 
@@ -661,7 +663,7 @@ public class UiManager : MonoBehaviour
         isExpanded = true;
     }
 
-    private void RetractCoins()
+    internal void RetractCoins()
     {
         Vector3 center = coinSelector.transform.localPosition;
         if (audioController) audioController.PlayWLAudio("coinSelect");
