@@ -189,13 +189,13 @@ public class GameManager : MonoBehaviour
         anim.StartAnimation();
 
         LoadingPage.SetActive(isActive);
-        if (isActive) StartCoroutine(ManageloadingPageText());
+        if (isActive) LoadingPage_text.text = "Joining A Table....."; ;
     }
     IEnumerator ManageloadingPageText()
     {
         for (int i = 0; i < 10; i++)
         {
-            if (i < 8) LoadingPage_text.text = "Joining A Room.....";
+            if (i < 8) LoadingPage_text.text = "Joining A Table.....";
             else LoadingPage_text.text = "Waiting For New Round To Start.....";
 
             yield return new WaitForSeconds(1f);
@@ -528,7 +528,7 @@ public class GameManager : MonoBehaviour
     IEnumerator GameLoop()
     {
         uiManager.Repeatpanel.SetActive(false);
-        RoundInfo_Text.text = "bet Locked!";
+        RoundInfo_Text.text = "Bet Locked!";
         if (StartGameCorutine != null)
         {
             StopCoroutine(StartGameCorutine);

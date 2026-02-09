@@ -20,6 +20,7 @@ public class UiManager : MonoBehaviour
 
 
     [Header("Andar Bahar Main Buttons")]
+    [SerializeField] private GameObject ButtonPanels;
     [SerializeField] private Button HistoryMain_button;
     [SerializeField] private Button MenuMain_button;
     [SerializeField] private Button CasualGame_button;
@@ -1033,6 +1034,7 @@ public class UiManager : MonoBehaviour
             }
             else
             {
+                RetractCoins();
                 ClosePopup(QuitPopup_Object);
                 IsMenuPanelOpen = false; socketManager.SendHome(); ResetMenuPanel(false);
             }
@@ -1047,4 +1049,5 @@ public class UiManager : MonoBehaviour
 
 
     }
+
 }
