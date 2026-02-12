@@ -22,6 +22,9 @@ public class OptionPrefab : MonoBehaviour
     internal int Optionindex;
     internal string VaridontWant;
 
+    internal int totalBet;
+    internal int playerBet;
+
     internal string NameT;
     void Start()
     {
@@ -48,10 +51,21 @@ public class OptionPrefab : MonoBehaviour
     }
     internal void DontShowText()
     {
+        totalBet = 0;
+        playerBet = 0;
         TotalBetText.text = "";
         MyBetText.text = "";
         TotalBetObj.SetActive(false);
         MyBetObj.SetActive(false);
     }
+    internal IEnumerator Highlighttext()
+    {
+        Color orignalColor = Name.color;
+        Name.color = Color.yellow;
+        Text.color = Color.yellow;
+        yield return new WaitForSeconds(3f);
+        Name.color = orignalColor;
+        Text.color = orignalColor;
 
+    }
 }

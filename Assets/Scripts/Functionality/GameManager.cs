@@ -102,7 +102,7 @@ public class GameManager : MonoBehaviour
     private Vector3 startPos;
     private Color startColor;
     private Tween coinTween;
-
+    private Tween popTween;
 
     [SerializeField] private float moveDuration = 0.5f;
     [SerializeField] private float holdDuration = 1f;
@@ -116,6 +116,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Sprite HandResetSprite;
     [Header("Round Info ")]
     [SerializeField] private GameObject RoundInfoImage;
+    [SerializeField] private TMP_Text pulseText;
     [SerializeField] private List<Sprite> roundInfoSprites;
 
 
@@ -130,6 +131,7 @@ public class GameManager : MonoBehaviour
     private double currentWin;
     private double animationduration = 2f;
 
+    internal bool isRepeatbetActive = false;
     private Coroutine StartGameCorutine;
     private Coroutine EndGameCorutine;
 
@@ -156,7 +158,7 @@ public class GameManager : MonoBehaviour
         GamePage.SetActive(false);
 
         BetBlocker.onClick.RemoveAllListeners();
-        BetBlocker.onClick.AddListener(() => PlayPopup("This Round is alredy closed.\nPlease wait for next round."));
+        BetBlocker.onClick.AddListener(() => PlayPopup("This Round is already closed.\nPlease wait for next round."));
         startPoscoin = coinAddText.rectTransform.localPosition;
         startColor = coinAddText.color;
         coinAddText.gameObject.SetActive(false);
@@ -396,7 +398,7 @@ public class GameManager : MonoBehaviour
         BetBlocker.gameObject.SetActive(false);
         uiManager.setCoins(true);
         uiManager.SetChipoption(false);
-        uiManager.Repeatpanel.SetActive(true);
+        if (isRepeatbetActive) uiManager.Repeatpanel.SetActive(true);
         uiManager.SetNetBetPanel(false);
         MainFlushObj.SetActive(false);
         ResetAllBetUI();
@@ -435,8 +437,18 @@ public class GameManager : MonoBehaviour
         animHand.RightCard.gameObject.SetActive(false);
 
         int time = socketManager.TimeRemaining.timeRemaining / 1000;
+        if (time > 5)
+        {
+            RoundInfo_Text.text = "<size=30>Place bet Now</size>\n " + "<size=50><color=yellow>" + time + "</color></size>";
+        }
+        else
+        {
+            RoundInfo_Text.text = "<size=30>Place bet Now</size>\n ";
+            pulseText.text = time.ToString();
+            pulseText.gameObject.SetActive(true);
+            PopTMP(pulseText);
 
-        RoundInfo_Text.text = "Place bet Now\n" + "<size=50><color=yellow>" + time + "</color></size>";
+        }
         if (time == 5)
         {
             RoundInfoAnim(2);
@@ -444,6 +456,7 @@ public class GameManager : MonoBehaviour
         }
         else if (time == 0)
         {
+            pulseText.gameObject.SetActive(false);
             RoundInfoAnim(1);
             BetBlocker.gameObject.SetActive(true);
             audioManager.PlayGirlAudio("nomorebets");
@@ -462,6 +475,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void PopTMP(TMP_Text tmp)
+    {
+        if (tmp == null) return;
+
+        popTween?.Kill(); // stop previous
+
+        RectTransform rt = tmp.rectTransform;
+
+        rt.localScale = Vector3.one;
+
+        popTween = rt.DOScale(1.4f, 0.15f)
+                     .SetEase(Ease.OutQuad)
+                     .SetLoops(2, LoopType.Yoyo);
+    }
     internal void ManageCardDelt(Root cardDelt)
     {
 
@@ -479,12 +506,12 @@ public class GameManager : MonoBehaviour
 
         if (cardDelt.side == "andar")
         {
-            PlayAndarCardAnim();
+            PlayAndarCardAnim(cardDelt.cardsDealt);
 
         }
         else
         {
-            PlayBagarCardAnim();
+            PlayBagarCardAnim(cardDelt.cardsDealt);
 
         }
 
@@ -594,11 +621,7 @@ public class GameManager : MonoBehaviour
     }
     IEnumerator ManagePayout()
     {
-        foreach (var item in AllOptions)
-        {
-            item.BG.SetActive(true);
-            item.HighlightedBG.SetActive(false);
-        }
+
         MoveAllChipstohome();
         yield return new WaitForSeconds(1f);
 
@@ -666,21 +689,34 @@ public class GameManager : MonoBehaviour
         uiManager.CalculateStringProbability(socketManager.gameLoopData.middleCard.rank);
         // Debug.Log(socketManager.gameLoopData.middleCard.suit);
     }
-    void PlayAndarCardAnim()
+    void PlayAndarCardAnim(int cardCount)
     {
-        AndarHighLight.SetActive(true);
-        BaharHighLight.SetActive(false);
+        if (cardCount > 2)
+        {
+            AndarHighLight.SetActive(true);
+            BaharHighLight.SetActive(false);
+        }
+        else StartCoroutine(delayedactive(true, false));
         animHand.LeftSprite = CardSet(socketManager.CardDelt.card.suit, socketManager.CardDelt.card.rank);
         Handanimator.Play("LeftCard");
     }
-    void PlayBagarCardAnim()
+    void PlayBagarCardAnim(int cardCount)
     {
-        AndarHighLight.SetActive(false);
-        BaharHighLight.SetActive(true);
+        if (cardCount > 2)
+        {
+            AndarHighLight.SetActive(false);
+            BaharHighLight.SetActive(true);
+        }
+        else StartCoroutine(delayedactive(false, true));
         animHand.RightSprite = CardSet(socketManager.CardDelt.card.suit, socketManager.CardDelt.card.rank);
         Handanimator.Play("RightCard");
     }
-
+    IEnumerator delayedactive(bool andar, bool bahar)
+    {
+        yield return new WaitForSeconds(1f);
+        AndarHighLight.SetActive(andar);
+        BaharHighLight.SetActive(bahar);
+    }
     private void MoveChip(Transform chip, Transform startPos, Transform endPos, bool disableOnEnd, float duration = 0.4f)
     {
         if (chip == null || startPos == null || endPos == null)
@@ -728,7 +764,7 @@ public class GameManager : MonoBehaviour
         }
         socketManager.BetPlaced(index, optionprefab.VaridontWant, socketManager.initialData.betOptions[optionprefab.Optionindex]);
         uiManager.RetractCoins();
-
+        isRepeatbetActive = true;
 
     }
     internal void ManageBrodcastBetsPlayer()
@@ -879,7 +915,9 @@ public class GameManager : MonoBehaviour
             item.winAnimation.StopAnimation();
             if (item.HighlightedBG.activeInHierarchy)
             {
+                item.HighlightedBG.SetActive(true);
                 item.winAnimation.StartAnimation();
+                StartCoroutine(item.Highlighttext());
             }
         }
     }
@@ -930,6 +968,14 @@ public class GameManager : MonoBehaviour
 
 
            .Append(rt.DOAnchorPosX(startX, 0.6f).SetEase(Ease.InOutSine));
+
+
+        foreach (var item in AllOptions)
+        {
+            item.BG.SetActive(true);
+            item.HighlightedBG.SetActive(false);
+        }
+
     }
 
 
@@ -1167,6 +1213,18 @@ public class GameManager : MonoBehaviour
         }
         PlayerChips.Clear();
         ResetAllBetUI();
+        for (int i = 0; i < AllOptions.Count; i++)
+        {
+            int newAmount = AllOptions[i].totalBet - AllOptions[i].playerBet;
+            if (newAmount <= 0) AllOptions[i].TotalBetObj.SetActive(false);
+            AllOptions[i].TotalBetText.text = newAmount.ToString();
+            AllOptions[i].totalBet = newAmount;
+            AllOptions[i].MyBetObj.SetActive(false);
+            AllOptions[i].MyBetText.text = "0";
+            AllOptions[i].playerBet = 0;
+
+
+        }
     }
     internal void UnduBets(string betId)
     {
@@ -1706,12 +1764,13 @@ public class GameManager : MonoBehaviour
 
         option.MyBetObj.SetActive(true);
 
-        int prev = 0;
-        int.TryParse(option.MyBetText.text, out prev);
+        // int prev = 0;
+        // int.TryParse(option.MyBetText.text, out prev);
 
-        int newAmount = prev + amount;
+        int newAmount = option.playerBet + amount;
         if (newAmount <= 0) option.MyBetObj.SetActive(false);
         option.MyBetText.text = newAmount.ToString();
+        option.playerBet = newAmount;
     }
     internal void UpdateTotalBetOnOption(string opt, int amount)
     {
@@ -1720,12 +1779,13 @@ public class GameManager : MonoBehaviour
 
         option.TotalBetObj.SetActive(true);
 
-        int prev = 0;
-        int.TryParse(option.TotalBetText.text, out prev);
+        // int prev = 0;
+        // int.TryParse(option.TotalBetText.text, out prev);
 
-        int newAmount = prev + amount;
+        int newAmount = option.totalBet + amount;
         if (newAmount <= 0) option.TotalBetObj.SetActive(false);
         option.TotalBetText.text = newAmount.ToString();
+        option.totalBet = newAmount;
     }
 
     internal void ResetBetUI(OptionPrefab option)
@@ -1765,10 +1825,10 @@ public class GameManager : MonoBehaviour
     internal void SetPlayerCountOnReturn(Lobby lobby, double playerbalance)
     {
         homepage.PlayerBalance.text = playerbalance.ToString();
-        homepage.CPlayerCount.text = lobby.casual.ToString() + "Players";
-        homepage.NPlayerCount.text = lobby.novice.ToString() + "Players";
-        homepage.EPlayerCount.text = lobby.expert.ToString() + "Players";
-        homepage.HPlayerCount.text = lobby.high_roller.ToString() + "Players";
+        homepage.CPlayerCount.text = lobby.casual.ToString();
+        homepage.NPlayerCount.text = lobby.novice.ToString();
+        homepage.EPlayerCount.text = lobby.expert.ToString();
+        homepage.HPlayerCount.text = lobby.high_roller.ToString();
         homepage.TotalPlayerCount.text = (lobby.casual + lobby.novice + lobby.expert + lobby.high_roller).ToString();
     }
     public void RoundInfoAnim(int spriteIndex)

@@ -101,7 +101,7 @@ public class AnimationCall : MonoBehaviour
         if (audioManager) audioManager.PlayWLAudio("cards");
         seq.AppendInterval(2f);
         seq.Append(MiddleCard.transform.DOScale(1.3f, 0.25f).SetEase(Ease.OutBack));
-        MiddleEffect.StartAnimation();
+        //   MiddleEffect.StartAnimation();
 
         seq.AppendCallback(() => MiddleEffect.StartAnimation());
     }

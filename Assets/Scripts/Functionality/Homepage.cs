@@ -106,22 +106,22 @@ public class Homepage : MonoBehaviour
 
         CMinBet.text = gameData.bets.casual[0].ToString();
         CMaxBet.text = gameData.bets.casual[gameData.bets.casual.Count - 1].ToString();
-        CPlayerCount.text = "<size=40>" + gameData.lobby.casual.ToString() + "</size>" + "<size=25> Players</size>";
+        CPlayerCount.text = gameData.lobby.casual.ToString();
 
 
         NMinBet.text = gameData.bets.novice[0].ToString();
         NMaxBet.text = gameData.bets.novice[gameData.bets.novice.Count - 1].ToString();
-        NPlayerCount.text = "<size=40>" + gameData.lobby.novice.ToString() + "</size>" + "<size=25> Players</size>";
+        NPlayerCount.text = gameData.lobby.novice.ToString();
 
 
         EMinBet.text = gameData.bets.expert[0].ToString();
         EMaxBet.text = gameData.bets.expert[gameData.bets.expert.Count - 1].ToString();
-        EPlayerCount.text = "<size=40>" + gameData.lobby.expert.ToString() + "</size>" + "<size=25> Players</size>";
+        EPlayerCount.text = gameData.lobby.expert.ToString();
 
 
         HMinBet.text = gameData.bets.high_roller[0].ToString();
         HMaxBet.text = gameData.bets.high_roller[gameData.bets.high_roller.Count - 1].ToString();
-        HPlayerCount.text = "<size=40>" + gameData.lobby.high_roller.ToString() + "</size>" + "<size=25> Players</size>";
+        HPlayerCount.text = gameData.lobby.high_roller.ToString();
 
         TotalPlayerCount.text = (gameData.lobby.casual + gameData.lobby.novice + gameData.lobby.expert + gameData.lobby.high_roller).ToString();
 

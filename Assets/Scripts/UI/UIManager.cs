@@ -380,10 +380,10 @@ public class UiManager : MonoBehaviour
         if (InfoRight_button) InfoRight_button.onClick.AddListener(delegate { GoToNextInfoPage(); });
 
         if (InfoClose_button) InfoClose_button.onClick.RemoveAllListeners();
-        if (InfoClose_button) InfoClose_button.onClick.AddListener(delegate { ClosePopup(InfoPopup_Object); IsMenuPanelOpen = false; if (audioController) audioController.PlayButtonAudio(); });
+        if (InfoClose_button) InfoClose_button.onClick.AddListener(delegate { PopAndDisable(InfoPopup_Object); IsMenuPanelOpen = false; if (audioController) audioController.PlayButtonAudio(); });
 
         if (HistoryClose_button) HistoryClose_button.onClick.RemoveAllListeners();
-        if (HistoryClose_button) HistoryClose_button.onClick.AddListener(delegate { ClosePopup(HistoryPopup_Object); IsMenuPanelOpen = false; if (audioController) audioController.PlayButtonAudio(); });
+        if (HistoryClose_button) HistoryClose_button.onClick.AddListener(delegate { PopAndDisable(HistoryPopup_Object); IsMenuPanelOpen = false; if (audioController) audioController.PlayButtonAudio(); });
 
 
         Repeatbtn.onClick.RemoveAllListeners();
@@ -408,17 +408,27 @@ public class UiManager : MonoBehaviour
         DontShowBtn.onClick.AddListener(delegate { OnClickDontShow(); if (audioController) audioController.PlayButtonAudio(); });
 
         CloseIntroPage.onClick.RemoveAllListeners();
-        CloseIntroPage.onClick.AddListener(delegate { ClosePopup(Intropage); if (audioController) audioController.PlayButtonAudio(); });
+        CloseIntroPage.onClick.AddListener(delegate { PopAndDisable(Intropage); if (audioController) audioController.PlayButtonAudio(); });
 
         ReadmoreBtn.onClick.RemoveAllListeners();
-        ReadmoreBtn.onClick.AddListener(delegate { ClosePopup(Intropage); OpenPopup(InfoPopup_Object); });
+        ReadmoreBtn.onClick.AddListener(delegate { PopAndDisable(Intropage); OpenPopup(InfoPopup_Object); });
         // OnClickDontShow();
         ShowIntroPage();
-
+        SpawnDummyStats(30);
     }
 
 
+    private void SpawnDummyStats(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            string dummyCard = Random.Range(1, 14).ToString();   // 1–13 cards
+            bool isBlue = Random.value > 0.5f;                   // random color
+            string dummyCount = Random.Range(1, 10).ToString();  // count number
 
+            UpdateStats(dummyCard, isBlue, dummyCount);
+        }
+    }
 
     #region Everytheing else
 
@@ -556,6 +566,16 @@ public class UiManager : MonoBehaviour
         if (Popup) Popup.SetActive(false);
         if (MainPopup_Object) MainPopup_Object.SetActive(false);
     }
+    public void PopAndDisable(GameObject Popup)
+    {
+        Popup.transform.DOScale(0f, duration)
+                 .SetEase(Ease.InBack)
+                 .OnComplete(() =>
+                 {
+                     Popup.SetActive(false);
+                     if (MainPopup_Object) MainPopup_Object.SetActive(false);
+                 });
+    }
 
     private void ToggleMusic()
     {
@@ -692,7 +712,10 @@ public class UiManager : MonoBehaviour
             SetChipoption(true);
 
         }
-        else Repeatpanel.SetActive(true);
+        else
+        {
+            if (gameManager.isRepeatbetActive) Repeatpanel.SetActive(true);
+        }
         isExpanded = false;
     }
 
@@ -933,7 +956,7 @@ public class UiManager : MonoBehaviour
 
             Sprite middleCard = gameManager.CardSet(payload.history[i].middleCardParsed.suit, payload.history[i].middleCardParsed.rank);
             Sprite sideCard = gameManager.CardSet(payload.history[i].matchingCardParsed.suit, payload.history[i].matchingCardParsed.rank);
-            script.SetData(i + 1, payload.history[i], middleCard, sideCard);
+            script.SetData(i + 1, payload.history[i], middleCard, sideCard, payload.history[i].cards_dealt);
         }
     }
 
@@ -1043,6 +1066,7 @@ public class UiManager : MonoBehaviour
                 RetractCoins();
                 ClosePopup(QuitPopup_Object);
                 IsMenuPanelOpen = false; socketManager.SendHome(); ResetMenuPanel(false);
+                gameManager.isRepeatbetActive = false;
             }
 
 

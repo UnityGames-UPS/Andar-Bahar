@@ -31,6 +31,7 @@ public class PopAnimation : MonoBehaviour
 
     private void OnEnable()
     {
+        transform.localScale = Vector3.one;
         if (isPoping)
             PlayPop();
         else
