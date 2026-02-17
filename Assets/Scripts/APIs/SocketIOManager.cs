@@ -27,6 +27,7 @@ public class SocketIOManager : MonoBehaviour
     internal Root BetChipData;
     internal Root OtherChipData;
     internal Root CashoutData;
+    internal Root BonusData;
     internal Root doubleBetData;
     internal Root HistoryPageData;
     internal Root ReturnHome;
@@ -38,7 +39,7 @@ public class SocketIOManager : MonoBehaviour
     // internal Payload resultData = null;
     internal Player playerdata = null;
     [SerializeField]
-    internal List<string> bonusdata = null;
+    // internal List<string> bonusdata = null;
     internal List<double> MultiplierList;
     //WebSocket currentSocket = null;
     internal bool isResultdone = false;
@@ -208,6 +209,7 @@ public class SocketIOManager : MonoBehaviour
         gameSocket.On<string>("game:bet_placed", ManageOtherPlayerbets);
         gameSocket.On<string>("game:round_start", OnGameLoopStarted);
         gameSocket.On<string>("game:round_end", OnGameLoopEnd);
+        gameSocket.On<string>("game:bonus", OnGameBonus);
         gameSocket.On<string>("game:cashout", OnCashout);
         gameSocket.On<string>("game:lobby_count", OnLobbyCount);
         gameSocket.On<string>("game:betting_timer", OnListenTimeEvent);
@@ -266,7 +268,7 @@ public class SocketIOManager : MonoBehaviour
     private void OnListenTimeEvent(string data)
     {
         gameManager.OnGameLoaded();
-        Debug.Log("Received timer:/n " + data);
+        //        Debug.Log("Received timer:/n " + data);
         //  ParseResponse(data);
         TimeRemaining = JsonUtility.FromJson<Root>(data);
         gameManager.SetBetTimer();
@@ -274,14 +276,14 @@ public class SocketIOManager : MonoBehaviour
     private void OnListenCardEvent(string data)
     {
         gameManager.OnGameLoaded();
-        Debug.Log("Received Card:/n " + data);
+        //   Debug.Log("Received Card:/n " + data);
         //  ParseResponse(data);
         CardDelt = JsonUtility.FromJson<Root>(data);
         gameManager.ManageCardDelt(CardDelt);
     }
     private void OnListenFlush(string data)
     {
-        Debug.Log("Received flush:/n " + data);
+        //   Debug.Log("Received flush:/n " + data);
         FlushData = JsonUtility.FromJson<Root>(data);
         StartCoroutine(gameManager.ManageFlushAnimation());
         //  ParseResponse(data);
@@ -688,7 +690,7 @@ public class SocketIOManager : MonoBehaviour
 
         string json = JsonUtility.ToJson(message);
 
-        //  SendDataWithNamespace("request", json);
+        SendDataWithNamespace("Undo Send", json);
         gameSocket.ExpectAcknowledgement<string>(OnUndo).Emit("request", json);
     }
     internal void SendRepeat()
@@ -764,11 +766,21 @@ public class SocketIOManager : MonoBehaviour
         ReturnHome = JsonUtility.FromJson<Root>(json);
         gameManager.SetPlayerCountOnReturn(ReturnHome.payload.lobby, ReturnHome.payload.balance);
         playerdata.balance = ReturnHome.payload.balance;
-        StartCoroutine(gameManager.ShowLoadingPage("Loading...."));
+        if (!gameManager.directJump) StartCoroutine(gameManager.ShowLoadingPage("Loading...."));
+        else gameManager.LoadingPage.SetActive(true); ;
         gameManager.GamePage.SetActive(false);
         gameManager.HomePage.SetActive(true);
+        uiManager.MenuMain_button.gameObject.SetActive(true);
+        uiManager.MenuInGame_button.gameObject.SetActive(false);
+        uiManager.sideMenuePanel.transform.position = new Vector3(uiManager.sideMenuePanel.transform.position.x, 451f, uiManager.sideMenuePanel.transform.position.z);
         //  Invoke(nameof(Reconnect), 0.2f);
-
+        if (gameManager.directJump) StartCoroutine(WaitandCallnewRoom());
+    }
+    IEnumerator WaitandCallnewRoom()
+    {
+        yield return new WaitForSeconds(4f);
+        SendRoomSelection(gameManager.nextRoom);
+        gameManager.currentRoom = gameManager.nextRoom;
     }
     void OnHistory(string json)
     {
@@ -812,7 +824,7 @@ public class SocketIOManager : MonoBehaviour
     void OnCancle(string json)
     {
         doubleBetData = JsonUtility.FromJson<Root>(json);
-        gameManager.CancleBets();
+        StartCoroutine(gameManager.CancleBets());
         gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
         playerdata.balance = doubleBetData.payload.balance;
         gameManager.currentTotalBet = 0;
@@ -821,9 +833,10 @@ public class SocketIOManager : MonoBehaviour
     void OnUndo(string json)
     {
         Debug.Log("undo :" + json);
-        Debug.Log(json);
+        //  Debug.Log(json);
         doubleBetData = JsonUtility.FromJson<Root>(json);
-        gameManager.UnduBets(doubleBetData.payload.bet.betId);
+        // StartCoroutine(gameManager.UnduBets(doubleBetData.payload.bet.betId));
+        gameManager.UndoBetsFast(doubleBetData.payload.bet.betId);
         gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
         playerdata.balance = doubleBetData.payload.balance;
         gameManager.currentTotalBet = doubleBetData.payload.totalBet;
@@ -845,6 +858,9 @@ public class SocketIOManager : MonoBehaviour
         gameManager.SetCoinData();
         gameManager.SetOptionData();
         gameManager.SetOtherplayerData(roomData.payload.leaderboards);
+        uiManager.MenuMain_button.gameObject.SetActive(false);
+        uiManager.MenuInGame_button.gameObject.SetActive(true);
+        uiManager.sideMenuePanel.transform.position = new Vector3(uiManager.sideMenuePanel.transform.position.x, 271f, uiManager.sideMenuePanel.transform.position.z);
     }
 
     void ManageOtherPlayerbets(string data)
@@ -893,6 +909,14 @@ public class SocketIOManager : MonoBehaviour
         CashoutData = JsonUtility.FromJson<Root>(data);
 
         gameManager.ManagePayouts();
+
+    }
+    void OnGameBonus(string data)
+    {
+        Debug.Log("Bonus\n" + data);
+        BonusData = JsonUtility.FromJson<Root>(data);
+
+        gameManager.ManageBonus();
 
     }
     void OnLobbyCount(string data)
@@ -1019,163 +1043,164 @@ public class Leaderboards
     public List<Richest> richest;
     public List<Winner> winners;
 }
-
+[System.Serializable]
 public class S1115
 {
-    public double payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public double payout;
+    public MaxBetLimit max_bet_limit;
 }
-
+[System.Serializable]
 public class S15
 {
-    public double payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public double payout;
+    public MaxBetLimit max_bet_limit;
 }
-
+[System.Serializable]
 public class S1620
 {
-    public double payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public double payout;
+    public MaxBetLimit max_bet_limit;
 }
-
+[System.Serializable]
 public class S2125
 {
-    public double payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public double payout;
+    public MaxBetLimit max_bet_limit;
 }
-
+[System.Serializable]
 public class S2630
 {
-    public double payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public double payout;
+    public MaxBetLimit max_bet_limit;
 }
-
+[System.Serializable]
 public class S3135
 {
-    public double payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public double payout;
+    public MaxBetLimit max_bet_limit;
 }
-
+[System.Serializable]
 public class S3640
 {
-    public int payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public int payout;
+    public MaxBetLimit max_bet_limit;
 }
-
+[System.Serializable]
 public class S4153
 {
-    public int payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public int payout;
+    public MaxBetLimit max_bet_limit;
 }
-
+[System.Serializable]
 public class S610
 {
-    public double payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public double payout;
+    public MaxBetLimit max_bet_limit;
 }
+[System.Serializable]
 public class Andar
 {
-    public List<double> payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public List<double> payout;
+    public MaxBetLimit max_bet_limit;
 }
-
+[System.Serializable]
 public class Bahar
 {
-    public List<double> payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public List<double> payout;
+    public MaxBetLimit max_bet_limit;
 }
-
+[System.Serializable]
 public class Bets
 {
-    public List<int> casual { get; set; }
-    public List<int> novice { get; set; }
-    public List<int> expert { get; set; }
-    public List<int> high_roller { get; set; }
+    public List<int> casual;
+    public List<int> novice;
+    public List<int> expert;
+    public List<int> high_roller;
 
-    public string username { get; set; }
-    public int amount { get; set; }
-    public string betId { get; set; }
-    public string betType { get; set; }
-    public string level { get; set; }
-    public string userId { get; set; }
-    public string betOption { get; set; }
+    public string username;
+    public int amount;
+    public string betId;
+    public string betType;
+    public string level;
+    public string userId;
+    public string betOption;
 }
-
+[System.Serializable]
 public class First1Andar
 {
-    public List<double> payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public List<double> payout;
+    public MaxBetLimit max_bet_limit;
 }
-
+[System.Serializable]
 public class First1Bahar
 {
-    public List<double> payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public List<double> payout;
+    public MaxBetLimit max_bet_limit;
 }
-
+[System.Serializable]
 public class First3
 {
-    public Payout payout { get; set; }
-    public MaxBetLimit max_bet_limit { get; set; }
+    public Payout payout;
+    public MaxBetLimit max_bet_limit;
 }
-
+[System.Serializable]
 public class GameData
 {
-    public List<string> betOptions { get; set; }
-    public int roundInterval { get; set; }
-    public int cashoutInterval { get; set; }
-    public int middleCardLimit { get; set; }
-    public int statsLimit { get; set; }
-    public Bets bets { get; set; }
-    public List<string> levels { get; set; }
-    public Wagers wagers { get; set; }
-    public Lobby lobby { get; set; }
-    public HandCode handCode { get; set; }
-    public Leaderboards leaderboards { get; set; }
-    public List<object> stats { get; set; }
+    public List<string> betOptions;
+    public int roundInterval;
+    public int cashoutInterval;
+    public int middleCardLimit;
+    public int statsLimit;
+    public Bets bets;
+    public List<string> levels;
+    public Wagers wagers;
+    public Lobby lobby;
+    public HandCode handCode;
+    public Leaderboards leaderboards;
+    public List<object> stats;
 }
-
+[System.Serializable]
 public class HandCode
 {
     [JsonProperty("1")]
-    public string _1 { get; set; }
+    public string _1;
 
     [JsonProperty("2")]
-    public string _2 { get; set; }
+    public string _2;
 
     [JsonProperty("3")]
-    public string _3 { get; set; }
+    public string _3;
 
     [JsonProperty("4")]
-    public string _4 { get; set; }
+    public string _4;
 
     [JsonProperty("5")]
-    public string _5 { get; set; }
+    public string _5;
 
     [JsonProperty("6")]
-    public string _6 { get; set; }
+    public string _6;
 
     [JsonProperty("7")]
-    public string _7 { get; set; }
+    public string _7;
 
     [JsonProperty("8")]
-    public string _8 { get; set; }
+    public string _8;
 
     [JsonProperty("9")]
-    public string _9 { get; set; }
+    public string _9;
 
     [JsonProperty("10")]
-    public string _10 { get; set; }
-    public int HIGH_CARD { get; set; }
-    public int PAIR { get; set; }
-    public int TWO_PAIR { get; set; }
-    public int THREE_OF_A_KIND { get; set; }
-    public int STRAIGHT { get; set; }
-    public int FLUSH { get; set; }
-    public int FULL_HOUSE { get; set; }
-    public int FOUR_OF_A_KIND { get; set; }
-    public int STRAIGHT_FLUSH { get; set; }
-    public int ROYAL_FLUSH { get; set; }
+    public string _10;
+    public int HIGH_CARD;
+    public int PAIR;
+    public int TWO_PAIR;
+    public int THREE_OF_A_KIND;
+    public int STRAIGHT;
+    public int FLUSH;
+    public int FULL_HOUSE;
+    public int FOUR_OF_A_KIND;
+    public int STRAIGHT_FLUSH;
+    public int ROYAL_FLUSH;
 }
 
 
@@ -1187,26 +1212,26 @@ public class Lobby
     public int expert;
     public int high_roller;
 }
-
+[Serializable]
 public class MainBets
 {
-    public Andar andar { get; set; }
-    public Bahar bahar { get; set; }
+    public Andar andar;
+    public Bahar bahar;
 }
-
+[Serializable]
 public class MaxBetLimit
 {
-    public int casual { get; set; }
-    public int novice { get; set; }
-    public int expert { get; set; }
-    public int high_roller { get; set; }
+    public int casual;
+    public int novice;
+    public int expert;
+    public int high_roller;
 }
-
+[Serializable]
 public class OpBets
 {
-    public First1Andar first_1_andar { get; set; }
-    public First1Bahar first_1_bahar { get; set; }
-    public First3 first_3 { get; set; }
+    public First1Andar first_1_andar;
+    public First1Bahar first_1_bahar;
+    public First3 first_3;
 }
 [Serializable]
 public class Payout
@@ -1275,26 +1300,28 @@ public class Root
     public List<Card> cards;
     public Leaderboards leaderboards;
 
-}
+    public string bonus;
 
+}
+[Serializable]
 public class SideBets
 {
-    public S15 s_1_5 { get; set; }
-    public S610 s_6_10 { get; set; }
-    public S1115 s_11_15 { get; set; }
-    public S1620 s_16_20 { get; set; }
-    public S2125 s_21_25 { get; set; }
-    public S2630 s_26_30 { get; set; }
-    public S3135 s_31_35 { get; set; }
-    public S3640 s_36_40 { get; set; }
-    public S4153 s_41_53 { get; set; }
+    public S15 s_1_5;
+    public S610 s_6_10;
+    public S1115 s_11_15;
+    public S1620 s_16_20;
+    public S2125 s_21_25;
+    public S2630 s_26_30;
+    public S3135 s_31_35;
+    public S3640 s_36_40;
+    public S4153 s_41_53;
 }
-
+[Serializable]
 public class Wagers
 {
-    public MainBets main_bets { get; set; }
-    public OpBets op_bets { get; set; }
-    public SideBets side_bets { get; set; }
+    public MainBets main_bets;
+    public OpBets op_bets;
+    public SideBets side_bets;
 }
 
 [Serializable]

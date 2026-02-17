@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: 5515be296d87d4f4485f29214e9c9dae
+guid: 1d857a0b4409040b6ae825d44515c5db
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1647483591476038039
-    second: Text-08_0
+      213: -4463598264020841534
+    second: Chips-07_0
+  - first:
+      213: 6977182201024636932
+    second: Chips-07_1
+  - first:
+      213: 2565800701094217795
+    second: Chips-07_2
+  - first:
+      213: -4050423667451595298
+    second: Chips-07_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +55,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -113,13 +122,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Text-08_0
+      name: Chips-07_0
       rect:
         serializedVersion: 2
-        x: 102
-        y: 178
-        width: 567
-        height: 3177
+        x: 34
+        y: 290
+        width: 188
+        height: 188
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +137,74 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 799c63309990dd610800000000000000
-      internalID: 1647483591476038039
+      spriteID: 2cbccfc270d1e02c0800000000000000
+      internalID: -4463598264020841534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chips-07_1
+      rect:
+        serializedVersion: 2
+        x: 290
+        y: 290
+        width: 188
+        height: 188
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4086041ce3ee3d060800000000000000
+      internalID: 6977182201024636932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chips-07_2
+      rect:
+        serializedVersion: 2
+        x: 35
+        y: 34
+        width: 189
+        height: 188
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3484b29b42e8b9320800000000000000
+      internalID: 2565800701094217795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chips-07_3
+      rect:
+        serializedVersion: 2
+        x: 290
+        y: 34
+        width: 188
+        height: 188
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed576bf62210ac7c0800000000000000
+      internalID: -4050423667451595298
       vertices: []
       indices: 
       edges: []
@@ -138,7 +213,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +223,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Text-08_0: 1647483591476038039
+      Chips-07_0: -4463598264020841534
+      Chips-07_1: 6977182201024636932
+      Chips-07_2: 2565800701094217795
+      Chips-07_3: -4050423667451595298
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

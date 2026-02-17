@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: 5515be296d87d4f4485f29214e9c9dae
+guid: 5bb025b31ec4842ea9ea9d762a34abf0
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1647483591476038039
-    second: Text-08_0
+      213: -4222678011655707092
+    second: yellow_leaf_0
+  - first:
+      213: 5941087345241401424
+    second: yellow_leaf_1
+  - first:
+      213: -5788566945011070101
+    second: yellow_leaf_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +52,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -113,13 +119,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Text-08_0
+      name: yellow_leaf_0
       rect:
         serializedVersion: 2
-        x: 102
-        y: 178
-        width: 567
-        height: 3177
+        x: 22
+        y: 115
+        width: 89
+        height: 62
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +134,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 799c63309990dd610800000000000000
-      internalID: 1647483591476038039
+      spriteID: c26a86a98b80665c0800000000000000
+      internalID: -4222678011655707092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: yellow_leaf_1
+      rect:
+        serializedVersion: 2
+        x: 31
+        y: 33
+        width: 7
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 058aea8967bf27250800000000000000
+      internalID: 5941087345241401424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: yellow_leaf_2
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 30
+        width: 58
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b6b0c0c5801eaafa0800000000000000
+      internalID: -5788566945011070101
       vertices: []
       indices: 
       edges: []
@@ -138,7 +188,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +198,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Text-08_0: 1647483591476038039
+      yellow_leaf_0: -4222678011655707092
+      yellow_leaf_1: 5941087345241401424
+      yellow_leaf_2: -5788566945011070101
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

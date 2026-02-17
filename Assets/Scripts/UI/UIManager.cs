@@ -4,8 +4,9 @@ using UnityEngine;
 using DG.Tweening;
 using UnityEngine.UI;
 using TMPro;
+using System;
 using UnityEngine.Networking;
-using Unity.VisualScripting;
+
 
 public class UiManager : MonoBehaviour
 {
@@ -22,14 +23,14 @@ public class UiManager : MonoBehaviour
     [Header("Andar Bahar Main Buttons")]
     [SerializeField] private GameObject ButtonPanels;
     [SerializeField] private Button HistoryMain_button;
-    [SerializeField] private Button MenuMain_button;
+    [SerializeField] internal Button MenuMain_button;
     [SerializeField] private Button CasualGame_button;
     [SerializeField] private Button NoviceGame_button;
     [SerializeField] private Button ExpertGame_button;
     [SerializeField] private Button HighRollerGame_button;
 
     [Header("Andar Bahar")]
-    [SerializeField] private Button MenuInGame_button;
+    [SerializeField] internal Button MenuInGame_button;
     [SerializeField] private Button History_button;
     [SerializeField] private Button Info_button;
     [SerializeField] private Button Sound_button;
@@ -84,6 +85,8 @@ public class UiManager : MonoBehaviour
 
 
     [Header("Settings Popup")]
+    [SerializeField]
+    internal GameObject sideMenuePanel;
     [SerializeField]
     private GameObject SettingsPopup_Object;
     [SerializeField]
@@ -208,6 +211,9 @@ public class UiManager : MonoBehaviour
     [SerializeField] internal List<PlayerData> WinnerPlayers;
     [SerializeField] internal List<Sprite> UserIcons;
     [Header("SetBetLimit  data")]
+    [SerializeField] internal Button BetLimitBtn;
+    [SerializeField] internal Sprite SelectedBtn;
+    [SerializeField] internal Sprite NonSelectedBtn;
     [SerializeField] internal GameObject BetLimitPanel;
     [SerializeField] internal Button betBtnQ;
     [SerializeField] internal Button betBtnW;
@@ -313,11 +319,23 @@ public class UiManager : MonoBehaviour
         isMusic = true;
         isSound = true;
 
-        if (Sound_Button) Sound_Button.onClick.RemoveAllListeners();
-        if (Sound_Button) Sound_Button.onClick.AddListener(ToggleSound);
+        if (Sound_Button)
+        {
+            Sound_Button.onClick.RemoveAllListeners();
+            Sound_Button.onClick.AddListener(() =>
+            {
+                PlayButtonAnimation(Sound_Button, ToggleSound);
+            });
+        }
 
-        if (Music_Button) Music_Button.onClick.RemoveAllListeners();
-        if (Music_Button) Music_Button.onClick.AddListener(ToggleMusic);
+        if (Music_Button)
+        {
+            Music_Button.onClick.RemoveAllListeners();
+            Music_Button.onClick.AddListener(() =>
+            {
+                PlayButtonAnimation(Music_Button, ToggleMusic);
+            });
+        }
 
 
         // Andar Bahar 
@@ -326,11 +344,35 @@ public class UiManager : MonoBehaviour
         if (HomePageHistoryBtn) HistoryMain_button.onClick.RemoveAllListeners();
         if (HomePageHistoryBtn) HistoryMain_button.onClick.AddListener(delegate { OpenPopup(HistoryPopup_Object); HistorypageOpen(); });
 
-        if (MenuMain_button) MenuMain_button.onClick.RemoveAllListeners();
-        if (MenuMain_button) MenuMain_button.onClick.AddListener(delegate { ResetMenuPanel(false); ToggleMenuPanel(); if (audioController) audioController.PlayButtonAudio(); });
+        if (MenuMain_button)
+        {
+            MenuMain_button.onClick.RemoveAllListeners();
+            MenuMain_button.onClick.AddListener(() =>
+            {
+                PlayButtonAnimation(MenuMain_button, () =>
+                {
+                    ResetMenuPanel(false);
+                    ToggleMenuPanel();
+                    if (audioController)
+                        audioController.PlayButtonAudio();
+                });
+            });
+        }
 
-        if (MenuInGame_button) MenuInGame_button.onClick.RemoveAllListeners();
-        if (MenuInGame_button) MenuInGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); ToggleMenuPanel(); if (audioController) audioController.PlayButtonAudio(); });
+        if (MenuInGame_button)
+        {
+            MenuInGame_button.onClick.RemoveAllListeners();
+            MenuInGame_button.onClick.AddListener(() =>
+            {
+                PlayButtonAnimation(MenuInGame_button, () =>
+                {
+                    ResetMenuPanel(true);
+                    ToggleMenuPanel();
+                    if (audioController)
+                        audioController.PlayButtonAudio();
+                });
+            });
+        }
 
         if (CasualGame_button) CasualGame_button.onClick.RemoveAllListeners();
         if (CasualGame_button) CasualGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); GameScreen_Object.SetActive(true); if (audioController) audioController.PlayButtonAudio(); });
@@ -343,24 +385,81 @@ public class UiManager : MonoBehaviour
 
         if (HighRollerGame_button) HighRollerGame_button.onClick.RemoveAllListeners();
         if (HighRollerGame_button) HighRollerGame_button.onClick.AddListener(delegate { ResetMenuPanel(true); GameScreen_Object.SetActive(true); if (audioController) audioController.PlayButtonAudio(); });
+        if (Info_button)
+        {
+            Info_button.onClick.RemoveAllListeners();
+            Info_button.onClick.AddListener(() =>
+            {
+                PlayButtonAnimation(Info_button, () =>
+                {
+                    OpenPopup(InfoPopup_Object);
+                    MenuPanel_Object.SetActive(false);
+                });
+            });
+        }
 
-        if (Info_button) Info_button.onClick.RemoveAllListeners();
-        if (Info_button) Info_button.onClick.AddListener(delegate { OpenPopup(InfoPopup_Object); MenuPanel_Object.SetActive(false); });
+        if (History_button)
+        {
+            History_button.onClick.RemoveAllListeners();
+            History_button.onClick.AddListener(() =>
+            {
+                PlayButtonAnimation(History_button, () =>
+                {
+                    OpenPopup(HistoryPopup_Object);
+                    HistorypageOpen();
+                    MenuPanel_Object.SetActive(false);
+                });
+            });
+        }
 
-        if (History_button) History_button.onClick.RemoveAllListeners();
-        if (History_button) History_button.onClick.AddListener(delegate { OpenPopup(HistoryPopup_Object); HistorypageOpen(); MenuPanel_Object.SetActive(false); });
+        if (Sound_button)
+        {
+            Sound_button.onClick.RemoveAllListeners();
+            Sound_button.onClick.AddListener(() =>
+            {
+                PlayButtonAnimation(Sound_button, () =>
+                {
+                    ToggleSound();
+                });
+            });
+        }
 
-        if (Sound_button) Sound_button.onClick.RemoveAllListeners();
-        if (Sound_button) Sound_button.onClick.AddListener(delegate { ToggleSound(); });
+        if (SoundMute_button)
+        {
+            SoundMute_button.onClick.RemoveAllListeners();
+            SoundMute_button.onClick.AddListener(() =>
+            {
+                PlayButtonAnimation(SoundMute_button, () =>
+                {
+                    ToggleSound();
+                });
+            });
+        }
 
-        if (SoundMute_button) SoundMute_button.onClick.RemoveAllListeners();
-        if (SoundMute_button) SoundMute_button.onClick.AddListener(delegate { ToggleSound(); });
+        if (Music_button)
+        {
+            Music_button.onClick.RemoveAllListeners();
+            Music_button.onClick.AddListener(() =>
+            {
+                PlayButtonAnimation(Music_button, () =>
+                {
+                    ToggleMusic();
+                });
+            });
+        }
 
-        if (Music_button) Music_button.onClick.RemoveAllListeners();
-        if (Music_button) Music_button.onClick.AddListener(delegate { ToggleMusic(); });
+        if (MusicMute_button)
+        {
+            MusicMute_button.onClick.RemoveAllListeners();
+            MusicMute_button.onClick.AddListener(() =>
+            {
+                PlayButtonAnimation(MusicMute_button, () =>
+                {
+                    ToggleMusic();
+                });
+            });
+        }
 
-        if (MusicMute_button) MusicMute_button.onClick.RemoveAllListeners();
-        if (MusicMute_button) MusicMute_button.onClick.AddListener(delegate { ToggleMusic(); });
 
         if (Home_button) Home_button.onClick.RemoveAllListeners();
         if (Home_button) Home_button.onClick.AddListener(delegate { homepopup = true; OpenPopup(QuitPopup_Object); SetQuitPopupAnimation(true); });
@@ -412,6 +511,23 @@ public class UiManager : MonoBehaviour
 
         ReadmoreBtn.onClick.RemoveAllListeners();
         ReadmoreBtn.onClick.AddListener(delegate { PopAndDisable(Intropage); OpenPopup(InfoPopup_Object); });
+
+        BetLimitBtn.onClick.RemoveAllListeners();
+        BetLimitBtn.onClick.AddListener(delegate
+        {
+            OnOpenBetLimit();
+        });
+        betBtnQ.onClick.RemoveAllListeners();
+        betBtnQ.onClick.AddListener(delegate { OnChangeLimitClicked(betBtnQ, "casual"); });
+        betBtnW.onClick.RemoveAllListeners();
+        betBtnW.onClick.AddListener(delegate { OnChangeLimitClicked(betBtnW, "novice"); });
+        betBtnE.onClick.RemoveAllListeners();
+        betBtnE.onClick.AddListener(delegate { OnChangeLimitClicked(betBtnE, "expert"); });
+        betBtnR.onClick.RemoveAllListeners();
+        betBtnR.onClick.AddListener(delegate { OnChangeLimitClicked(betBtnR, "high_roller"); });
+        ConfirmBtn.onClick.RemoveAllListeners();
+        ConfirmBtn.onClick.AddListener(delegate { gameManager.OnClickNextroom(); ClosePopup(BetLimitPanel); });
+
         // OnClickDontShow();
         ShowIntroPage();
         SpawnDummyStats(30);
@@ -422,9 +538,9 @@ public class UiManager : MonoBehaviour
     {
         for (int i = 0; i < count; i++)
         {
-            string dummyCard = Random.Range(1, 14).ToString();   // 1–13 cards
-            bool isBlue = Random.value > 0.5f;                   // random color
-            string dummyCount = Random.Range(1, 10).ToString();  // count number
+            string dummyCard = UnityEngine.Random.Range(1, 14).ToString();   // 1–13 cards
+            bool isBlue = UnityEngine.Random.value > 0.5f;                   // random color
+            string dummyCount = UnityEngine.Random.Range(1, 10).ToString();  // count number
 
             UpdateStats(dummyCard, isBlue, dummyCount);
         }
@@ -474,10 +590,7 @@ public class UiManager : MonoBehaviour
     internal void SetgameRulePanel()
     {
         float bet = 1;
-        if (float.TryParse(coinSelector.Chiptext.text, out bet))
-        {
-            // Debug.Log("Parsed float: " + value);
-        }
+
         PayoutText[0].text = (socketManager.initialData.wagers.op_bets.first_3.payout.flush * bet).ToString();
         PayoutText[1].text = (socketManager.initialData.wagers.op_bets.first_3.payout.straight * bet).ToString();
         PayoutText[2].text = (socketManager.initialData.wagers.op_bets.first_3.payout.straight_flush * bet).ToString();
@@ -663,32 +776,64 @@ public class UiManager : MonoBehaviour
         else
             ExpandCoins();
     }
-
     private void ExpandCoins()
     {
-        if (audioController) audioController.PlayWLAudio("coinSelect");
+        if (audioController)
+            audioController.PlayWLAudio("coinSelect");
+
         SetChipoption(false);
         Repeatpanel.SetActive(false);
-        float spacing = 90f; // distance between coins
+
+        float spacing = 90f;
         Vector3 center = coinSelector.transform.localPosition;
 
         for (int i = 0; i < Coins.Count; i++)
         {
             var coin = Coins[i];
 
+            coin.transform.DOKill(true); // stop old tween safely
+
             coin.gameObject.SetActive(true);
 
-            // Each coin moves left by (i + 1) * spacing
-            float offset = (i + 1) * spacing;
+            // IMPORTANT: reset to center first
+            coin.transform.localPosition = center;
 
+            float offset = (i + 1) * spacing;
             Vector3 targetPos = center + new Vector3(-offset, 0, 0);
 
-            coin.transform.DOLocalMove(targetPos, duration)
+            coin.transform
+                .DOLocalMove(targetPos, duration)
                 .SetEase(Ease.OutBack);
         }
 
         isExpanded = true;
     }
+
+    // private void ExpandCoins()
+    // {
+    //     if (audioController) audioController.PlayWLAudio("coinSelect");
+    //     SetChipoption(false);
+    //     Repeatpanel.SetActive(false);
+    //     float spacing = 90f; // distance between coins
+    //     Vector3 center = coinSelector.transform.localPosition;
+
+    //     for (int i = 0; i < Coins.Count; i++)
+    //     {
+    //         var coin = Coins[i];
+
+    //         coin.gameObject.SetActive(true);
+
+    //         // Each coin moves left by (i + 1) * spacing
+    //         float offset = (i + 1) * spacing;
+
+    //         Vector3 targetPos = center + new Vector3(-offset, 0, 0);
+
+    //         coin.transform.DOLocalMove(targetPos, duration)
+    //             .SetEase(Ease.OutBack);
+    //     }
+
+    //     isExpanded = true;
+    // }
 
     internal void RetractCoins()
     {
@@ -1063,6 +1208,7 @@ public class UiManager : MonoBehaviour
             }
             else
             {
+                gameManager.directJump = false;
                 RetractCoins();
                 ClosePopup(QuitPopup_Object);
                 IsMenuPanelOpen = false; socketManager.SendHome(); ResetMenuPanel(false);
@@ -1080,4 +1226,85 @@ public class UiManager : MonoBehaviour
 
     }
 
+    private void PlayButtonAnimation(Button button, Action onComplete)
+    {
+        RectTransform rect = button.GetComponent<RectTransform>();
+
+        float startScale = 1.2f;
+        float endScale = 1f;
+        float duration = 0.15f;
+
+        rect.localScale = Vector3.one * startScale;
+
+        rect.DOScale(endScale, duration)
+            .SetEase(Ease.OutBack)
+            .OnComplete(() =>
+            {
+                onComplete?.Invoke();
+            });
+    }
+
+    void OnOpenBetLimit()
+    {
+        ChangeButtonLimitData();
+
+        string room = gameManager.currentRoom;
+        Button button = null;
+
+
+        switch (room)
+        {
+            case "casual":
+                button = betBtnQ;
+                break;
+
+            case "novice":
+                button = betBtnW;
+                break;
+
+            case "expert":
+                button = betBtnE;
+                break;
+
+            case "high_roller":
+                button = betBtnR;
+                break;
+        }
+        OnChangeLimitClicked(button, gameManager.currentRoom);
+        OpenPopup(BetLimitPanel);
+    }
+    private void OnChangeLimitClicked(Button btnindex, string room)
+    {
+        gameManager.nextRoom = room;
+        betBtnQ.image.sprite = NonSelectedBtn;
+        betBtnW.image.sprite = NonSelectedBtn;
+        betBtnE.image.sprite = NonSelectedBtn;
+        betBtnR.image.sprite = NonSelectedBtn;
+        btnindex.image.sprite = SelectedBtn;
+
+        string fullText = btnindex.GetComponentInChildren<TMP_Text>().text;
+
+
+        string minBet = fullText.Split('-')[0];
+
+        ChangeLimitData(minBet, room);
+
+
+    }
+    void ChangeButtonLimitData()
+    {
+        betBtnQ.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.bets.casual[0].ToString() + "-" + socketManager.initialData.bets.casual[socketManager.initialData.bets.casual.Count - 1].ToString();
+        betBtnW.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.bets.novice[0].ToString() + "-" + socketManager.initialData.bets.novice[socketManager.initialData.bets.novice.Count - 1].ToString();
+        betBtnE.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.bets.expert[0].ToString() + "-" + socketManager.initialData.bets.expert[socketManager.initialData.bets.expert.Count - 1].ToString();
+        betBtnR.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.bets.high_roller[0].ToString() + "-" + socketManager.initialData.bets.high_roller[socketManager.initialData.bets.high_roller.Count - 1].ToString();
+    }
+    void ChangeLimitData(string minBet, string room)
+    {
+        List<string> data = gameManager.GetAllMaxLimits(room);
+        for (int i = 0; i < BetLimitdata.Count; i++)
+        {
+            BetLimitdata[i].text = minBet + " - " + data[i];
+        }
+
+    }
 }

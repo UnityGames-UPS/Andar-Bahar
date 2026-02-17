@@ -68,4 +68,6 @@ public class PopAnimation : MonoBehaviour
             .SetEase(slideEase)
             .SetUpdate(true);
     }
+
+
 }
