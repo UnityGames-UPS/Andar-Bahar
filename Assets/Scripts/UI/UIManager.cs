@@ -211,6 +211,7 @@ public class UiManager : MonoBehaviour
     [SerializeField] internal List<PlayerData> WinnerPlayers;
     [SerializeField] internal List<Sprite> UserIcons;
     [Header("SetBetLimit  data")]
+    [SerializeField] internal Button BetLimitQuitBtn;
     [SerializeField] internal Button BetLimitBtn;
     [SerializeField] internal Sprite SelectedBtn;
     [SerializeField] internal Sprite NonSelectedBtn;
@@ -527,6 +528,8 @@ public class UiManager : MonoBehaviour
         betBtnR.onClick.AddListener(delegate { OnChangeLimitClicked(betBtnR, "high_roller"); });
         ConfirmBtn.onClick.RemoveAllListeners();
         ConfirmBtn.onClick.AddListener(delegate { gameManager.OnClickNextroom(); ClosePopup(BetLimitPanel); });
+        BetLimitQuitBtn.onClick.RemoveAllListeners();
+        BetLimitQuitBtn.onClick.AddListener(delegate { ClosePopup(BetLimitPanel); });
 
         // OnClickDontShow();
         ShowIntroPage();

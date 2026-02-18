@@ -4664,6 +4664,8 @@ MonoBehaviour:
   holdDuration: 1
   AndarHighLight: {fileID: 543295578}
   BaharHighLight: {fileID: 2013153669}
+  AndarBtnHighLight: {fileID: 1409654371}
+  BaharBtnHighLight: {fileID: 441553776}
   AndarbaharBetReset: {fileID: 596450518}
   NewRoundAnim: {fileID: 1101693328}
   HandResetSprite: {fileID: 21300000, guid: 60adf8dc5ca4d4786bb9308a09eeef53, type: 3}
@@ -18860,7 +18862,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 6eead1908f19d42aab7888c335eb6532, type: 3}
+  m_Sprite: {fileID: -739031100866418518, guid: 2649167d08335411f81c1adca9e59670, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -37521,7 +37523,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &885869742
 RectTransform:
   m_ObjectHideFlags: 0
@@ -42881,8 +42883,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 789233950}
   - {fileID: 1303096527}
+  - {fileID: 789233950}
   m_Father: {fileID: 284640510}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -50213,7 +50215,7 @@ MonoBehaviour:
   uiManager: {fileID: 2115417990}
   MultiplierList: []
   JSManager: {fileID: 1519490010}
-  testToken: cdc88a3873954ca5a6b621f5d345c440
+  testToken: 741f3d5179064341807f3ecd586378cf
   RaycastBlocker: {fileID: 1127067818}
 --- !u!4 &1272847617
 Transform:
@@ -55761,7 +55763,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 10d9fbe044b6f4a52aa767a75564b9c3, type: 3}
+  m_Sprite: {fileID: 3806944039811262105, guid: 5ec283c3faeae4e6a9e0c851728c5259, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -81907,6 +81909,7 @@ MonoBehaviour:
   - {fileID: 1105077622, guid: ec4029ed54bb447aab4c46ee8fcfa3e5, type: 3}
   - {fileID: -329427568, guid: ec4029ed54bb447aab4c46ee8fcfa3e5, type: 3}
   - {fileID: -684079799, guid: ec4029ed54bb447aab4c46ee8fcfa3e5, type: 3}
+  BetLimitQuitBtn: {fileID: 1451058122}
   BetLimitBtn: {fileID: 1393506941}
   SelectedBtn: {fileID: -1824105428, guid: e10ea47382d3642ac976d20974afe61b, type: 3}
   NonSelectedBtn: {fileID: -1178743288, guid: e10ea47382d3642ac976d20974afe61b, type: 3}

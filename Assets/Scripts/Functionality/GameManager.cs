@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
 
 
     [Header("Texts")]
-    [SerializeField] private TMP_Text LoadingPage_text;
+    [SerializeField] internal TMP_Text LoadingPage_text;
     [SerializeField] private TMP_Text RoundInfo_Text;
     [SerializeField] private TMP_Text CardCount_Text;
     [SerializeField] private TMP_Text TotalPlayer_text;
@@ -113,6 +113,8 @@ public class GameManager : MonoBehaviour
     [Header("Result ")]
     [SerializeField] private GameObject AndarHighLight;
     [SerializeField] private GameObject BaharHighLight;
+    [SerializeField] private GameObject AndarBtnHighLight;
+    [SerializeField] private GameObject BaharBtnHighLight;
     [SerializeField] private GameObject AndarbaharBetReset;
     [SerializeField] private ImageAnimation NewRoundAnim;
     [SerializeField] private Sprite HandResetSprite;
@@ -535,13 +537,13 @@ public class GameManager : MonoBehaviour
         {
             // RoundInfo_Text.text = "<size=30>Place bet Now</size>\n " + "<size=50><color=yellow>" + time + "</color></size>";
             RoundInfo_Text.text = "<size=30>Place bet Now</size>\n ";
-            pulseText.text = time.ToString();
+            pulseText.text = "<color=yellow>" + time.ToString() + "</color>";
             pulseText.gameObject.SetActive(true);
         }
         else
         {
             RoundInfo_Text.text = "<size=30>Place bet Now</size>\n ";
-            pulseText.text = time.ToString();
+            pulseText.text = "<color=yellow>" + time.ToString() + "</color>";
             pulseText.gameObject.SetActive(true);
             PopTMP(pulseText);
 
@@ -562,7 +564,7 @@ public class GameManager : MonoBehaviour
             uiManager.setCoins(false);
             uiManager.Repeatpanel.SetActive(false);
             uiManager.SetNetBetPanel(true, currentTotalBet.ToString());
-            RoundInfo_Text.text = "Bet Locked!";
+            RoundInfo_Text.text = "<size=30>Bet Locked!</size>";
             BetBlocker.gameObject.SetActive(true);
         }
         if (time % 5 == 4)
@@ -595,7 +597,7 @@ public class GameManager : MonoBehaviour
         uiManager.setCoins(false);
         uiManager.Repeatpanel.SetActive(false);
         uiManager.SetNetBetPanel(true, currentTotalBet.ToString());
-        RoundInfo_Text.text = "Bet Locked!";
+        RoundInfo_Text.text = "<size=30>Bet Locked!</size>";
 
         ManageCardCounts(cardDelt.cardsDealt);
         animHand.MiddleCard.sprite = CardSet(cardDelt.middleCard.suit, cardDelt.middleCard.rank);
@@ -652,7 +654,7 @@ public class GameManager : MonoBehaviour
     IEnumerator GameLoop()
     {
         uiManager.Repeatpanel.SetActive(false);
-        RoundInfo_Text.text = "Bet Locked!";
+        RoundInfo_Text.text = "<size=30>Bet Locked!</size>";
         if (StartGameCorutine != null)
         {
             StopCoroutine(StartGameCorutine);
@@ -689,6 +691,8 @@ public class GameManager : MonoBehaviour
         ResetCardHistory();
         AndarHighLight.SetActive(false);
         BaharHighLight.SetActive(false);
+        AndarBtnHighLight.SetActive(false);
+        BaharBtnHighLight.SetActive(false);
         yield return new WaitForSeconds(1f);
         PlayResetAnimation();
         if (currentWin >= 1)
@@ -701,7 +705,7 @@ public class GameManager : MonoBehaviour
 
         currentWin = 0;
         ResetAllBetUI();
-        RoundInfoAnim(1);
+        // RoundInfoAnim(1);
         animHand.MiddleCard.gameObject.SetActive(false);
     }
     internal IEnumerator ManageFlushAnimation()
@@ -715,6 +719,24 @@ public class GameManager : MonoBehaviour
     internal void ManagePayouts()
     {
         StartCoroutine(ManagePayout());
+        StartCoroutine(NextRoundtext());
+    }
+    IEnumerator NextRoundtext(int time = 4)
+    {
+        pulseText.gameObject.SetActive(true);
+        RoundInfoAnim(3);
+        for (int i = time; i >= 0; i--)
+        {
+            RoundInfo_Text.text = "<size=30>Next Round</size>\n ";
+
+            pulseText.text = $"<color=#00AB15>{i}</color>";
+
+            yield return new WaitForSeconds(1f);
+        }
+        RoundInfoAnim(0);
+        RoundInfo_Text.text = "  ";
+
+        pulseText.text = " ";
     }
     IEnumerator ManagePayout()
     {
@@ -797,6 +819,8 @@ public class GameManager : MonoBehaviour
         {
             AndarHighLight.SetActive(true);
             BaharHighLight.SetActive(false);
+            AndarBtnHighLight.SetActive(true);
+            BaharBtnHighLight.SetActive(false);
         }
         else StartCoroutine(delayedactive(true, false));
         animHand.LeftSprite = CardSet(socketManager.CardDelt.card.suit, socketManager.CardDelt.card.rank);
@@ -808,6 +832,8 @@ public class GameManager : MonoBehaviour
         {
             AndarHighLight.SetActive(false);
             BaharHighLight.SetActive(true);
+            AndarBtnHighLight.SetActive(false);
+            BaharBtnHighLight.SetActive(true);
         }
         else StartCoroutine(delayedactive(false, true));
         animHand.RightSprite = CardSet(socketManager.CardDelt.card.suit, socketManager.CardDelt.card.rank);
@@ -818,6 +844,8 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1f);
         AndarHighLight.SetActive(andar);
         BaharHighLight.SetActive(bahar);
+        AndarBtnHighLight.SetActive(andar);
+        BaharBtnHighLight.SetActive(bahar);
     }
     private void MoveChip(Transform chip, Transform startPos, Transform endPos, bool disableOnEnd, float duration = 0.4f)
     {

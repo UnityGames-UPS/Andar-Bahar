@@ -767,7 +767,7 @@ public class SocketIOManager : MonoBehaviour
         gameManager.SetPlayerCountOnReturn(ReturnHome.payload.lobby, ReturnHome.payload.balance);
         playerdata.balance = ReturnHome.payload.balance;
         if (!gameManager.directJump) StartCoroutine(gameManager.ShowLoadingPage("Loading...."));
-        else gameManager.LoadingPage.SetActive(true); ;
+        else gameManager.LoadingPage.SetActive(true); gameManager.LoadingPage_text.text = "Loading....";
         gameManager.GamePage.SetActive(false);
         gameManager.HomePage.SetActive(true);
         uiManager.MenuMain_button.gameObject.SetActive(true);
