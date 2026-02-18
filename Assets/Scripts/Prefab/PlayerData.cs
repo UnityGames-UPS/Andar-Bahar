@@ -44,22 +44,40 @@ public class PlayerData : MonoBehaviour
             positionsCached = true;
         }
 
-
         nameRT.localPosition = nameOriginalPos;
         balRT.localPosition = balOriginalPos;
 
+        float fastDuration = 0.2f;     // Faster movement
+        float stayTime = 0.4f;         // Stay at top
+        float bottomDelay = 0.2f;      // Small delay before next
+
         loopSeq = DOTween.Sequence();
 
-        loopSeq.Append(nameRT.DOLocalMoveY(nameOriginalPos.y + moveY, duration).SetEase(Ease.OutQuad));
-        loopSeq.Append(nameRT.DOLocalMoveY(nameOriginalPos.y, duration).SetEase(Ease.InQuad));
-        loopSeq.AppendInterval(delayBetween);
+        // 🔹 Name animation
+        loopSeq.Append(nameRT.DOLocalMoveY(nameOriginalPos.y + moveY, fastDuration)
+            .SetEase(Ease.OutQuad));
 
-        loopSeq.Append(balRT.DOLocalMoveY(balOriginalPos.y + moveY, duration).SetEase(Ease.OutQuad));
-        loopSeq.Append(balRT.DOLocalMoveY(balOriginalPos.y, duration).SetEase(Ease.InQuad));
-        loopSeq.AppendInterval(delayBetween);
+        loopSeq.AppendInterval(stayTime);   // Stay at top
+
+        loopSeq.Append(nameRT.DOLocalMoveY(nameOriginalPos.y, fastDuration)
+            .SetEase(Ease.InQuad));
+
+        loopSeq.AppendInterval(bottomDelay);
+
+        // 🔹 Balance animation
+        loopSeq.Append(balRT.DOLocalMoveY(balOriginalPos.y + moveY, fastDuration)
+            .SetEase(Ease.OutQuad));
+
+        loopSeq.AppendInterval(stayTime);
+
+        loopSeq.Append(balRT.DOLocalMoveY(balOriginalPos.y, fastDuration)
+            .SetEase(Ease.InQuad));
+
+        loopSeq.AppendInterval(bottomDelay);
 
         loopSeq.SetLoops(-1);
     }
+
 
 
 

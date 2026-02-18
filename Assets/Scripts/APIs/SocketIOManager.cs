@@ -861,6 +861,7 @@ public class SocketIOManager : MonoBehaviour
         uiManager.MenuMain_button.gameObject.SetActive(false);
         uiManager.MenuInGame_button.gameObject.SetActive(true);
         uiManager.sideMenuePanel.transform.position = new Vector3(uiManager.sideMenuePanel.transform.position.x, 271f, uiManager.sideMenuePanel.transform.position.z);
+        uiManager.Rayid.text = "R.ID: " + roomData.payload.roomId;
     }
 
     void ManageOtherPlayerbets(string data)

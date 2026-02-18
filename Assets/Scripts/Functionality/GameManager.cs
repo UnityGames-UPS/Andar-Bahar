@@ -228,15 +228,15 @@ public class GameManager : MonoBehaviour
         FirstAndarTxt.SetData(2, "firstOneAndar", socketManager.initialData.wagers.op_bets.first_1_andar.payout[0].ToString(), "op_bets");
         FirstBaharTxt.SetData(3, "firstOneBahar", socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0].ToString(), "op_bets");
         FirstThreeTxt.SetData(4, "firstThree", socketManager.initialData.wagers.op_bets.first_3.payout.straight.ToString(), "op_bets");
-        OptionQTxt.SetData(5, "1-5 Cards", socketManager.initialData.wagers.side_bets.s_1_5.payout.ToString(), "side_bets");
-        OptionWTxt.SetData(6, "6-10 Cards", socketManager.initialData.wagers.side_bets.s_6_10.payout.ToString(), "side_bets");
-        OptionETxt.SetData(7, "11-15 Cards", socketManager.initialData.wagers.side_bets.s_11_15.payout.ToString(), "side_bets");
-        OptionRTxt.SetData(8, "15-20 Cards", socketManager.initialData.wagers.side_bets.s_16_20.payout.ToString(), "side_bets");
-        OptionTTxt.SetData(9, "21-25 Cards", socketManager.initialData.wagers.side_bets.s_21_25.payout.ToString(), "side_bets");
-        OptionYTxt.SetData(10, "26-30 Cards", socketManager.initialData.wagers.side_bets.s_26_30.payout.ToString(), "side_bets");
-        OptionUTxt.SetData(11, "31-35 Cards", socketManager.initialData.wagers.side_bets.s_31_35.payout.ToString(), "side_bets");
-        OptionITxt.SetData(12, "36-40 Cards", socketManager.initialData.wagers.side_bets.s_36_40.payout.ToString(), "side_bets");
-        OptionOTxt.SetData(13, "41-45 Cards", socketManager.initialData.wagers.side_bets.s_41_53.payout.ToString(), "side_bets");
+        OptionQTxt.SetData(5, "1 - 5 Cards", socketManager.initialData.wagers.side_bets.s_1_5.payout.ToString(), "side_bets");
+        OptionWTxt.SetData(6, "6 - 10 Cards", socketManager.initialData.wagers.side_bets.s_6_10.payout.ToString(), "side_bets");
+        OptionETxt.SetData(7, "11 - 15 Cards", socketManager.initialData.wagers.side_bets.s_11_15.payout.ToString(), "side_bets");
+        OptionRTxt.SetData(8, "15 - 20 Cards", socketManager.initialData.wagers.side_bets.s_16_20.payout.ToString(), "side_bets");
+        OptionTTxt.SetData(9, "21 - 25 Cards", socketManager.initialData.wagers.side_bets.s_21_25.payout.ToString(), "side_bets");
+        OptionYTxt.SetData(10, "26 - 30 Cards", socketManager.initialData.wagers.side_bets.s_26_30.payout.ToString(), "side_bets");
+        OptionUTxt.SetData(11, "31 - 35 Cards", socketManager.initialData.wagers.side_bets.s_31_35.payout.ToString(), "side_bets");
+        OptionITxt.SetData(12, "36 - 40 Cards", socketManager.initialData.wagers.side_bets.s_36_40.payout.ToString(), "side_bets");
+        OptionOTxt.SetData(13, "41 or more", socketManager.initialData.wagers.side_bets.s_41_53.payout.ToString(), "side_bets");
 
     }
 
@@ -271,6 +271,7 @@ public class GameManager : MonoBehaviour
         uiManager.coinSelector.Chiptext.text = data[0].ToString();
         uiManager.coinSelector.chipIndex = 0;
         minBet_text.text = data[0].ToString();
+        uiManager.MinBet.text = data[0].ToString();
         maxBet_text.text = data[uiManager.Coins.Count].ToString();
 
         for (int i = 0; i < uiManager.Coins.Count; i++)
@@ -297,6 +298,7 @@ public class GameManager : MonoBehaviour
     {
         homepage.setPlayerData(socketManager.playerdata);
         uiManager.MainPlayers.SetData(player.username, player.balance.ToString(), uiManager.UserIcons[0]);
+        uiManager.Username.text = "ID: " + player.username;
     }
     internal void SetOtherplayerData(Leaderboards leaderboard)
     {
@@ -494,7 +496,7 @@ public class GameManager : MonoBehaviour
         BetBlocker.gameObject.SetActive(false);
         uiManager.setCoins(true);
         uiManager.SetChipoption(false);
-        if (isRepeatbetActive) uiManager.Repeatpanel.SetActive(true);
+        if (isRepeatbetActive && !uiManager.isExpanded) uiManager.Repeatpanel.SetActive(true);
         uiManager.SetNetBetPanel(false);
         MainFlushObj.SetActive(false);
         ResetAllBetUI();

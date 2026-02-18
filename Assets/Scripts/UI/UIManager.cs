@@ -19,7 +19,13 @@ public class UiManager : MonoBehaviour
     [SerializeField] private GameObject HomeScreen_Object;
     [SerializeField] private GameObject GameScreen_Object;
 
-
+    [Header("Topbar")]
+    [SerializeField]
+    internal TMP_Text MinBet;
+    [SerializeField]
+    internal TMP_Text Username;
+    [SerializeField]
+    internal TMP_Text Rayid;
     [Header("Andar Bahar Main Buttons")]
     [SerializeField] private GameObject ButtonPanels;
     [SerializeField] private Button HistoryMain_button;
@@ -45,6 +51,7 @@ public class UiManager : MonoBehaviour
     [SerializeField] private GameObject MenuPanel_Object;
     [SerializeField] private GameObject MenuPanelContainer_Object;
     [SerializeField] private GameObject Homebutton_Object;
+    [SerializeField] private GameObject ExitButton_Object;
 
     [SerializeField] private Button HistoryClose_button;
 
@@ -169,7 +176,7 @@ public class UiManager : MonoBehaviour
     bool isSound;
     bool homepopup;
 
-    private bool isExpanded = false;
+    internal bool isExpanded = false;
     public float duration = 0.5f;
 
 
@@ -222,6 +229,7 @@ public class UiManager : MonoBehaviour
     [SerializeField] internal Button betBtnR;
     [SerializeField] internal List<TMP_Text> BetLimitdata;
     [SerializeField] internal Button ConfirmBtn;
+    [SerializeField] internal GameObject Disclamer;
     [Header("Intro page")]
     [SerializeField] internal GameObject Intropage;
     [SerializeField] private Button CloseIntroPage;
@@ -557,6 +565,7 @@ public class UiManager : MonoBehaviour
         if (IsGameScreen)
         {
             Homebutton_Object.SetActive(true);
+            ExitButton_Object.gameObject.SetActive(false);
             //  MenuPanelContainer_Object.transform.localPosition = new Vector2(56, 394);
             MenuPanelContainer_Object.GetComponent<RectTransform>().anchoredPosition = new Vector2(56, 394);
             //  MenuPanel_Object.transform.SetParent(GameScreen_Object.transform, true);
@@ -567,6 +576,7 @@ public class UiManager : MonoBehaviour
         else
         {
             Homebutton_Object.SetActive(false);
+            ExitButton_Object.gameObject.SetActive(true);
             // MenuPanelContainer_Object.transform.localPosition = new Vector2(56, 221);
             MenuPanelContainer_Object.GetComponent<RectTransform>().anchoredPosition = new Vector2(56, 221);
             //  MenuPanel_Object.transform.SetParent(HomeScreen_Object.transform, true);
@@ -787,7 +797,7 @@ public class UiManager : MonoBehaviour
         SetChipoption(false);
         Repeatpanel.SetActive(false);
 
-        float spacing = 90f;
+        float spacing = 100f;
         Vector3 center = coinSelector.transform.localPosition;
 
         for (int i = 0; i < Coins.Count; i++)
@@ -805,7 +815,7 @@ public class UiManager : MonoBehaviour
             Vector3 targetPos = center + new Vector3(-offset, 0, 0);
 
             coin.transform
-                .DOLocalMove(targetPos, duration)
+                .DOLocalMove(targetPos, 0.3f)
                 .SetEase(Ease.OutBack);
         }
 
@@ -846,7 +856,7 @@ public class UiManager : MonoBehaviour
         {
             var coin = Coins[i];
 
-            coin.transform.DOLocalMove(center, duration)
+            coin.transform.DOLocalMove(center, 0.2f)
                 .SetEase(Ease.InBack)
                 .OnComplete(() =>
                 {
@@ -1291,7 +1301,8 @@ public class UiManager : MonoBehaviour
         string minBet = fullText.Split('-')[0];
 
         ChangeLimitData(minBet, room);
-
+        if (gameManager.currentRoom == room) Disclamer.gameObject.SetActive(false);
+        else Disclamer.gameObject.SetActive(true);
 
     }
     void ChangeButtonLimitData()
