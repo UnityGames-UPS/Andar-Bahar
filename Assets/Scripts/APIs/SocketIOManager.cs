@@ -29,6 +29,7 @@ public class SocketIOManager : MonoBehaviour
     internal Root CashoutData;
     internal Root BonusData;
     internal Root doubleBetData;
+    internal Root CancleBetData;
     internal Root HistoryPageData;
     internal Root ReturnHome;
     internal Root TotalPlayerCountData;
@@ -823,12 +824,16 @@ public class SocketIOManager : MonoBehaviour
     }
     void OnCancle(string json)
     {
-        doubleBetData = JsonUtility.FromJson<Root>(json);
-        StartCoroutine(gameManager.CancleBets());
-        gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
-        playerdata.balance = doubleBetData.payload.balance;
-        gameManager.currentTotalBet = 0;
-        uiManager.SetChipoption(false);
+        Debug.Log("cancle :" + json);
+        CancleBetData = JsonUtility.FromJson<Root>(json);
+        if (CancleBetData.success == true)
+        {
+            StartCoroutine(gameManager.CancleBets());
+            gameManager.UpdatePlayerbalance(CancleBetData.payload.balance.ToString());
+            playerdata.balance = CancleBetData.payload.balance;
+            gameManager.currentTotalBet = 0;
+            uiManager.SetChipoption(false);
+        }
     }
     void OnUndo(string json)
     {
@@ -981,7 +986,7 @@ public class Payload
     public int totalBet;
 
 
-    public int balance;
+    public double balance;
     public List<Bet> bets;
 
 

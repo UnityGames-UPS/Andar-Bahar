@@ -62,9 +62,9 @@ public class PopAnimation : MonoBehaviour
 
         rectTransform.anchoredPosition =
             new Vector2(endPos.x - startOffsetX, endPos.y);
-
+        Vector2 endOffset = new Vector2(endPos.x - 20f, endPos.y);
         slideTween = rectTransform
-            .DOAnchorPos(endPos, slideDuration)
+            .DOAnchorPos(endOffset, slideDuration)
             .SetEase(slideEase)
             .SetUpdate(true);
     }

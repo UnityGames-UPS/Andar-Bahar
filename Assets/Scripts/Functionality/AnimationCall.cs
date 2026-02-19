@@ -81,9 +81,9 @@ public class AnimationCall : MonoBehaviour
         MiddleEffect.StopAnimation();
         MiddleCard.sprite = MiddleSprite;
 
-        MiddleCard.gameObject.SetActive(true);
 
         MiddleCard.transform.position = MiddleAnimStart.position;
+        MiddleCard.gameObject.SetActive(true);
         MiddleCard.transform.localScale = new Vector3(0f, 1f, 1f);
 
         float duration = 0.1f;

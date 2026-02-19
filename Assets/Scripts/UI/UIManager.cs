@@ -541,7 +541,7 @@ public class UiManager : MonoBehaviour
 
         // OnClickDontShow();
         ShowIntroPage();
-        SpawnDummyStats(30);
+        //  SpawnDummyStats(30);
     }
 
 
@@ -1207,7 +1207,7 @@ public class UiManager : MonoBehaviour
         NoQuit_Button.interactable = false;
         yield return new WaitForSeconds(1f);
         SetQuitPopupAnimation(false);
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1f);
         QuitpopupAnim.StopAnimation();
 
         if (yesBtnClicked)

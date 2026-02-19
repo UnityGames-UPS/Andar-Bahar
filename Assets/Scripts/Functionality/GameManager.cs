@@ -125,10 +125,10 @@ public class GameManager : MonoBehaviour
     [Header("Bonus  ")]
     [SerializeField] private GameObject BonusObject;
 
+    internal List<OptionPrefab> resultsOptions;
 
-
-    public float popScale = 1.15f;
-    public float animTime = 0.15f;
+    private float popScale = 1.15f;
+    private float animTime = 0.15f;
 
     internal int BetCounter;
     internal int MultiplierCounter;
@@ -769,7 +769,23 @@ public class GameManager : MonoBehaviour
 
 
 
-
+    void MoveAllChipstohomeNew()
+    {
+        foreach (var item in PlayerChips)
+        {
+            if (!resultsOptions.Contains(item.betoptions))
+            {
+                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true);
+            }
+        }
+        foreach (var item in OtherPlayerChips)
+        {
+            if (!resultsOptions.Contains(item.betoptions))
+            {
+                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true);
+            }
+        }
+    }
 
 
 
@@ -966,6 +982,7 @@ public class GameManager : MonoBehaviour
             ChipData data = new ChipData();
             data.betId = chipdata.betId;
             data.amount = piece;
+            data.betoptions = FindOption(chipdata.payload.betOption);
 
             data.chip = SpawnChip(
                 findOtherPlayerChipSprite(piece, roomChips),
@@ -1105,20 +1122,20 @@ public class GameManager : MonoBehaviour
         RectTransform rt = AndarbaharBetReset.GetComponent<RectTransform>();
 
         float startX = rt.anchoredPosition.x;
-        float targetX = -1252f;
+        float targetX = -766f;
 
         Sequence seq = DOTween.Sequence();
 
         seq.Append(rt.DOAnchorPosX(targetX, 0.8f).SetEase(Ease.OutBounce))
 
 
-           .AppendInterval(0.4f)
+           .AppendInterval(0.01f)
             .AppendCallback(() =>
            {
                NewRoundAnim.StopAnimation();
                NewRoundAnim.StartAnimation();
            })
-           .AppendInterval(1f)
+           .AppendInterval(1.5f)
            .AppendCallback(() =>
            {
 
@@ -2052,6 +2069,11 @@ public class GameManager : MonoBehaviour
         ResetBetUI(FirstThreeTxt);
 
         foreach (var opt in AllOptions)
+        {
+            opt.totalBet = 0;
+            opt.playerBet = 0;
+        }
+        foreach (var opt in BiggerOptions)
         {
             opt.totalBet = 0;
             opt.playerBet = 0;
