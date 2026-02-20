@@ -125,7 +125,7 @@ public class GameManager : MonoBehaviour
     [Header("Bonus  ")]
     [SerializeField] private GameObject BonusObject;
 
-    internal List<OptionPrefab> resultsOptions;
+    internal List<OptionPrefab> resultsOptions = new List<OptionPrefab>();
 
     private float popScale = 1.15f;
     private float animTime = 0.15f;
@@ -593,7 +593,7 @@ public class GameManager : MonoBehaviour
     internal void ManageCardDelt(Root cardDelt)
     {
 
-
+        pulseText.gameObject.SetActive(false);
         BetBlocker.gameObject.SetActive(true);
         uiManager.SetChipoption(false);
         uiManager.setCoins(false);
@@ -670,15 +670,18 @@ public class GameManager : MonoBehaviour
             if (delivered < 3)
             {
                 FirstAndarTxt.HighlightedBG.SetActive(true);
+                resultsOptions.Add(FirstAndarTxt);
             }
-
+            resultsOptions.Add(AndarTxt);
 
         }
         else
         {
+            resultsOptions.Add(BaharTxt);
             if (delivered < 3)
             {
                 FirstBaharTxt.HighlightedBG.SetActive(true);
+                resultsOptions.Add(FirstBaharTxt);
             }
             uiManager.UpdateStats(socketManager.gameLoopData.middleCard.rank, false, delivered.ToString());
         }
@@ -717,6 +720,7 @@ public class GameManager : MonoBehaviour
         FirstThreeTxt.HighlightedBG.SetActive(true);
         yield return new WaitForSeconds(4f);
         MainFlushObj.SetActive(false);
+        resultsOptions.Add(FirstThreeTxt);
     }
     internal void ManagePayouts()
     {
@@ -743,12 +747,24 @@ public class GameManager : MonoBehaviour
     IEnumerator ManagePayout()
     {
 
-        MoveAllChipstohome();
+        MoveAllChipstohomeNew();
         yield return new WaitForSeconds(1f);
 
         DistributeAllPayout();
         SetOtherplayerData(socketManager.CashoutData.leaderboards);
+        resultsOptions.Clear();
         yield return null;
+
+        // MoveAllChipstohomeNew();
+        // yield return new WaitForSeconds(1f);
+
+
+        // SpawnPayoutOnWinningOptions(socketManager.CashoutData.payouts);
+        // yield return new WaitForSeconds(1f);
+
+
+        // MoveWinningChipsToPlayers(socketManager.CashoutData.payouts);
+        // SetOtherplayerData(socketManager.CashoutData.leaderboards);
     }
     void MoveAllChipstohome()
     {
@@ -788,9 +804,107 @@ public class GameManager : MonoBehaviour
     }
 
 
+    public void DistributePayoutsNew(List<Payout> payouts)
+    {
+        foreach (var payout in payouts)
+        {
+            Transform target = FindPlayerTransform(payout.username);
+            if (uiManager.MainPlayers.playername.text == payout.username)
+            {
+                int oldBalance = int.Parse(uiManager.MainPlayers.playerBalence.text);
+                double newBalance = payout.balance;
+
+                currentWin = newBalance - oldBalance;
+                uiManager.MainPlayers.playerBalence.text = payout.balance.ToString();
+                Debug.Log("Managing playerBet" + payout.balance);
+                socketManager.playerdata.balance = payout.balance;
+            }
+            if (target == null)
+                target = TotalPlayer_text.transform;
+
+            SpawnPayoutChips(payout.win, target);
+        }
+    }
+
+    void SpawnPayoutOnWinningOptions(List<Payout> payouts)
+    {
+        foreach (var payout in payouts)
+        {
+            if (payout.win <= 0)
+                continue;
+
+            // 🔹 Find player's winning bet
+            var playerWinningChip = PlayerChips
+                .FirstOrDefault(x =>
+                    x.betId == payout.username &&
+                    resultsOptions.Contains(x.betoptions));
+
+            if (playerWinningChip == null)
+            {
+                // Mid-game join case
+                // UpdateBalanceIfLocal(payout);
+                continue;
+            }
+            List<int> roomChips = FindRoom();
+            // 🔹 Break win into chip pieces
+            List<int> chipPieces =
+                BreakAmountIntoChips((int)payout.win, roomChips);
+            foreach (int piece in chipPieces)
+            {
+                int index = findChipindex(piece, roomChips);
+                ChipData data = new ChipData();
+                data.betId = "";
+                data.amount = piece;
+                // 🔹 Spawn EXACTLY like bet placement
+                data.chip = SpawnChip(
+                      findChipSprite(piece, roomChips),
+                     piece.ToString(),
+                     index,
+                     RoundInfo_Text.transform,              // START = Dealer
+                     playerWinningChip.betoptions,          // TARGET OPTION
+                     false,
+                     0.4f
+                 );
+
+                // 🔹 Add to correct list
+                PlayerChips.Add(data);
+            }
+        }
+    }
 
 
 
+    void MoveWinningChipsToPlayers(List<Payout> payouts)
+    {
+        foreach (var payout in payouts)
+        {
+            Transform target = FindPlayerTransform(payout.username);
+
+            if (target == null)
+                target = TotalPlayer_text.transform;
+
+            var chipsToMove = PlayerChips
+                .Where(x => resultsOptions.Contains(x.betoptions))
+                .ToList();
+
+            foreach (var chipData in chipsToMove)
+            {
+                Chip chip = chipData.chip.GetComponent<Chip>();
+                MoveChip(chip, target, true);
+            }
+
+            // Update balance here (AFTER animation if you want)
+            if (uiManager.MainPlayers.playername.text == payout.username)
+            {
+                int oldBalance = int.Parse(uiManager.MainPlayers.playerBalence.text);
+                double newBalance = payout.balance;
+
+                currentWin = newBalance - oldBalance;
+                uiManager.MainPlayers.playerBalence.text = payout.balance.ToString();
+                socketManager.playerdata.balance = payout.balance;
+            }
+        }
+    }
 
     internal void ManageBonus()
     {
