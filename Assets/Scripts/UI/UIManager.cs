@@ -947,7 +947,25 @@ public class UiManager : MonoBehaviour
             LineStats[i].HighBg.SetActive(false);
     }
 
+    internal void InitializeStatsFromServer(List<string> statsList)
+    {
+        if (statsList == null || statsList.Count == 0)
+            return;
 
+        foreach (string statString in statsList)
+        {
+            StatData data = JsonUtility.FromJson<StatData>(statString);
+
+            if (data == null || data.middleCard == null)
+                continue;
+
+            string cardNo = data.middleCard.rank;     // "10", "A", "K"
+            bool isBlue = data.matchSide == "bahar";  // bahar = blue
+            string countNo = data.cardsDealt.ToString();
+
+            UpdateStats(cardNo, isBlue, countNo);
+        }
+    }
 
     private void UpdateGridStats(string cardNo, bool isBlue, string countNo)
     {

@@ -220,6 +220,8 @@ public class GameManager : MonoBehaviour
         SetLoadingPage(false);
 
     }
+
+
     internal void SetOptionData()
     {
         AndarTxt.SetData(0, "andar", "", "main_bets");

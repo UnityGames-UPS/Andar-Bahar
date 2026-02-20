@@ -867,6 +867,7 @@ public class SocketIOManager : MonoBehaviour
         uiManager.MenuInGame_button.gameObject.SetActive(true);
         uiManager.sideMenuePanel.transform.position = new Vector3(uiManager.sideMenuePanel.transform.position.x, 271f, uiManager.sideMenuePanel.transform.position.z);
         uiManager.Rayid.text = "R.ID: " + roomData.payload.roomId;
+        uiManager.InitializeStatsFromServer(roomData.payload.stats);
     }
 
     void ManageOtherPlayerbets(string data)
@@ -999,7 +1000,7 @@ public class Payload
     public Meta meta;
 
     public Lobby lobby;
-
+    public List<string> stats;
 
 }
 [System.Serializable]
@@ -1393,4 +1394,11 @@ public class Card
     public string color;
     public string suit;
     public string rank;
+}
+[System.Serializable]
+public class StatData
+{
+    public MiddleCard middleCard;
+    public string matchSide;
+    public int cardsDealt;
 }
