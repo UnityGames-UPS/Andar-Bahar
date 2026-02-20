@@ -747,7 +747,7 @@ public class GameManager : MonoBehaviour
     IEnumerator ManagePayout()
     {
 
-        MoveAllChipstohomeNew();
+        MoveAllChipstohome();
         yield return new WaitForSeconds(1f);
 
         DistributeAllPayout();
