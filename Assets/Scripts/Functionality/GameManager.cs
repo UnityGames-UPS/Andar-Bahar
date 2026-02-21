@@ -2206,6 +2206,11 @@ public class GameManager : MonoBehaviour
         homepage.EPlayerCount.text = lobby.expert.ToString();
         homepage.HPlayerCount.text = lobby.high_roller.ToString();
         homepage.TotalPlayerCount.text = (lobby.casual + lobby.novice + lobby.expert + lobby.high_roller).ToString();
+
+        homepage.CPlayerCountParent.gameObject.SetActive(lobby.casual != 0);
+        homepage.NPlayerCountParent.gameObject.SetActive(lobby.novice != 0);
+        homepage.EPlayerCountParent.gameObject.SetActive(lobby.expert != 0);
+        homepage.HPlayerCountParent.gameObject.SetActive(lobby.high_roller != 0);
     }
     public void RoundInfoAnim(int spriteIndex)
     {

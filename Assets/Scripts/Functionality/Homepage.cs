@@ -24,24 +24,28 @@ public class Homepage : MonoBehaviour
     [SerializeField] private TMP_Text CMinBet;
     [SerializeField] private TMP_Text CMaxBet;
     [SerializeField] internal TMP_Text CPlayerCount;
+    [SerializeField] internal GameObject CPlayerCountParent;
 
     [Header("Novice Room")]
     [SerializeField] Button Novicebutton;
     [SerializeField] private TMP_Text NMinBet;
     [SerializeField] private TMP_Text NMaxBet;
     [SerializeField] internal TMP_Text NPlayerCount;
+    [SerializeField] internal GameObject NPlayerCountParent;
 
     [Header("Expert Room")]
     [SerializeField] Button Expertbutton;
     [SerializeField] private TMP_Text EMinBet;
     [SerializeField] private TMP_Text EMaxBet;
     [SerializeField] internal TMP_Text EPlayerCount;
+    [SerializeField] internal GameObject EPlayerCountParent;
 
     [Header("HighRoller Room")]
     [SerializeField] Button HighRollerbutton;
     [SerializeField] private TMP_Text HMinBet;
     [SerializeField] private TMP_Text HMaxBet;
     [SerializeField] internal TMP_Text HPlayerCount;
+    [SerializeField] internal GameObject HPlayerCountParent;
     [Header("anouncement panel")]
     [SerializeField] private GameObject textAnnouncement;
     [SerializeField] private Transform AnnouncementStartpos;
@@ -107,21 +111,22 @@ public class Homepage : MonoBehaviour
         CMinBet.text = gameData.bets.casual[0].ToString();
         CMaxBet.text = gameData.bets.casual[gameData.bets.casual.Count - 1].ToString();
         CPlayerCount.text = gameData.lobby.casual.ToString();
-
+        CPlayerCountParent.gameObject.SetActive(gameData.lobby.casual != 0);
 
         NMinBet.text = gameData.bets.novice[0].ToString();
         NMaxBet.text = gameData.bets.novice[gameData.bets.novice.Count - 1].ToString();
         NPlayerCount.text = gameData.lobby.novice.ToString();
-
+        NPlayerCountParent.gameObject.SetActive(gameData.lobby.novice != 0);
 
         EMinBet.text = gameData.bets.expert[0].ToString();
         EMaxBet.text = gameData.bets.expert[gameData.bets.expert.Count - 1].ToString();
         EPlayerCount.text = gameData.lobby.expert.ToString();
-
+        EPlayerCountParent.gameObject.SetActive(gameData.lobby.expert != 0);
 
         HMinBet.text = gameData.bets.high_roller[0].ToString();
         HMaxBet.text = gameData.bets.high_roller[gameData.bets.high_roller.Count - 1].ToString();
         HPlayerCount.text = gameData.lobby.high_roller.ToString();
+        HPlayerCountParent.gameObject.SetActive(gameData.lobby.high_roller != 0);
 
         TotalPlayerCount.text = (gameData.lobby.casual + gameData.lobby.novice + gameData.lobby.expert + gameData.lobby.high_roller).ToString();
 
