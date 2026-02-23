@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using UnityEngine.Networking;
-
+using System.Linq;
 
 public class UiManager : MonoBehaviour
 {
@@ -561,31 +561,62 @@ public class UiManager : MonoBehaviour
 
     public void ResetMenuPanel(bool IsGameScreen)
     {
+        //     SlideOutAndDisable(() =>
+        // {
+        //     MenuPanel_Object.SetActive(false);
+
+        //     if (IsGameScreen)
+        //     {
+        //         Homebutton_Object.SetActive(true);
+        //         ExitButton_Object.gameObject.SetActive(false);
+
+        //         MenuPanelContainer_Object.GetComponent<RectTransform>().anchoredPosition
+        //             = new Vector2(56, 394);
+        //     }
+        //     else
+        //     {
+        //         Homebutton_Object.SetActive(false);
+        //         ExitButton_Object.gameObject.SetActive(true);
+
+        //         MenuPanelContainer_Object.GetComponent<RectTransform>().anchoredPosition
+        //             = new Vector2(56, 221);
+        //     }
+        // });
+
         MenuPanel_Object.SetActive(false);
         if (IsGameScreen)
         {
             Homebutton_Object.SetActive(true);
             ExitButton_Object.gameObject.SetActive(false);
-            //  MenuPanelContainer_Object.transform.localPosition = new Vector2(56, 394);
+
             MenuPanelContainer_Object.GetComponent<RectTransform>().anchoredPosition = new Vector2(56, 394);
-            //  MenuPanel_Object.transform.SetParent(GameScreen_Object.transform, true);
-            // int lastIndex = GameScreen_Object.transform.childCount - 1;
-            // MenuPanel_Object.transform.SetSiblingIndex(lastIndex - 1);
+
 
         }
         else
         {
             Homebutton_Object.SetActive(false);
             ExitButton_Object.gameObject.SetActive(true);
-            // MenuPanelContainer_Object.transform.localPosition = new Vector2(56, 221);
+
             MenuPanelContainer_Object.GetComponent<RectTransform>().anchoredPosition = new Vector2(56, 221);
-            //  MenuPanel_Object.transform.SetParent(HomeScreen_Object.transform, true);
-            //   int lastIndex = HomeScreen_Object.transform.childCount - 1;
-            // MenuPanel_Object.transform.SetSiblingIndex(lastIndex - 1);
-            //
+
         }
     }
+    private Tween slideTween;
+    public void SlideOutAndDisable(System.Action onComplete)
+    {
+        RectTransform rect = MenuPanel_Object.GetComponent<RectTransform>();
 
+        slideTween?.Kill();
+
+        slideTween = rect
+            .DOAnchorPosX(800f, 0.2f)
+            .SetUpdate(true)
+            .OnComplete(() =>
+            {
+                onComplete?.Invoke();   // call your ResetMenuPanel logic
+            });
+    }
     public void ToggleMenuPanel()
     {
         if (IsMenuPanelOpen)
@@ -903,10 +934,23 @@ public class UiManager : MonoBehaviour
         selectedChip.chipIndex = tempIndex;
         // Debug.Log("mmmmmmmmmmmmmmmmm" + selectorChip.chipIndex);
         RetractCoins();
+        SortCoinsByIndex();
         SetgameRulePanel();
 
     }
+    private void SortCoinsByIndex()
+    {
+        // Sort list based on chipIndex
+        Coins = Coins
+            .OrderBy(c => c.GetComponent<Chip>().chipIndex)
+            .ToList();
 
+        // Update hierarchy order (important for UI rendering order)
+        for (int i = 0; i < Coins.Count; i++)
+        {
+            Coins[i].transform.SetSiblingIndex(i);
+        }
+    }
     #endregion
 
 
@@ -1096,6 +1140,7 @@ public class UiManager : MonoBehaviour
         if (totalbet != "-1") NetBet.text = totalbet;
         else NetBet.text = "0";
         NetBetPanel.SetActive(istrue);
+        if (istrue) SetChipoption(false);
     }
     internal void SetChipoption(bool istrue, bool db = true, bool canc = true, bool undo = true)
     {
