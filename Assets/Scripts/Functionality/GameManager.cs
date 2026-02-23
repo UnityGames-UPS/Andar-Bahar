@@ -105,7 +105,7 @@ public class GameManager : MonoBehaviour
     private Color startColor;
     private Tween coinTween;
     private Tween popTween;
-
+    private OptionPrefab ResultOption;
     [SerializeField] private float moveDuration = 0.5f;
     [SerializeField] private float holdDuration = 1f;
     private Coroutine animRoutine;
@@ -657,6 +657,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator GameLoop()
     {
+
         uiManager.Repeatpanel.SetActive(false);
         RoundInfo_Text.text = "<size=30>Bet Locked!</size>";
         if (StartGameCorutine != null)
@@ -673,17 +674,22 @@ public class GameManager : MonoBehaviour
             {
                 FirstAndarTxt.HighlightedBG.SetActive(true);
                 resultsOptions.Add(FirstAndarTxt);
+                Debug.Log("$$$$firstandar");
             }
             resultsOptions.Add(AndarTxt);
+            Debug.Log("$$$$andar");
 
         }
         else
         {
             resultsOptions.Add(BaharTxt);
+            Debug.Log("$$$$Bahar");
             if (delivered < 3)
             {
                 FirstBaharTxt.HighlightedBG.SetActive(true);
                 resultsOptions.Add(FirstBaharTxt);
+                Debug.Log("$$$$firstBahar");
+
             }
             uiManager.UpdateStats(socketManager.gameLoopData.middleCard.rank, false, delivered.ToString());
         }
@@ -723,6 +729,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(4f);
         MainFlushObj.SetActive(false);
         resultsOptions.Add(FirstThreeTxt);
+        Debug.Log("$$$$first3");
     }
     internal void ManagePayouts()
     {
@@ -749,24 +756,32 @@ public class GameManager : MonoBehaviour
     IEnumerator ManagePayout()
     {
 
-        MoveAllChipstohome();
-        yield return new WaitForSeconds(1f);
-
-        DistributeAllPayout();
-        SetOtherplayerData(socketManager.CashoutData.leaderboards);
-        resultsOptions.Clear();
-        yield return null;
-
-        // MoveAllChipstohomeNew();
+        // MoveAllChipstohome();
         // yield return new WaitForSeconds(1f);
 
-
-        // SpawnPayoutOnWinningOptions(socketManager.CashoutData.payouts);
-        // yield return new WaitForSeconds(1f);
-
-
-        // MoveWinningChipsToPlayers(socketManager.CashoutData.payouts);
+        // DistributeAllPayout();
         // SetOtherplayerData(socketManager.CashoutData.leaderboards);
+        // resultsOptions.Clear();
+        // yield return null;
+        resultsOptions.Add(ResultOption);
+        MoveAllChipstohomeNew();
+        yield return new WaitForSeconds(0.8f);
+
+        // 2️⃣ Spawn payout chips on winning options
+        SpawnPayoutOnWinningOptions(socketManager.CashoutData.payouts);
+        yield return new WaitForSeconds(0.8f);
+
+        // 3️⃣ Move winning chips to players
+        MoveWinningChipsToPlayers(socketManager.CashoutData.payouts);
+
+        // 4️⃣ Update leaderboard
+        SetOtherplayerData(socketManager.CashoutData.leaderboards);
+        yield return new WaitForSeconds(0.8f);
+        ResetAllChips();
+        yield return new WaitForSeconds(1f);
+        resultsOptions.Clear();
+
+
     }
     void MoveAllChipstohome()
     {
@@ -784,7 +799,30 @@ public class GameManager : MonoBehaviour
         DistributePayouts(socketManager.CashoutData.payouts);
     }
 
+    void ResetAllChips()
+    {
+        // Return main player chips to pool
+        foreach (var chip in PlayerChips)
+        {
+            if (chip.chip != null)
+            {
+                // If you have pooling system
+                chip.chip.SetActive(false);
+            }
+        }
 
+        // Return other player chips to pool
+        foreach (var chip in OtherPlayerChips)
+        {
+            if (chip.chip != null)
+            {
+                chip.chip.SetActive(false);
+            }
+        }
+
+        PlayerChips.Clear();
+        OtherPlayerChips.Clear();
+    }
 
 
     void MoveAllChipstohomeNew()
@@ -830,78 +868,172 @@ public class GameManager : MonoBehaviour
 
     void SpawnPayoutOnWinningOptions(List<Payout> payouts)
     {
+        List<OptionPrefab> validOptions = GetValidWinningOptions();
+
+        Debug.Log("@@@@@@@" + validOptions.Count);
+        if (validOptions.Count == 0)
+        {
+            validOptions.Add(resultsOptions[0]);
+        }
+
+        int totalCount = validOptions.Count;
+        int resultIndex = 0;
+
         foreach (var payout in payouts)
         {
             if (payout.win <= 0)
                 continue;
 
-            // 🔹 Find player's winning bet
-            var playerWinningChip = PlayerChips
-                .FirstOrDefault(x =>
-                    x.betId == payout.username &&
-                    resultsOptions.Contains(x.betoptions));
-
-            if (playerWinningChip == null)
-            {
-                // Mid-game join case
-                // UpdateBalanceIfLocal(payout);
-                continue;
-            }
             List<int> roomChips = FindRoom();
-            // 🔹 Break win into chip pieces
             List<int> chipPieces =
-                BreakAmountIntoChips((int)payout.win, roomChips);
+                BreakAmountIntoMinChips((int)payout.win, roomChips);
+
             foreach (int piece in chipPieces)
             {
-                int index = findChipindex(piece, roomChips);
-                ChipData data = new ChipData();
-                data.betId = "";
-                data.amount = piece;
-                // 🔹 Spawn EXACTLY like bet placement
-                data.chip = SpawnChip(
-                      findChipSprite(piece, roomChips),
-                     piece.ToString(),
-                     index,
-                     RoundInfo_Text.transform,              // START = Dealer
-                     playerWinningChip.betoptions,          // TARGET OPTION
-                     false,
-                     0.4f
-                 );
+                OptionPrefab winningOption = validOptions[resultIndex];
 
-                // 🔹 Add to correct list
-                PlayerChips.Add(data);
+                int index = findChipindex(piece, roomChips);
+
+                ChipData data = new ChipData();
+                data.betId = payout.username;
+                data.amount = piece;
+                data.betoptions = winningOption;
+
+                data.chip = SpawnChip(
+                    findChipSprite(piece, roomChips),
+                    piece.ToString(),
+                    index,
+                    RoundInfo_Text.transform,
+                    winningOption,
+                    false,
+                    0.4f
+                );
+
+                if (uiManager.MainPlayers.playername.text == payout.username)
+                {
+                    PlayerChips.Add(data);
+                    double oldBalance = double.Parse(uiManager.MainPlayers.playerBalence.text);
+                    double newBalance = payout.balance;
+
+                    currentWin = newBalance - oldBalance;
+                }
+                else
+                    OtherPlayerChips.Add(data);
+
+                // rotate safely
+                resultIndex++;
+                if (resultIndex >= totalCount)
+                    resultIndex = 0;
             }
         }
     }
 
 
+    List<OptionPrefab> GetValidWinningOptions()
+    {
+        Debug.Log("@@@ GetValidWinningOptions CALLED");
 
+        if (resultsOptions == null)
+        {
+            Debug.Log("@@@ resultsOptions is NULL");
+            return new List<OptionPrefab>();
+        }
+
+        Debug.Log("@@@ resultsOptions Count: " + resultsOptions.Count);
+        Debug.Log("@@@ PlayerChips Count: " + PlayerChips.Count);
+        Debug.Log("@@@ OtherPlayerChips Count: " + OtherPlayerChips.Count);
+
+        List<OptionPrefab> validOptions = new List<OptionPrefab>();
+
+        for (int i = 0; i < resultsOptions.Count; i++)
+        {
+            OptionPrefab option = resultsOptions[i];
+
+            Debug.Log("@@@ Checking Option Index: " + i + " | Name: " + option.name);
+
+            bool foundInPlayer = false;
+            bool foundInOther = false;
+
+            // 🔹 Check PlayerChips
+            for (int j = 0; j < PlayerChips.Count; j++)
+            {
+                Debug.Log("@@@   PlayerChip[" + j + "] betOption: " + PlayerChips[j].betoptions?.name);
+
+                if (PlayerChips[j].betoptions == option)
+                {
+                    foundInPlayer = true;
+                    Debug.Log("@@@   MATCH FOUND IN PlayerChips");
+                    break;
+                }
+            }
+
+            // 🔹 Check OtherPlayerChips
+            for (int k = 0; k < OtherPlayerChips.Count; k++)
+            {
+                Debug.Log("@@@   OtherChip[" + k + "] betOption: " + OtherPlayerChips[k].betoptions?.name);
+
+                if (OtherPlayerChips[k].betoptions == option)
+                {
+                    foundInOther = true;
+                    Debug.Log("@@@   MATCH FOUND IN OtherPlayerChips");
+                    break;
+                }
+            }
+
+            if (foundInPlayer || foundInOther)
+            {
+                Debug.Log("@@@   ADDING OPTION: " + option.name);
+                validOptions.Add(option);
+            }
+            else
+            {
+                Debug.Log("@@@   NO MATCH FOR OPTION: " + option.name);
+            }
+        }
+
+        Debug.Log("@@@ FINAL validOptions Count: " + validOptions.Count);
+
+        return validOptions;
+    }
     void MoveWinningChipsToPlayers(List<Payout> payouts)
     {
         foreach (var payout in payouts)
         {
             Transform target = FindPlayerTransform(payout.username);
-
             if (target == null)
                 target = TotalPlayer_text.transform;
 
-            var chipsToMove = PlayerChips
-                .Where(x => resultsOptions.Contains(x.betoptions))
-                .ToList();
-
-            foreach (var chipData in chipsToMove)
-            {
-                Chip chip = chipData.chip.GetComponent<Chip>();
-                MoveChip(chip, target, true);
-            }
-
-            // Update balance here (AFTER animation if you want)
+            // 🔹 Move Main Player Chips
             if (uiManager.MainPlayers.playername.text == payout.username)
             {
-                int oldBalance = int.Parse(uiManager.MainPlayers.playerBalence.text);
-                double newBalance = payout.balance;
+                var chipsToMove = PlayerChips
+                    .Where(x => resultsOptions.Contains(x.betoptions))
+                    .ToList();
 
-                currentWin = newBalance - oldBalance;
+                foreach (var chipData in chipsToMove)
+                {
+                    MoveChip(chipData.chip.GetComponent<Chip>(), target, true);
+                }
+
+                uiManager.MainPlayers.playerBalence.text = payout.balance.ToString();
+                socketManager.playerdata.balance = payout.balance;
+            }
+            else
+            {
+                // 🔹 Move Other Player Chips
+                var chipsToMove = OtherPlayerChips
+                    .Where(x => x.betId == payout.username &&
+                                resultsOptions.Contains(x.betoptions))
+                    .ToList();
+
+                foreach (var chipData in chipsToMove)
+                {
+                    MoveChip(chipData.chip.GetComponent<Chip>(), target, true);
+                }
+            }
+
+            if (uiManager.MainPlayers.playername.text == payout.username)
+            {
                 uiManager.MainPlayers.playerBalence.text = payout.balance.ToString();
                 socketManager.playerdata.balance = payout.balance;
             }
@@ -927,6 +1059,7 @@ public class GameManager : MonoBehaviour
         //  Debug.Log("Highlight option index = " + optionIndex);
 
         HighlightOption(optionIndex);
+        ResultOption = AllOptions[optionIndex];
     }
     void HighlightOption(int index)
     {
@@ -1937,7 +2070,24 @@ public class GameManager : MonoBehaviour
 
         return results;
     }
+    List<int> BreakAmountIntoMinChips(int amount, List<int> chipOptions)
+    {
+        List<int> results = new List<int>();
 
+        if (amount <= 0)
+            return results;
+
+        int minChip = chipOptions[0];   // ✅ always smallest chip
+
+        int count = amount / minChip;
+
+        for (int i = 0; i < count; i++)
+        {
+            results.Add(minChip);
+        }
+
+        return results;
+    }
 
     internal void UpdatePlayerbalance(string balance)
     {
