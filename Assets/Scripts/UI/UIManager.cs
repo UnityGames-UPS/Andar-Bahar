@@ -519,7 +519,7 @@ public class UiManager : MonoBehaviour
         CloseIntroPage.onClick.AddListener(delegate { PopAndDisable(Intropage); if (audioController) audioController.PlayButtonAudio(); });
 
         ReadmoreBtn.onClick.RemoveAllListeners();
-        ReadmoreBtn.onClick.AddListener(delegate { PopAndDisable(Intropage); OpenPopup(InfoPopup_Object); });
+        ReadmoreBtn.onClick.AddListener(delegate { ClosePopup(Intropage); OpenPopup(InfoPopup_Object); });
 
         BetLimitBtn.onClick.RemoveAllListeners();
         BetLimitBtn.onClick.AddListener(delegate

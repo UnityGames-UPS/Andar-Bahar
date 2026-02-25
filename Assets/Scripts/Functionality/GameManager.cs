@@ -170,7 +170,7 @@ public class GameManager : MonoBehaviour
         startPoscoin = coinAddText.rectTransform.localPosition;
         startColor = coinAddText.color;
         coinAddText.gameObject.SetActive(false);
-        animHand.MiddleCard.gameObject.SetActive(false);
+        // animHand.MiddleCard.gameObject.SetActive(false);
 
     }
 
@@ -730,7 +730,7 @@ public class GameManager : MonoBehaviour
         currentWin = 0;
         ResetAllBetUI();
         // RoundInfoAnim(1);
-        animHand.MiddleCard.gameObject.SetActive(false);
+        // animHand.MiddleCard.gameObject.SetActive(false);
     }
     internal IEnumerator ManageFlushAnimation()
     {
@@ -1087,6 +1087,7 @@ public class GameManager : MonoBehaviour
     void PlayMiddleCardAnim()
     {
         animHand.MiddleSprite = CardSet(socketManager.gameLoopData.middleCard.suit, socketManager.gameLoopData.middleCard.rank);
+        // animHand.MiddleCard.gameObject.SetActive(false);
         Handanimator.Play("MiddleCard");
         uiManager.CalculateStringProbability(socketManager.gameLoopData.middleCard.rank);
         // Debug.Log(socketManager.gameLoopData.middleCard.suit);
