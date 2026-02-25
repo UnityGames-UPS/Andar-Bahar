@@ -76,6 +76,53 @@ public class AnimationCall : MonoBehaviour
             // Debug.Log("Right card flip animation complete!");
         });
     }
+    // public void CenterHandAnim()
+    // {
+    //     MiddleCard.transform.DOKill();   // stop old tweens
+
+    //     MiddleEffect.StopAnimation();
+    //     MiddleCard.sprite = MiddleSprite;
+
+    //     // 1️⃣ Disable first (important)
+    //     MiddleCard.gameObject.SetActive(false);
+
+    //     // 2️⃣ Set start position BEFORE enabling
+    //     MiddleCard.transform.position = MiddleAnimStart.position;
+    //     MiddleCard.transform.localScale = new Vector3(0f, 1f, 1f);
+
+    //     // 3️⃣ Enable AFTER position is set
+    //     MiddleCard.gameObject.SetActive(true);
+
+    //     float duration = 0.2f;
+
+    //     Sequence seq = DOTween.Sequence();
+
+    //     // 4️⃣ Now animate
+    //     seq.Join(
+    //         MiddleCard.transform
+    //             .DOMove(MiddleAnimEnd.position, duration)
+    //             .SetEase(Ease.OutQuad)
+    //     );
+
+    //     seq.Join(
+    //         MiddleCard.transform
+    //             .DOScaleX(1f, duration)
+    //             .SetEase(Ease.OutQuad)
+    //     );
+
+    //     if (audioManager)
+    //         audioManager.PlayWLAudio("cards");
+
+    //     seq.AppendInterval(2f);
+
+    //     seq.Append(
+    //         MiddleCard.transform
+    //             .DOScale(1.2f, 0.25f)
+    //             .SetEase(Ease.OutQuad)
+    //     );
+
+    //     seq.AppendCallback(() => MiddleEffect.StartAnimation());
+    // }
     public void CenterHandAnim()
     {
         MiddleEffect.StopAnimation();
@@ -83,11 +130,12 @@ public class AnimationCall : MonoBehaviour
 
 
         MiddleCard.transform.position = MiddleAnimStart.position;
-        MiddleCard.gameObject.SetActive(true);
+
+
         MiddleCard.transform.localScale = new Vector3(0f, 1f, 1f);
 
         float duration = 0.1f;
-
+        StartCoroutine(delayedActive());
 
         Sequence seq = DOTween.Sequence();
 
@@ -105,7 +153,11 @@ public class AnimationCall : MonoBehaviour
 
         seq.AppendCallback(() => MiddleEffect.StartAnimation());
     }
-
+    IEnumerator delayedActive()
+    {
+        yield return new WaitForSeconds(0.2f);
+        MiddleCard.gameObject.SetActive(true);
+    }
     public void SwipCardOne()
     {
         MovableCard.SetActive(true);

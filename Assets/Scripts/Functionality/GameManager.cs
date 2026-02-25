@@ -170,6 +170,7 @@ public class GameManager : MonoBehaviour
         startPoscoin = coinAddText.rectTransform.localPosition;
         startColor = coinAddText.color;
         coinAddText.gameObject.SetActive(false);
+        animHand.MiddleCard.gameObject.SetActive(false);
 
     }
 
@@ -244,7 +245,7 @@ public class GameManager : MonoBehaviour
 
     internal void SetCoinData()
     {
-        ResetCoinsToDefault();
+        // ResetCoinsToDefault();
         TotalPlayer_text.text = socketManager.roomData.payload.playerCount.ToString();
         string room = currentRoom;
         List<int> data = null;
@@ -494,7 +495,7 @@ public class GameManager : MonoBehaviour
 
 
         currentTotalBet = 0;
-        audioManager.PlayGirlAudio("placeyourbet");
+
         BetBlocker.gameObject.SetActive(false);
         uiManager.setCoins(true);
         uiManager.SetChipoption(false);
@@ -576,6 +577,10 @@ public class GameManager : MonoBehaviour
 
             RoundInfo_Text.text = "<size=30>Bet Locked!</size>";
             BetBlocker.gameObject.SetActive(true);
+        }
+        else if (time == 25)
+        {
+            audioManager.PlayGirlAudio("placeyourbet");
         }
         if (time % 5 == 4)
         {
@@ -2403,6 +2408,7 @@ public class GameManager : MonoBehaviour
             //  ResetMenuPanel(false);
             isRepeatbetActive = false;
             BonusObject.gameObject.SetActive(false);
+            animHand.MiddleCard.gameObject.SetActive(false);
         }
         else
         {

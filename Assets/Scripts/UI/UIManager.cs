@@ -828,7 +828,7 @@ public class UiManager : MonoBehaviour
         SetChipoption(false);
         Repeatpanel.SetActive(false);
 
-        float spacing = 100f;
+        float spacing = 115f;
         Vector3 center = coinSelector.transform.localPosition;
 
         for (int i = 0; i < Coins.Count; i++)
