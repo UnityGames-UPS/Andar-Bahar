@@ -123,7 +123,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMP_Text pulseText;
     [SerializeField] private List<Sprite> roundInfoSprites;
     [Header("Bonus  ")]
-    [SerializeField] private GameObject BonusObject;
+    [SerializeField] internal GameObject BonusObject;
 
     internal List<OptionPrefab> resultsOptions = new List<OptionPrefab>();
 
@@ -529,12 +529,18 @@ public class GameManager : MonoBehaviour
     internal void SetBetTimer()
     {
         ResetCardHistory();
+        BonusObject.gameObject.SetActive(false);
         BetBlocker.gameObject.SetActive(false);
         RoundInfo_Text.gameObject.SetActive(true);
         animHand.MiddleCard.sprite = CardSet(socketManager.TimeRemaining.middleCard.suit, socketManager.TimeRemaining.middleCard.rank);
         animHand.MiddleCard.gameObject.SetActive(true);
         animHand.LeftCard.gameObject.SetActive(false);
         animHand.RightCard.gameObject.SetActive(false);
+        CardCount_Text.text = "";
+        AndarHighLight.SetActive(false);
+        BaharHighLight.SetActive(false);
+        AndarBtnHighLight.SetActive(false);
+        BaharBtnHighLight.SetActive(false);
 
         int time = socketManager.TimeRemaining.timeRemaining / 1000;
         if (time > 5)
@@ -567,7 +573,7 @@ public class GameManager : MonoBehaviour
             uiManager.SetChipoption(false);
             uiManager.setCoins(false);
             uiManager.Repeatpanel.SetActive(false);
-            uiManager.SetNetBetPanel(true, currentTotalBet.ToString());
+
             RoundInfo_Text.text = "<size=30>Bet Locked!</size>";
             BetBlocker.gameObject.SetActive(true);
         }
@@ -1114,7 +1120,7 @@ public class GameManager : MonoBehaviour
         AndarBtnHighLight.SetActive(andar);
         BaharBtnHighLight.SetActive(bahar);
     }
-    private void MoveChip(Transform chip, Transform startPos, Transform endPos, bool disableOnEnd, float duration = 0.4f)
+    private void MoveChip(Transform chip, Transform startPos, Transform endPos, bool disableOnEnd, float duration = 0.6f)
     {
         if (chip == null || startPos == null || endPos == null)
         {
@@ -1124,7 +1130,7 @@ public class GameManager : MonoBehaviour
 
         chip.position = startPos.position;
         chip.DOMove(endPos.position, duration)
-            .SetEase(Ease.OutQuad)
+            .SetEase(Ease.InOutCubic)
             .OnComplete(() =>
             {
                 if (disableOnEnd)
@@ -1421,8 +1427,8 @@ public class GameManager : MonoBehaviour
 
     private void MoveChip(Chip chip, Transform target, bool returnToPool)
     {
-        chip.transform.DOMove(target.position, 0.6f)
-            .SetEase(Ease.OutQuad)
+        chip.transform.DOMove(target.position, 1f)
+            .SetEase(Ease.InOutCubic)
             .OnComplete(() =>
             {
                 if (returnToPool)
@@ -2396,6 +2402,7 @@ public class GameManager : MonoBehaviour
             socketManager.SendHome();
             //  ResetMenuPanel(false);
             isRepeatbetActive = false;
+            BonusObject.gameObject.SetActive(false);
         }
         else
         {

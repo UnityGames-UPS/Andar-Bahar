@@ -1275,6 +1275,7 @@ public class UiManager : MonoBehaviour
 
         if (yesBtnClicked)
         {
+            gameManager.BonusObject.gameObject.SetActive(false);
             YesBtnParticles.StopAnimation();
             if (!homepopup)
             {

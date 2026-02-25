@@ -26,7 +26,7 @@ public class StatsPrefab : MonoBehaviour
 
             if (isBlue)
             {
-                cardnumber.color = Color.blue;
+                cardnumber.color = new Color32(0x0D, 0xB3, 0xEE, 255);
                 winColor = Color.blue;
                 // winColor = Color.blue;
                 winner = "andar";
