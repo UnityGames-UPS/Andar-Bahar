@@ -881,7 +881,7 @@ public class GameManager : MonoBehaviour
     {
         List<OptionPrefab> validOptions = GetValidWinningOptions();
 
-        Debug.Log("@@@@@@@" + validOptions.Count);
+        //        Debug.Log("@@@@@@@" + validOptions.Count);
         if (validOptions.Count == 0)
         {
             validOptions.Add(resultsOptions[0]);
@@ -942,7 +942,7 @@ public class GameManager : MonoBehaviour
 
     List<OptionPrefab> GetValidWinningOptions()
     {
-        Debug.Log("@@@ GetValidWinningOptions CALLED");
+        //  Debug.Log("@@@ GetValidWinningOptions CALLED");
 
         if (resultsOptions == null)
         {
@@ -950,9 +950,9 @@ public class GameManager : MonoBehaviour
             return new List<OptionPrefab>();
         }
 
-        Debug.Log("@@@ resultsOptions Count: " + resultsOptions.Count);
-        Debug.Log("@@@ PlayerChips Count: " + PlayerChips.Count);
-        Debug.Log("@@@ OtherPlayerChips Count: " + OtherPlayerChips.Count);
+        //  Debug.Log("@@@ resultsOptions Count: " + resultsOptions.Count);
+        //  Debug.Log("@@@ PlayerChips Count: " + PlayerChips.Count);
+        //  Debug.Log("@@@ OtherPlayerChips Count: " + OtherPlayerChips.Count);
 
         List<OptionPrefab> validOptions = new List<OptionPrefab>();
 
@@ -960,7 +960,7 @@ public class GameManager : MonoBehaviour
         {
             OptionPrefab option = resultsOptions[i];
 
-            Debug.Log("@@@ Checking Option Index: " + i + " | Name: " + option.name);
+            //  Debug.Log("@@@ Checking Option Index: " + i + " | Name: " + option.name);
 
             bool foundInPlayer = false;
             bool foundInOther = false;
@@ -968,12 +968,12 @@ public class GameManager : MonoBehaviour
             // 🔹 Check PlayerChips
             for (int j = 0; j < PlayerChips.Count; j++)
             {
-                Debug.Log("@@@   PlayerChip[" + j + "] betOption: " + PlayerChips[j].betoptions?.name);
+                //    Debug.Log("@@@   PlayerChip[" + j + "] betOption: " + PlayerChips[j].betoptions?.name);
 
                 if (PlayerChips[j].betoptions == option)
                 {
                     foundInPlayer = true;
-                    Debug.Log("@@@   MATCH FOUND IN PlayerChips");
+                    //   Debug.Log("@@@   MATCH FOUND IN PlayerChips");
                     break;
                 }
             }
@@ -981,28 +981,28 @@ public class GameManager : MonoBehaviour
             // 🔹 Check OtherPlayerChips
             for (int k = 0; k < OtherPlayerChips.Count; k++)
             {
-                Debug.Log("@@@   OtherChip[" + k + "] betOption: " + OtherPlayerChips[k].betoptions?.name);
+                //  Debug.Log("@@@   OtherChip[" + k + "] betOption: " + OtherPlayerChips[k].betoptions?.name);
 
                 if (OtherPlayerChips[k].betoptions == option)
                 {
                     foundInOther = true;
-                    Debug.Log("@@@   MATCH FOUND IN OtherPlayerChips");
+                    //    Debug.Log("@@@   MATCH FOUND IN OtherPlayerChips");
                     break;
                 }
             }
 
             if (foundInPlayer || foundInOther)
             {
-                Debug.Log("@@@   ADDING OPTION: " + option.name);
+                //  Debug.Log("@@@   ADDING OPTION: " + option.name);
                 validOptions.Add(option);
             }
             else
             {
-                Debug.Log("@@@   NO MATCH FOR OPTION: " + option.name);
+                // Debug.Log("@@@   NO MATCH FOR OPTION: " + option.name);
             }
         }
 
-        Debug.Log("@@@ FINAL validOptions Count: " + validOptions.Count);
+        //  Debug.Log("@@@ FINAL validOptions Count: " + validOptions.Count);
 
         return validOptions;
     }
@@ -2156,7 +2156,7 @@ public class GameManager : MonoBehaviour
                 return otherChipSprite[i];
             }
         }
-        return null;
+        return otherChipSprite[0];
 
     }
     int findChipindex(int amount, List<int> betOptions)
