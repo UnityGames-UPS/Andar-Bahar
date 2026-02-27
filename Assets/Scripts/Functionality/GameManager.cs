@@ -578,7 +578,7 @@ public class GameManager : MonoBehaviour
             RoundInfo_Text.text = "<size=30>Bet Locked!</size>";
             BetBlocker.gameObject.SetActive(true);
         }
-        else if (time == 25)
+        else if (time == 28)
         {
             audioManager.PlayGirlAudio("placeyourbet");
         }
@@ -2061,23 +2061,53 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region helper
+    // List<int> BreakAmountIntoChips(int amount, List<int> chipOptions)
+    // {
+    //     // ✅ Make a COPY so original list is not modified
+    //     List<int> sortedChips = new List<int>(chipOptions);
+
+    //     // Sort descending
+    //     sortedChips.Sort((a, b) => b.CompareTo(a));
+
+    //     List<int> results = new List<int>();
+
+    //     foreach (int chip in sortedChips)
+    //     {
+    //         while (amount >= chip)
+    //         {
+    //             amount -= chip;
+    //             results.Add(chip);
+    //         }
+    //     }
+
+    //     return results;
+    // }
     List<int> BreakAmountIntoChips(int amount, List<int> chipOptions)
     {
-        // ✅ Make a COPY so original list is not modified
-        List<int> sortedChips = new List<int>(chipOptions);
-
-        // Sort descending
-        sortedChips.Sort((a, b) => b.CompareTo(a));
-
         List<int> results = new List<int>();
 
-        foreach (int chip in sortedChips)
+        while (amount > 0)
         {
-            while (amount >= chip)
+            int bestValue = int.MinValue;
+
+            // Find largest chip <= remaining amount
+            for (int i = 0; i < chipOptions.Count; i++)
             {
-                amount -= chip;
-                results.Add(chip);
+                if (chipOptions[i] <= amount && chipOptions[i] > bestValue)
+                {
+                    bestValue = chipOptions[i];
+                }
             }
+
+            // If no valid chip found → just add remaining amount and stop
+            if (bestValue == int.MinValue)
+            {
+                results.Add(amount);
+                break;
+            }
+
+            results.Add(bestValue);
+            amount -= bestValue;
         }
 
         return results;
@@ -2114,7 +2144,7 @@ public class GameManager : MonoBehaviour
                 return PlayerChipSprite[i];
             }
         }
-        return null;
+        return PlayerChipSprite[0];
 
     }
     Sprite findOtherPlayerChipSprite(int amount, List<int> betOptions)
@@ -2131,15 +2161,19 @@ public class GameManager : MonoBehaviour
     }
     int findChipindex(int amount, List<int> betOptions)
     {
+        int bestIndex = 0;
+        int bestValue = int.MinValue;
+
         for (int i = 0; i < betOptions.Count; i++)
         {
-            if (betOptions[i] == amount)
+            if (betOptions[i] <= amount && betOptions[i] > bestValue)
             {
-                return i;
+                bestValue = betOptions[i];
+                bestIndex = i;
             }
         }
-        return 0;
 
+        return bestIndex; // returns -1 if no valid chip found
     }
     List<int> FindRoom()
     {

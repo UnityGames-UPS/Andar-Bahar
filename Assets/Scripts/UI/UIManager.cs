@@ -1359,8 +1359,13 @@ public class UiManager : MonoBehaviour
         betBtnR.image.sprite = NonSelectedBtn;
         btnindex.image.sprite = SelectedBtn;
 
-        string fullText = btnindex.GetComponentInChildren<TMP_Text>().text;
+        SetButtonTextColor(betBtnQ, Color.white);
+        SetButtonTextColor(betBtnW, Color.white);
+        SetButtonTextColor(betBtnE, Color.white);
+        SetButtonTextColor(betBtnR, Color.white);
 
+        string fullText = btnindex.GetComponentInChildren<TMP_Text>().text;
+        SetButtonTextColor(btnindex, Color.yellow);
 
         string minBet = fullText.Split('-')[0];
 
@@ -1384,5 +1389,11 @@ public class UiManager : MonoBehaviour
             BetLimitdata[i].text = minBet + " - " + data[i];
         }
 
+    }
+    private void SetButtonTextColor(Button button, Color color)
+    {
+        TMP_Text txt = button.GetComponentInChildren<TMP_Text>();
+        if (txt != null)
+            txt.color = color;
     }
 }
