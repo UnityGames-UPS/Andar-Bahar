@@ -83807,6 +83807,7 @@ MonoBehaviour:
   MusicMute_button: {fileID: 677716532}
   ExpandHome_Button: {fileID: 2097265801}
   ShrinkHome_Button: {fileID: 2083487173}
+  Expand_Button_Text: {fileID: 1558099329}
   Home_button: {fileID: 835168165}
   Exit_Button: {fileID: 2007055644}
   YesHome_button: {fileID: 568220946}

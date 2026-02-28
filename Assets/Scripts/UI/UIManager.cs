@@ -46,6 +46,7 @@ public class UiManager : MonoBehaviour
     [SerializeField] private Button MusicMute_button;
     [SerializeField] private Button ExpandHome_Button;
     [SerializeField] private Button ShrinkHome_Button;
+    [SerializeField] private TMP_Text Expand_Button_Text;
     [SerializeField] private Button Home_button;
     [SerializeField] private Button Exit_Button;
     [SerializeField] private Button YesHome_button;
@@ -1450,6 +1451,8 @@ public class UiManager : MonoBehaviour
     {
         if (ExpandHome_Button) ExpandHome_Button.gameObject.SetActive(!isExpanded);
         if (ShrinkHome_Button) ShrinkHome_Button.gameObject.SetActive(isExpanded);
+        if (!isExpanded) Expand_Button_Text.text = "Expand";
+        else Expand_Button_Text.text = "Shrink";
         // if (ExpandMenu_Button) ExpandMenu_Button.gameObject.SetActive(!isExpanded);
         // if (ShrinkMenu_Button) ShrinkMenu_Button.gameObject.SetActive(isExpanded);
         // if (ExpandSideMenu_Button)
