@@ -14,6 +14,7 @@ public class UiManager : MonoBehaviour
     private AudioManager audioController;
     [SerializeField]
     private SocketIOManager socketManager;
+    [SerializeField] private JSFunctCalls jsFunctCalls;
 
     [Header("Screens UI")]
     [SerializeField] private GameObject HomeScreen_Object;
@@ -43,6 +44,8 @@ public class UiManager : MonoBehaviour
     [SerializeField] private Button Music_button;
     [SerializeField] private Button SoundMute_button;
     [SerializeField] private Button MusicMute_button;
+    [SerializeField] private Button ExpandHome_Button;
+    [SerializeField] private Button ShrinkHome_Button;
     [SerializeField] private Button Home_button;
     [SerializeField] private Button Exit_Button;
     [SerializeField] private Button YesHome_button;
@@ -465,6 +468,28 @@ public class UiManager : MonoBehaviour
                 PlayButtonAnimation(MusicMute_button, () =>
                 {
                     ToggleMusic();
+                });
+            });
+        }
+        if (ExpandHome_Button)
+        {
+            ExpandHome_Button.onClick.RemoveAllListeners();
+            ExpandHome_Button.onClick.AddListener(() =>
+            {
+                PlayButtonAnimation(ExpandHome_Button, () =>
+                {
+                    OnExpand();
+                });
+            });
+        }
+        if (ShrinkHome_Button)
+        {
+            ShrinkHome_Button.onClick.RemoveAllListeners();
+            ShrinkHome_Button.onClick.AddListener(() =>
+            {
+                PlayButtonAnimation(ShrinkHome_Button, () =>
+                {
+                    OnShrink();
                 });
             });
         }
@@ -1376,10 +1401,10 @@ public class UiManager : MonoBehaviour
     }
     void ChangeButtonLimitData()
     {
-        betBtnQ.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.bets.casual[0].ToString() + "-" + socketManager.initialData.bets.casual[socketManager.initialData.bets.casual.Count - 1].ToString();
-        betBtnW.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.bets.novice[0].ToString() + "-" + socketManager.initialData.bets.novice[socketManager.initialData.bets.novice.Count - 1].ToString();
-        betBtnE.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.bets.expert[0].ToString() + "-" + socketManager.initialData.bets.expert[socketManager.initialData.bets.expert.Count - 1].ToString();
-        betBtnR.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.bets.high_roller[0].ToString() + "-" + socketManager.initialData.bets.high_roller[socketManager.initialData.bets.high_roller.Count - 1].ToString();
+        betBtnQ.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.levelBetLimit.casual.min_bet_limit.ToString() + "-" + socketManager.initialData.levelBetLimit.casual.max_bet_limit.ToString();
+        betBtnW.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.levelBetLimit.novice.min_bet_limit.ToString() + "-" + socketManager.initialData.levelBetLimit.novice.max_bet_limit.ToString();
+        betBtnE.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.levelBetLimit.expert.min_bet_limit.ToString() + "-" + socketManager.initialData.levelBetLimit.expert.max_bet_limit.ToString();
+        betBtnR.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.levelBetLimit.high_roller.min_bet_limit.ToString() + "-" + socketManager.initialData.levelBetLimit.high_roller.max_bet_limit.ToString();
     }
     void ChangeLimitData(string minBet, string room)
     {
@@ -1396,4 +1421,70 @@ public class UiManager : MonoBehaviour
         if (txt != null)
             txt.color = color;
     }
+
+
+    #region Expand / Shrink
+
+    private void InitializeExpandShrink()
+    {
+
+        SetExpandShrinkButtons(isExpanded: false);
+    }
+
+    private void OnExpand()
+    {
+        isExpanded = true;
+        jsFunctCalls?.RequestExpandGame();
+        SetExpandShrinkButtons(isExpanded: true);
+    }
+
+    private void OnShrink()
+    {
+        isExpanded = false;
+        jsFunctCalls?.RequestShrinkGame();
+        SetExpandShrinkButtons(isExpanded: false);
+    }
+
+
+    private void SetExpandShrinkButtons(bool isExpanded)
+    {
+        if (ExpandHome_Button) ExpandHome_Button.gameObject.SetActive(!isExpanded);
+        if (ShrinkHome_Button) ShrinkHome_Button.gameObject.SetActive(isExpanded);
+        // if (ExpandMenu_Button) ExpandMenu_Button.gameObject.SetActive(!isExpanded);
+        // if (ShrinkMenu_Button) ShrinkMenu_Button.gameObject.SetActive(isExpanded);
+        // if (ExpandSideMenu_Button)
+        // {
+        //     RectTransform rect = ExpandSideMenu_Button.GetComponent<RectTransform>();
+        //     if (rect != null) rect.anchoredPosition = expandSideMenuOriginalPosition;
+        //     ExpandSideMenu_Button.gameObject.SetActive(!isExpanded);
+        //     ExpandSideMenu_Button.interactable = !isExpanded;
+        // }
+        // if (ShrinkSideMenu_Button)
+        // {
+        //     RectTransform rect = ShrinkSideMenu_Button.GetComponent<RectTransform>();
+        //     if (rect != null) rect.anchoredPosition = shrinkSideMenuOriginalPosition;
+        //     ShrinkSideMenu_Button.gameObject.SetActive(isExpanded);
+        //     ShrinkSideMenu_Button.interactable = isExpanded;
+        // }
+    }
+
+    private void RegisterFullscreenListener()
+    {
+        jsFunctCalls?.RegisterFullscreenListener(gameObject.name);
+    }
+
+    internal void OnFullscreenChanged(string isFullscreen)
+    {
+        bool newExpandedState = isFullscreen == "1";
+        Debug.Log($"[UI] OnFullscreenChanged callback: isFullscreen={isFullscreen}, newState={newExpandedState}");
+
+        // Only update if state actually changed
+        if (isExpanded != newExpandedState)
+        {
+            isExpanded = newExpandedState;
+            SetExpandShrinkButtons(isExpanded);
+            Debug.Log($"[UI] Button states synced to fullscreen: {(isExpanded ? "EXPANDED" : "SHRINK")}");
+        }
+    }
+    #endregion
 }

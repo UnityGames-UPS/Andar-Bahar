@@ -242,7 +242,38 @@ public class GameManager : MonoBehaviour
         OptionOTxt.SetData(13, "41 or more", socketManager.initialData.wagers.side_bets.s_41_53.payout.ToString(), "side_bets");
 
     }
+    internal void SetBetLimit(string room)
+    {
+        int min = 0;
+        int max = 0;
 
+        switch (room)
+        {
+            case "casual":
+                min = socketManager.initialData.levelBetLimit.casual.min_bet_limit;
+                max = socketManager.initialData.levelBetLimit.casual.max_bet_limit;
+                break;
+
+            case "novice":
+                min = socketManager.initialData.levelBetLimit.novice.min_bet_limit;
+                max = socketManager.initialData.levelBetLimit.novice.max_bet_limit;
+                break;
+
+            case "expert":
+                min = socketManager.initialData.levelBetLimit.expert.min_bet_limit;
+                max = socketManager.initialData.levelBetLimit.expert.max_bet_limit;
+                break;
+
+            case "high_roller":
+                min = socketManager.initialData.levelBetLimit.high_roller.min_bet_limit;
+                max = socketManager.initialData.levelBetLimit.high_roller.max_bet_limit;
+                break;
+        }
+        minBet_text.text = min.ToString();
+        uiManager.MinBet.text = min.ToString();
+        maxBet_text.text = max.ToString();
+
+    }
     internal void SetCoinData()
     {
         // ResetCoinsToDefault();
@@ -506,7 +537,8 @@ public class GameManager : MonoBehaviour
         FirstThreeTxt.HighlightedBG.SetActive(false);
         FirstAndarTxt.HighlightedBG.SetActive(false);
         FirstBaharTxt.HighlightedBG.SetActive(false);
-
+        RoundInfo_Text.gameObject.SetActive(false);
+        pulseText.text = "";
 
         PlayMiddleCardAnim();
         // yield return new WaitForSeconds(2f);
@@ -578,7 +610,7 @@ public class GameManager : MonoBehaviour
             RoundInfo_Text.text = "<size=30>Bet Locked!</size>";
             BetBlocker.gameObject.SetActive(true);
         }
-        else if (time == 28)
+        else if (time == 24)
         {
             audioManager.PlayGirlAudio("placeyourbet");
         }
@@ -1271,7 +1303,7 @@ public class GameManager : MonoBehaviour
                     Chip c = chips.chip.GetComponent<Chip>();
                     ReturnChip(c);
                     UpdateTotalBetOnOption(chipdata.betOption, chipdata.amount);
-                    break;
+                    // break;
                 }
             }
         }

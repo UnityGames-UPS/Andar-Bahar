@@ -135,7 +135,7 @@ public class AnimationCall : MonoBehaviour
         MiddleCard.transform.localScale = new Vector3(0f, 1f, 1f);
 
         float duration = 0.1f;
-        StartCoroutine(delayedActive());
+        MiddleCard.gameObject.SetActive(true);
 
         Sequence seq = DOTween.Sequence();
 
@@ -156,7 +156,7 @@ public class AnimationCall : MonoBehaviour
     IEnumerator delayedActive()
     {
         yield return new WaitForSeconds(0.2f);
-        MiddleCard.gameObject.SetActive(true);
+
     }
     public void SwipCardOne()
     {

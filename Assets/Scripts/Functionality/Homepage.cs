@@ -108,23 +108,23 @@ public class Homepage : MonoBehaviour
             HighRollerbutton.onClick.AddListener(() => OnClickARoom(gameData.levels[3]));
         }
 
-        CMinBet.text = gameData.bets.casual[0].ToString();
-        CMaxBet.text = gameData.bets.casual[gameData.bets.casual.Count - 1].ToString();
+        CMinBet.text = socketManager.initialData.levelBetLimit.casual.min_bet_limit.ToString();
+        CMaxBet.text = socketManager.initialData.levelBetLimit.casual.max_bet_limit.ToString();
         CPlayerCount.text = gameData.lobby.casual.ToString();
         CPlayerCountParent.gameObject.SetActive(gameData.lobby.casual != 0);
 
-        NMinBet.text = gameData.bets.novice[0].ToString();
-        NMaxBet.text = gameData.bets.novice[gameData.bets.novice.Count - 1].ToString();
+        NMinBet.text = socketManager.initialData.levelBetLimit.novice.min_bet_limit.ToString();
+        NMaxBet.text = socketManager.initialData.levelBetLimit.novice.max_bet_limit.ToString();
         NPlayerCount.text = gameData.lobby.novice.ToString();
         NPlayerCountParent.gameObject.SetActive(gameData.lobby.novice != 0);
 
-        EMinBet.text = gameData.bets.expert[0].ToString();
-        EMaxBet.text = gameData.bets.expert[gameData.bets.expert.Count - 1].ToString();
+        EMinBet.text = socketManager.initialData.levelBetLimit.expert.min_bet_limit.ToString();
+        EMaxBet.text = socketManager.initialData.levelBetLimit.expert.max_bet_limit.ToString();
         EPlayerCount.text = gameData.lobby.expert.ToString();
         EPlayerCountParent.gameObject.SetActive(gameData.lobby.expert != 0);
 
-        HMinBet.text = gameData.bets.high_roller[0].ToString();
-        HMaxBet.text = gameData.bets.high_roller[gameData.bets.high_roller.Count - 1].ToString();
+        HMinBet.text = socketManager.initialData.levelBetLimit.high_roller.min_bet_limit.ToString();
+        HMaxBet.text = socketManager.initialData.levelBetLimit.high_roller.max_bet_limit.ToString();
         HPlayerCount.text = gameData.lobby.high_roller.ToString();
         HPlayerCountParent.gameObject.SetActive(gameData.lobby.high_roller != 0);
 

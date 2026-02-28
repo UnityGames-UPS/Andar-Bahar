@@ -861,6 +861,7 @@ public class SocketIOManager : MonoBehaviour
 
         }
         gameManager.SetCoinData();
+        gameManager.SetBetLimit(gameManager.currentRoom);
         gameManager.SetOptionData();
         gameManager.SetOtherplayerData(roomData.payload.leaderboards);
         uiManager.MenuMain_button.gameObject.SetActive(false);
@@ -1165,6 +1166,7 @@ public class GameData
     public HandCode handCode;
     public Leaderboards leaderboards;
     public List<object> stats;
+    public LevelBetLimit levelBetLimit;
 }
 [System.Serializable]
 public class HandCode
@@ -1401,4 +1403,40 @@ public class StatData
     public MiddleCard middleCard;
     public string matchSide;
     public int cardsDealt;
+}
+[System.Serializable]
+public class LevelBetLimit
+{
+    public Casual casual;
+    public Novice novice;
+    public Expert expert;
+    public HighRoller high_roller;
+}
+
+[System.Serializable]
+public class Casual
+{
+    public int min_bet_limit;
+    public int max_bet_limit;
+}
+
+[System.Serializable]
+public class Novice
+{
+    public int min_bet_limit;
+    public int max_bet_limit;
+}
+
+[System.Serializable]
+public class Expert
+{
+    public int min_bet_limit;
+    public int max_bet_limit;
+}
+
+[System.Serializable]
+public class HighRoller
+{
+    public int min_bet_limit;
+    public int max_bet_limit;
 }
