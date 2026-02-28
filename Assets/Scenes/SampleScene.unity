@@ -83785,7 +83785,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioController: {fileID: 1508872095}
   socketManager: {fileID: 1272847616}
-  jsFunctCalls: {fileID: 0}
+  jsFunctCalls: {fileID: 1519490010}
   HomeScreen_Object: {fileID: 403466690}
   GameScreen_Object: {fileID: 653036171}
   MinBet: {fileID: 1968970102}
