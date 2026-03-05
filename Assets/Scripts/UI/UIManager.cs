@@ -568,6 +568,7 @@ public class UiManager : MonoBehaviour
         // OnClickDontShow();
         ShowIntroPage();
         //  SpawnDummyStats(30);
+        RegisterFullscreenListener();
     }
 
 

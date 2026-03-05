@@ -524,7 +524,11 @@ public class GameManager : MonoBehaviour
 
         TotalPlayer_text.text = socketManager.gameLoopData.playerCount.ToString();
 
-
+        foreach (var item in AllOptions)
+        {
+            item.BG.SetActive(true);
+            item.HighlightedBG.SetActive(false);
+        }
         currentTotalBet = 0;
 
         BetBlocker.gameObject.SetActive(false);
@@ -539,6 +543,13 @@ public class GameManager : MonoBehaviour
         FirstBaharTxt.HighlightedBG.SetActive(false);
         RoundInfo_Text.gameObject.SetActive(false);
         pulseText.text = "";
+        animHand.LeftCard.gameObject.SetActive(false);
+        animHand.RightCard.gameObject.SetActive(false);
+
+        AndarHighLight.SetActive(false);
+        BaharHighLight.SetActive(false);
+        AndarBtnHighLight.SetActive(false);
+        BaharBtnHighLight.SetActive(false);
 
         PlayMiddleCardAnim();
         // yield return new WaitForSeconds(2f);
@@ -574,6 +585,11 @@ public class GameManager : MonoBehaviour
         BaharHighLight.SetActive(false);
         AndarBtnHighLight.SetActive(false);
         BaharBtnHighLight.SetActive(false);
+        foreach (var item in AllOptions)
+        {
+            item.BG.SetActive(true);
+            item.HighlightedBG.SetActive(false);
+        }
 
         int time = socketManager.TimeRemaining.timeRemaining / 1000;
         if (time > 5)
