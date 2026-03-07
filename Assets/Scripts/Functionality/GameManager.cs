@@ -117,6 +117,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject BaharBtnHighLight;
     [SerializeField] private GameObject AndarbaharBetReset;
     [SerializeField] private ImageAnimation NewRoundAnim;
+    [SerializeField] private ImageAnimation SparkAnim;
     [SerializeField] private Sprite HandResetSprite;
     [Header("Round Info ")]
     [SerializeField] private GameObject RoundInfoImage;
@@ -623,7 +624,7 @@ public class GameManager : MonoBehaviour
             uiManager.setCoins(false);
             uiManager.Repeatpanel.SetActive(false);
 
-            RoundInfo_Text.text = "<size=30>Bet Locked!</size>";
+            RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
             BetBlocker.gameObject.SetActive(true);
         }
         else if (time == 24)
@@ -660,7 +661,7 @@ public class GameManager : MonoBehaviour
         uiManager.setCoins(false);
         uiManager.Repeatpanel.SetActive(false);
         uiManager.SetNetBetPanel(true, currentTotalBet.ToString());
-        RoundInfo_Text.text = "<size=30>Bet Locked!</size>";
+        RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
 
         ManageCardCounts(cardDelt.cardsDealt);
         animHand.MiddleCard.sprite = CardSet(cardDelt.middleCard.suit, cardDelt.middleCard.rank);
@@ -718,7 +719,7 @@ public class GameManager : MonoBehaviour
     {
 
         uiManager.Repeatpanel.SetActive(false);
-        RoundInfo_Text.text = "<size=30>Bet Locked!</size>";
+        RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
         if (StartGameCorutine != null)
         {
             StopCoroutine(StartGameCorutine);
@@ -765,7 +766,7 @@ public class GameManager : MonoBehaviour
         BaharHighLight.SetActive(false);
         AndarBtnHighLight.SetActive(false);
         BaharBtnHighLight.SetActive(false);
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(3f);
         PlayResetAnimation();
         if (currentWin >= 1)
         {
@@ -1443,10 +1444,13 @@ public class GameManager : MonoBehaviour
            {
                NewRoundAnim.StopAnimation();
                NewRoundAnim.StartAnimation();
+
            })
            .AppendInterval(1.5f)
            .AppendCallback(() =>
            {
+               SparkAnim.StopAnimation();
+               SparkAnim.StartAnimation();
 
                CardCount_Text.text = "";
                RoundInfo_Text.text = "";

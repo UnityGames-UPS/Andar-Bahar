@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 426750dc285944a7fb7478229646bd2e
+guid: 06740369657ba48df84c098f15b42292
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1031430828912151284
-    second: "Screenshot 2026-02-27 at 6.24.54\u202FPM_0"
+      213: -2023591094510697399
+    second: New_Box-18_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "Screenshot 2026-02-27 at 6.24.54\u202FPM_0"
+      name: New_Box-18_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 259
-        height: 466
+        width: 566
+        height: 189
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c05fd48302f9fa1f0800000000000000
-      internalID: -1031430828912151284
+      spriteID: 944cb09fe92cae3e0800000000000000
+      internalID: -2023591094510697399
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "Screenshot 2026-02-27 at 6.24.54\u202FPM_0": -1031430828912151284
+      New_Box-18_0: -2023591094510697399
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
