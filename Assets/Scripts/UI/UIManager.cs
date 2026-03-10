@@ -1168,12 +1168,13 @@ public class UiManager : MonoBehaviour
         if (totalbet != "-1") NetBet.text = totalbet;
         else NetBet.text = "0";
 
+        NetBetPanel.SetActive(istrue);
+        if (istrue) SetChipoption(false);
+
         RectTransform rect = NetBetPanel.GetComponent<RectTransform>();
         LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
 
 
-        NetBetPanel.SetActive(istrue);
-        if (istrue) SetChipoption(false);
     }
     internal void SetChipoption(bool istrue, bool db = true, bool canc = true, bool undo = true)
     {

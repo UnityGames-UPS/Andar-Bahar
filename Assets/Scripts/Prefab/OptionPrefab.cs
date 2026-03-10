@@ -42,6 +42,7 @@ public class OptionPrefab : MonoBehaviour
 
     internal void SetData(int index, string name, string ratio, string OptionType)
     {
+        Debug.Log("NAme :" + name + " index " + index + " ratio " + ratio + " option type " + OptionType);
         if (Name) Name.text = name;
         if (ratio == "") Text.text = "";
         else Text.text = "1 : " + ratio;

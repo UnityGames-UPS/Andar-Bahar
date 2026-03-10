@@ -558,12 +558,14 @@ public class GameManager : MonoBehaviour
         bool startWithAndar = socketManager.gameLoopData.middleCard.color == "black";
         if (startWithAndar)
         {
+            Debug.Log("Started with andar");
             AndarTxt.SetData(0, "andar", socketManager.initialData.wagers.main_bets.andar.payout[0].ToString(), "main_bets");
             BaharTxt.SetData(1, "bahar", "1", "main_bets");
 
         }
         else
         {
+            Debug.Log("Started with bahar");
             AndarTxt.SetData(0, "andar", "1", "main_bets");
             BaharTxt.SetData(1, "bahar", socketManager.initialData.wagers.main_bets.bahar.payout[0].ToString(), "main_bets");
 
@@ -1454,8 +1456,8 @@ public class GameManager : MonoBehaviour
 
                CardCount_Text.text = "";
                RoundInfo_Text.text = "";
-               AndarTxt.SetData(0, "andar", "", "main_bets");
-               BaharTxt.SetData(1, "bahar", "", "main_bets");
+               //   AndarTxt.SetData(0, "andar", "", "main_bets");
+               //   BaharTxt.SetData(1, "bahar", "", "main_bets");
                AndarTxt.DontShowText();
                BaharTxt.DontShowText();
                AndarTxt.winAnimation.StopAnimation();
