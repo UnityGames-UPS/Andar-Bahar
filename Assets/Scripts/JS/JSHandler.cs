@@ -62,4 +62,4 @@ public class JSHandler : MonoBehaviour
             Debug.LogError("Exception while freeing memory: " + ex.Message);
         }
     }
-}
+} 
