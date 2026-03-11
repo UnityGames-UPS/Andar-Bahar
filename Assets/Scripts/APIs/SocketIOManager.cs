@@ -209,6 +209,7 @@ public class SocketIOManager : MonoBehaviour
         gameSocket.On<string>("game:init", ManageInitData);
         gameSocket.On<string>("game:bet_placed", ManageOtherPlayerbets);
         gameSocket.On<string>("game:round_start", OnGameLoopStarted);
+        gameSocket.On<string>("game:cashout_timer", OnCashoutTimer);
         gameSocket.On<string>("game:round_end", OnGameLoopEnd);
         gameSocket.On<string>("game:bonus", OnGameBonus);
         gameSocket.On<string>("game:cashout", OnCashout);
@@ -534,94 +535,7 @@ public class SocketIOManager : MonoBehaviour
 #endif
     }
 
-    private void ParseResponse(string jsonObject)
-    {
-        Debug.Log("ParseResponse JSON: " + jsonObject);
 
-        Root myData = null;
-        try
-        {
-            myData = JsonConvert.DeserializeObject<Root>(jsonObject);
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError("Failed to deserialize JSON. Exception: " + ex.Message + "\nJSON: " + jsonObject);
-            return;
-        }
-
-        if (myData == null)
-        {
-            Debug.LogError("ParseResponse: myData is null. JSON = " + jsonObject);
-            return;
-        }
-
-        string id = myData.id;
-
-        switch (id)
-        {
-            case "initData":
-                {
-                    //  gameManager.uiManager.touchDisable.SetActive(false);
-
-                    if (myData.gameData == null)
-                    {
-                        Debug.LogError("initData missing gameData. JSON = " + jsonObject);
-                        return;
-                    }
-
-                    if (myData.player == null)
-                    {
-                        Debug.LogWarning("initData missing player data. JSON = " + jsonObject);
-                    }
-
-                    initialData = myData.gameData;
-                    playerdata = myData.player;
-
-                    setInitialData();
-                    // if (initialData.bets != null)
-                    // else
-                    //     Debug.LogWarning("initData: bets list is null.");
-
-#if UNITY_WEBGL && !UNITY_EDITOR
-            JSManager.SendCustomMessage("OnEnter");
-#endif
-
-                    break;
-                }
-
-            case "ResultData":
-                {
-                    playerdata = myData.player;
-
-
-                    isResultdone = true;
-                    break;
-                }
-
-            case "ExitUser":
-                {
-                    if (gameSocket != null)
-                    {
-                        Debug.Log("Dispose my Socket");
-                        this.manager.Close();
-                    }
-
-                    Application.ExternalCall("window.parent.postMessage", "onExit", "*");
-#if UNITY_WEBGL && !UNITY_EDITOR
-            Application.ExternalEval(@"
-              if(window.ReactNativeWebView){
-                window.ReactNativeWebView.postMessage('onExit');
-              }
-            ");
-#endif
-                    break;
-                }
-
-            default:
-                Debug.LogWarning("Unknown id in JSON: " + id);
-                break;
-        }
-    }
 
 
 
@@ -878,6 +792,12 @@ public class SocketIOManager : MonoBehaviour
         gameManager.ManageBrodcastBetsOtherPlayers(OtherChipData);
 
     }
+    void OnCashoutTimer(string json)
+    {
+        Debug.Log("New Round Timer\n" + json);
+        TimeRemaining = JsonUtility.FromJson<Root>(json);
+        gameManager.SetNewRoundTimer(TimeRemaining.timeRemaining);
+    }
     void OnGameLoopStarted(string json)
     {
         if (!loadingPageLoading)
@@ -889,6 +809,8 @@ public class SocketIOManager : MonoBehaviour
         Debug.Log("Loop Started\n" + json);
         gameLoopData = JsonUtility.FromJson<Root>(json);
         gameManager.SetMainCard();
+        gameManager.RestRoundText();
+
     }
     void OnGameLoopEnd(string data)
     {

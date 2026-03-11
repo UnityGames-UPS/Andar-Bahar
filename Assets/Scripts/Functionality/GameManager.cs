@@ -551,7 +551,7 @@ public class GameManager : MonoBehaviour
         BaharHighLight.SetActive(false);
         AndarBtnHighLight.SetActive(false);
         BaharBtnHighLight.SetActive(false);
-
+        firstTime = true;
         PlayMiddleCardAnim();
         // yield return new WaitForSeconds(2f);
 
@@ -639,7 +639,19 @@ public class GameManager : MonoBehaviour
 
         }
     }
+    bool firstTime = true;
+    internal void SetNewRoundTimer(int i)
+    {
 
+        if (firstTime) RoundInfoAnim(3);
+        firstTime = false;
+        pulseText.gameObject.SetActive(true);
+        RoundInfo_Text.text = "<size=30>Next Round</size>\n ";
+
+        int value = i >= 1000 ? i / 1000 : 0;
+
+        pulseText.text = $"<color=#00AB15>{value}</color>";
+    }
     public void PopTMP(TMP_Text tmp)
     {
         if (tmp == null) return;
@@ -796,20 +808,20 @@ public class GameManager : MonoBehaviour
     internal void ManagePayouts()
     {
         StartCoroutine(ManagePayout());
-        StartCoroutine(NextRoundtext());
+        // StartCoroutine(NextRoundtext());
     }
-    IEnumerator NextRoundtext(int time = 4)
+    internal void RestRoundText()
     {
-        pulseText.gameObject.SetActive(true);
-        RoundInfoAnim(3);
-        for (int i = time; i >= 0; i--)
-        {
-            RoundInfo_Text.text = "<size=30>Next Round</size>\n ";
+        // pulseText.gameObject.SetActive(true);
+        // RoundInfoAnim(3);
+        // for (int i = time; i >= 0; i--)
+        // {
+        //     RoundInfo_Text.text = "<size=30>Next Round</size>\n ";
 
-            pulseText.text = $"<color=#00AB15>{i}</color>";
+        //     pulseText.text = $"<color=#00AB15>{i}</color>";
 
-            yield return new WaitForSeconds(1f);
-        }
+        //     yield return new WaitForSeconds(1f);
+        // }
         RoundInfoAnim(0);
         RoundInfo_Text.text = "  ";
 
@@ -831,6 +843,8 @@ public class GameManager : MonoBehaviour
 
         // 2️⃣ Spawn payout chips on winning options
         SpawnPayoutOnWinningOptions(socketManager.CashoutData.payouts);
+        ResetAllBetUI();
+
         yield return new WaitForSeconds(0.8f);
 
         // 3️⃣ Move winning chips to players
@@ -989,74 +1003,96 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
-
     List<OptionPrefab> GetValidWinningOptions()
     {
-        //  Debug.Log("@@@ GetValidWinningOptions CALLED");
-
         if (resultsOptions == null)
-        {
-            Debug.Log("@@@ resultsOptions is NULL");
             return new List<OptionPrefab>();
-        }
-
-        //  Debug.Log("@@@ resultsOptions Count: " + resultsOptions.Count);
-        //  Debug.Log("@@@ PlayerChips Count: " + PlayerChips.Count);
-        //  Debug.Log("@@@ OtherPlayerChips Count: " + OtherPlayerChips.Count);
 
         List<OptionPrefab> validOptions = new List<OptionPrefab>();
 
-        for (int i = 0; i < resultsOptions.Count; i++)
+        foreach (var option in resultsOptions)
         {
-            OptionPrefab option = resultsOptions[i];
+            bool foundInPlayer = PlayerChips.Any(x =>
+                x.betoptions != null && x.betoptions.name == option.name);
 
-            //  Debug.Log("@@@ Checking Option Index: " + i + " | Name: " + option.name);
-
-            bool foundInPlayer = false;
-            bool foundInOther = false;
-
-            // 🔹 Check PlayerChips
-            for (int j = 0; j < PlayerChips.Count; j++)
-            {
-                //    Debug.Log("@@@   PlayerChip[" + j + "] betOption: " + PlayerChips[j].betoptions?.name);
-
-                if (PlayerChips[j].betoptions == option)
-                {
-                    foundInPlayer = true;
-                    //   Debug.Log("@@@   MATCH FOUND IN PlayerChips");
-                    break;
-                }
-            }
-
-            // 🔹 Check OtherPlayerChips
-            for (int k = 0; k < OtherPlayerChips.Count; k++)
-            {
-                //  Debug.Log("@@@   OtherChip[" + k + "] betOption: " + OtherPlayerChips[k].betoptions?.name);
-
-                if (OtherPlayerChips[k].betoptions == option)
-                {
-                    foundInOther = true;
-                    //    Debug.Log("@@@   MATCH FOUND IN OtherPlayerChips");
-                    break;
-                }
-            }
+            bool foundInOther = OtherPlayerChips.Any(x =>
+                x.betoptions != null && x.betoptions.name == option.name);
 
             if (foundInPlayer || foundInOther)
             {
-                //  Debug.Log("@@@   ADDING OPTION: " + option.name);
                 validOptions.Add(option);
-            }
-            else
-            {
-                // Debug.Log("@@@   NO MATCH FOR OPTION: " + option.name);
             }
         }
 
-        //  Debug.Log("@@@ FINAL validOptions Count: " + validOptions.Count);
-
         return validOptions;
     }
+
+    // List<OptionPrefab> GetValidWinningOptions()
+    // {
+    //     //  Debug.Log("@@@ GetValidWinningOptions CALLED");
+
+    //     if (resultsOptions == null)
+    //     {
+    //         Debug.Log("@@@ resultsOptions is NULL");
+    //         return new List<OptionPrefab>();
+    //     }
+
+    //     //  Debug.Log("@@@ resultsOptions Count: " + resultsOptions.Count);
+    //     //  Debug.Log("@@@ PlayerChips Count: " + PlayerChips.Count);
+    //     //  Debug.Log("@@@ OtherPlayerChips Count: " + OtherPlayerChips.Count);
+
+    //     List<OptionPrefab> validOptions = new List<OptionPrefab>();
+
+    //     for (int i = 0; i < resultsOptions.Count; i++)
+    //     {
+    //         OptionPrefab option = resultsOptions[i];
+
+    //         //  Debug.Log("@@@ Checking Option Index: " + i + " | Name: " + option.name);
+
+    //         bool foundInPlayer = false;
+    //         bool foundInOther = false;
+
+    //         // 🔹 Check PlayerChips
+    //         for (int j = 0; j < PlayerChips.Count; j++)
+    //         {
+    //             //    Debug.Log("@@@   PlayerChip[" + j + "] betOption: " + PlayerChips[j].betoptions?.name);
+
+    //             if (PlayerChips[j].betoptions == option)
+    //             {
+    //                 foundInPlayer = true;
+    //                 //   Debug.Log("@@@   MATCH FOUND IN PlayerChips");
+    //                 break;
+    //             }
+    //         }
+
+    //         // 🔹 Check OtherPlayerChips
+    //         for (int k = 0; k < OtherPlayerChips.Count; k++)
+    //         {
+    //             //  Debug.Log("@@@   OtherChip[" + k + "] betOption: " + OtherPlayerChips[k].betoptions?.name);
+
+    //             if (OtherPlayerChips[k].betoptions == option)
+    //             {
+    //                 foundInOther = true;
+    //                 //    Debug.Log("@@@   MATCH FOUND IN OtherPlayerChips");
+    //                 break;
+    //             }
+    //         }
+
+    //         if (foundInPlayer || foundInOther)
+    //         {
+    //             //  Debug.Log("@@@   ADDING OPTION: " + option.name);
+    //             validOptions.Add(option);
+    //         }
+    //         else
+    //         {
+    //             // Debug.Log("@@@   NO MATCH FOR OPTION: " + option.name);
+    //         }
+    //     }
+
+    //     //  Debug.Log("@@@ FINAL validOptions Count: " + validOptions.Count);
+
+    //     return validOptions;
+    // }
     void MoveWinningChipsToPlayers(List<Payout> payouts)
     {
         foreach (var payout in payouts)
@@ -1267,14 +1303,55 @@ public class GameManager : MonoBehaviour
 
         audioManager.PlayWLAudio("double");
     }
+    // internal void ManageBrodcastBetsOtherPlayers(Root chipdata)
+    // {
+    //     if (chipdata.amount < 0)
+    //     {
+    //         ClearOtherPlayerbets(chipdata);
+
+    //         return;
+    //     }
+    //     // Do not show own chip here
+    //     if (chipdata.username == uiManager.MainPlayers.playername.text)
+    //         return;
+
+    //     List<int> roomChips = FindRoom();
+    //     int totalAmount = chipdata.amount;
+
+    //     // Break large amount into individual chips
+    //     List<int> chipPieces = BreakAmountIntoChips(totalAmount, roomChips);
+
+    //     foreach (int piece in chipPieces)
+    //     {
+    //         int index = findChipindex(piece, roomChips);
+
+    //         string val = piece.ToString();
+
+    //         ChipData data = new ChipData();
+    //         data.betId = chipdata.betId;
+    //         data.amount = piece;
+    //         data.betoptions = FindOption(chipdata.payload.betOption);
+
+    //         data.chip = SpawnChip(
+    //             findOtherPlayerChipSprite(piece, roomChips),
+    //             val,
+    //             index,
+    //             TotalPlayer_text.transform,
+    //             FindOption(chipdata.betOption)
+    //         );
+    //         data.chip.transform.SetParent(OtherPlayerChipPoolParent);
+    //         OtherPlayerChips.Add(data);
+    //         UpdateTotalBetOnOption(chipdata.betOption, piece);
+    //     }
+    // }
     internal void ManageBrodcastBetsOtherPlayers(Root chipdata)
     {
         if (chipdata.amount < 0)
         {
             ClearOtherPlayerbets(chipdata);
-
             return;
         }
+
         // Do not show own chip here
         if (chipdata.username == uiManager.MainPlayers.playername.text)
             return;
@@ -1282,13 +1359,17 @@ public class GameManager : MonoBehaviour
         List<int> roomChips = FindRoom();
         int totalAmount = chipdata.amount;
 
+        // 🔹 Find player position (leaderboard / winner / richest)
+        Transform spawnFrom = FindPlayerTransform(chipdata.username);
+        if (spawnFrom == null)
+            spawnFrom = TotalPlayer_text.transform;
+
         // Break large amount into individual chips
         List<int> chipPieces = BreakAmountIntoChips(totalAmount, roomChips);
 
         foreach (int piece in chipPieces)
         {
             int index = findChipindex(piece, roomChips);
-
             string val = piece.ToString();
 
             ChipData data = new ChipData();
@@ -1300,15 +1381,17 @@ public class GameManager : MonoBehaviour
                 findOtherPlayerChipSprite(piece, roomChips),
                 val,
                 index,
-                TotalPlayer_text.transform,
+                spawnFrom, // 🔹 spawn from leaderboard player
                 FindOption(chipdata.betOption)
             );
+
             data.chip.transform.SetParent(OtherPlayerChipPoolParent);
+
             OtherPlayerChips.Add(data);
+
             UpdateTotalBetOnOption(chipdata.betOption, piece);
         }
     }
-
     void ClearOtherPlayerbets(Root chipdata)
     {
 
@@ -2456,6 +2539,7 @@ public class GameManager : MonoBehaviour
         homepage.EPlayerCount.text = lobby.expert.ToString();
         homepage.HPlayerCount.text = lobby.high_roller.ToString();
         homepage.TotalPlayerCount.text = (lobby.casual + lobby.novice + lobby.expert + lobby.high_roller).ToString();
+        TotalPlayer_text.text = (lobby.casual + lobby.novice + lobby.expert + lobby.high_roller).ToString();
 
         homepage.CPlayerCountParent.gameObject.SetActive(lobby.casual != 0);
         homepage.NPlayerCountParent.gameObject.SetActive(lobby.novice != 0);
