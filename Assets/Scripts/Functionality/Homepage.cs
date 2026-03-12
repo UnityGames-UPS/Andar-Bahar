@@ -46,11 +46,11 @@ public class Homepage : MonoBehaviour
     [SerializeField] private TMP_Text HMaxBet;
     [SerializeField] internal TMP_Text HPlayerCount;
     [SerializeField] internal GameObject HPlayerCountParent;
-    [Header("anouncement panel")]
+    /*[Header("anouncement panel")]
     [SerializeField] private GameObject textAnnouncement;
     [SerializeField] private Transform AnnouncementStartpos;
     [SerializeField] private Transform AnnouncementEndPos;
-    private float scrollDuration = 10f;
+    private float scrollDuration = 10f;*/
 
     [Header("Bottom panel")]
     [SerializeField] private List<Button> CommingSoonBtn;
@@ -64,7 +64,7 @@ public class Homepage : MonoBehaviour
     private CanvasGroup cg;
     void Start()
     {
-        AnnouncementScrollAnim();
+        //AnnouncementScrollAnim();
 
 
 
@@ -152,7 +152,7 @@ public class Homepage : MonoBehaviour
 
 
 
-    void AnnouncementScrollAnim()
+    /*void AnnouncementScrollAnim()
     {
         textAnnouncement.transform.localPosition =
             AnnouncementStartpos.localPosition;
@@ -162,7 +162,7 @@ public class Homepage : MonoBehaviour
             .DOLocalMove(AnnouncementEndPos.localPosition, scrollDuration)
             .SetEase(Ease.Linear)
             .SetLoops(-1, LoopType.Restart);
-    }
+    }*/
 
 
     void ShowComingSoon(Button btn)
