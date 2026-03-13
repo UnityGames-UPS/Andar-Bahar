@@ -5,7 +5,7 @@ public class PopAnimation : MonoBehaviour
 {
     [Header("Mode")]
     [SerializeField] private bool isPoping = true; // true = pop, false = slide
-
+    [SerializeField] private bool isPoupInGameSlide = false;
     [Header("Pop Settings")]
     [SerializeField] private float startScale = 0.8f;
     [SerializeField] private float endScale = 1f;
@@ -16,7 +16,8 @@ public class PopAnimation : MonoBehaviour
     [SerializeField] private float startOffsetX = -800f;
     [SerializeField] private float slideDuration = 0.35f;
     [SerializeField] private Ease slideEase = Ease.OutCubic;
-
+    [SerializeField] private float OffsetX = 20f;
+    [SerializeField] private float OffsetY = 20f;
     private RectTransform rectTransform;
     private Vector2 endPos;
 
@@ -58,11 +59,19 @@ public class PopAnimation : MonoBehaviour
 
     private void PlaySlide()
     {
-        slideTween?.Kill();
-
+        Vector2 endOffset;
+        slideTween?.Kill();        
         rectTransform.anchoredPosition =
             new Vector2(endPos.x - startOffsetX, endPos.y);
-        Vector2 endOffset = new Vector2(endPos.x - 20f, endPos.y);
+        if (isPoupInGameSlide)
+        {
+            endOffset = new Vector2(endPos.x - OffsetX, endPos.y + OffsetY);
+        }
+        else
+        {
+            endOffset = new Vector2(endPos.x - 20f, endPos.y);
+        }
+
         slideTween = rectTransform
             .DOAnchorPos(endOffset, slideDuration)
             .SetEase(slideEase)

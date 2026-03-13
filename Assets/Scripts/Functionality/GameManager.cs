@@ -59,6 +59,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<Sprite> DiamondSpriteList;
     [SerializeField] private List<Sprite> ClubSpriteList;
     [SerializeField] private List<Sprite> SpadeSpriteList;
+    [SerializeField] private List<Sprite> HeartSpriteListDisplay;
+    [SerializeField] private List<Sprite> DiamondSpriteListDisplay;
+    [SerializeField] private List<Sprite> ClubSpriteListDisplay;
+    [SerializeField] private List<Sprite> SpadeSpriteListDisplay;
     [Header("Hand Animation")]
     [SerializeField] private List<Image> AndarCardparent;
     [SerializeField] private List<Image> BaharCardparent;
@@ -708,7 +712,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < andarCount; i++)
         {
             andarSpriteList.Add(
-                CardSet(cardDelt.andarCards[i].suit, cardDelt.andarCards[i].rank)
+                CardSetHIS(cardDelt.andarCards[i].suit, cardDelt.andarCards[i].rank)
             );
         }
 
@@ -716,7 +720,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < baharCount; i++)
         {
             baharSpriteList.Add(
-                CardSet(cardDelt.baharCards[i].suit, cardDelt.baharCards[i].rank)
+                CardSetHIS(cardDelt.baharCards[i].suit, cardDelt.baharCards[i].rank)
             );
         }
 
@@ -2104,6 +2108,35 @@ public class GameManager : MonoBehaviour
                 break;
             case "SPADES":
                 tempSprite = GetCardSprite(SpadeSpriteList, value);
+                break;
+            default:
+                Debug.LogError("Invalid Suit: " + suit);
+                break;
+        }
+        //  Debug.Log("#----------------------------------------------------_# ");   // <== ADD
+        //   Debug.Log("##SUIT = " + suit);     // <== ADD
+        //   Debug.Log("##VALUE = " + value);   // <== ADD
+
+        return tempSprite;
+    }
+
+    internal Sprite CardSetHIS(string suit, string value)
+    {
+
+        Sprite tempSprite = null;
+        switch (suit.ToUpper())
+        {
+            case "HEARTS":
+                tempSprite = GetCardSprite(HeartSpriteListDisplay, value);
+                break;
+            case "DIAMONDS":
+                tempSprite = GetCardSprite(DiamondSpriteListDisplay, value);
+                break;
+            case "CLUBS":
+                tempSprite = GetCardSprite(ClubSpriteListDisplay, value);
+                break;
+            case "SPADES":
+                tempSprite = GetCardSprite(SpadeSpriteListDisplay, value);
                 break;
             default:
                 Debug.LogError("Invalid Suit: " + suit);

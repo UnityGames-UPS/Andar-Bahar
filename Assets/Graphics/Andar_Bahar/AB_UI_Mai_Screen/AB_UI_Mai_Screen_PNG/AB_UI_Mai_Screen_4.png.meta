@@ -161,10 +161,10 @@ TextureImporter:
       name: AB_UI_Mai_Screen_4_1
       rect:
         serializedVersion: 2
-        x: 3
-        y: 9
-        width: 119
-        height: 110
+        x: 29
+        y: 29
+        width: 70
+        height: 70
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}

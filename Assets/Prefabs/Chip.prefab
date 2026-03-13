@@ -47,6 +47,7 @@ CanvasRenderer:
   m_CullTransparentMesh: 1
 --- !u!114 &3456870597159376460
 MonoBehaviour:
+  m_SerializedVersion: 1
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -102,7 +103,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: -11.87
+  m_characterSpacing: -13.18889
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
