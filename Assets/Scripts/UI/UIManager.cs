@@ -662,25 +662,25 @@ public class UiManager : MonoBehaviour
     {
         float bet = 1;
 
-        PayoutText[0].text = (socketManager.initialData.wagers.op_bets.first_3.payout.flush * bet).ToString();
-        PayoutText[1].text = (socketManager.initialData.wagers.op_bets.first_3.payout.straight * bet).ToString();
-        PayoutText[2].text = (socketManager.initialData.wagers.op_bets.first_3.payout.straight_flush * bet).ToString();
+        PayoutText[0].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.op_bets.first_3.payout.flush * bet);
+        PayoutText[1].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.op_bets.first_3.payout.straight * bet);
+        PayoutText[2].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.op_bets.first_3.payout.straight_flush * bet);
 
-        PayoutText[3].text = (socketManager.initialData.wagers.op_bets.first_1_andar.payout[0] * bet).ToString();
-        PayoutText[4].text = (socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0] * bet).ToString();
+        PayoutText[3].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.op_bets.first_1_andar.payout[0] * bet);
+        PayoutText[4].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0] * bet);
 
-        PayoutText[5].text = (socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0] * bet).ToString();
-        PayoutText[6].text = (socketManager.initialData.wagers.op_bets.first_1_andar.payout[0] * bet).ToString();
+        PayoutText[5].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0] * bet);
+        PayoutText[6].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.op_bets.first_1_andar.payout[0] * bet);
 
-        PayoutText[7].text = (socketManager.initialData.wagers.side_bets.s_1_5.payout * bet).ToString();
-        PayoutText[8].text = (socketManager.initialData.wagers.side_bets.s_6_10.payout * bet).ToString();
-        PayoutText[9].text = (socketManager.initialData.wagers.side_bets.s_11_15.payout * bet).ToString();
-        PayoutText[10].text = (socketManager.initialData.wagers.side_bets.s_16_20.payout * bet).ToString();
-        PayoutText[11].text = (socketManager.initialData.wagers.side_bets.s_21_25.payout * bet).ToString();
-        PayoutText[12].text = (socketManager.initialData.wagers.side_bets.s_26_30.payout * bet).ToString();
-        PayoutText[13].text = (socketManager.initialData.wagers.side_bets.s_31_35.payout * bet).ToString();
-        PayoutText[14].text = (socketManager.initialData.wagers.side_bets.s_36_40.payout * bet).ToString();
-        PayoutText[15].text = (socketManager.initialData.wagers.side_bets.s_41_53.payout * bet).ToString();
+        PayoutText[7].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.side_bets.s_1_5.payout * bet);
+        PayoutText[8].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.side_bets.s_6_10.payout * bet);
+        PayoutText[9].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.side_bets.s_11_15.payout * bet);
+        PayoutText[10].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.side_bets.s_16_20.payout * bet);
+        PayoutText[11].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.side_bets.s_21_25.payout * bet);
+        PayoutText[12].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.side_bets.s_26_30.payout * bet);
+        PayoutText[13].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.side_bets.s_31_35.payout * bet);
+        PayoutText[14].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.side_bets.s_36_40.payout * bet);
+        PayoutText[15].text = FormatHelper.FormatAmount(socketManager.initialData.wagers.side_bets.s_41_53.payout * bet);
 
     }
 
@@ -1165,16 +1165,29 @@ public class UiManager : MonoBehaviour
     internal void SetNetBetPanel(bool istrue, string totalbet = "-1")
     {
         if (totalbet == "0") return;
-        if (totalbet != "-1") NetBet.text = totalbet;
-        else NetBet.text = "0";
+        
+        if (totalbet != "-1")
+        {
+            // Parse and format the total bet amount
+            if (double.TryParse(totalbet, out double betAmount))
+            {
+                NetBet.text = FormatHelper.FormatAmount(betAmount);
+            }
+            else
+            {
+                NetBet.text = totalbet;
+            }
+        }
+        else
+        {
+            NetBet.text = FormatHelper.FormatAmount(0);
+        }
 
         NetBetPanel.SetActive(istrue);
         if (istrue) SetChipoption(false);
 
         RectTransform rect = NetBetPanel.GetComponent<RectTransform>();
         LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
-
-
     }
     internal void SetChipoption(bool istrue, bool db = true, bool canc = true, bool undo = true)
     {
@@ -1410,17 +1423,25 @@ public class UiManager : MonoBehaviour
     }
     void ChangeButtonLimitData()
     {
-        betBtnQ.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.levelBetLimit.casual.min_bet_limit.ToString() + "-" + socketManager.initialData.levelBetLimit.casual.max_bet_limit.ToString();
-        betBtnW.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.levelBetLimit.novice.min_bet_limit.ToString() + "-" + socketManager.initialData.levelBetLimit.novice.max_bet_limit.ToString();
-        betBtnE.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.levelBetLimit.expert.min_bet_limit.ToString() + "-" + socketManager.initialData.levelBetLimit.expert.max_bet_limit.ToString();
-        betBtnR.GetComponentInChildren<TMP_Text>().text = socketManager.initialData.levelBetLimit.high_roller.min_bet_limit.ToString() + "-" + socketManager.initialData.levelBetLimit.high_roller.max_bet_limit.ToString();
+        betBtnQ.GetComponentInChildren<TMP_Text>().text = FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.casual.min_bet_limit) + "-" + FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.casual.max_bet_limit);
+        betBtnW.GetComponentInChildren<TMP_Text>().text = FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.novice.min_bet_limit) + "-" + FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.novice.max_bet_limit);
+        betBtnE.GetComponentInChildren<TMP_Text>().text = FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.expert.min_bet_limit) + "-" + FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.expert.max_bet_limit);
+        betBtnR.GetComponentInChildren<TMP_Text>().text = FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.high_roller.min_bet_limit) + "-" + FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.high_roller.max_bet_limit);
     }
     void ChangeLimitData(string minBet, string room)
     {
         List<string> data = gameManager.GetAllMaxLimits(room);
         for (int i = 0; i < BetLimitdata.Count; i++)
         {
-            BetLimitdata[i].text = minBet + " - " + data[i];
+            // Parse and format the min and max values
+            if (double.TryParse(minBet, out double minValue) && double.TryParse(data[i], out double maxValue))
+            {
+                BetLimitdata[i].text = FormatHelper.FormatAmount(minValue) + " - " + FormatHelper.FormatAmount(maxValue);
+            }
+            else
+            {
+                BetLimitdata[i].text = minBet + " - " + data[i];
+            }
         }
 
     }

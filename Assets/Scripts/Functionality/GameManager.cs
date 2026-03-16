@@ -102,8 +102,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform popCenter;
     [SerializeField] private Transform popEnd;
     [SerializeField] private TMP_Text coinAddText;
-    [SerializeField] private float moveY = 60f;
-    [SerializeField] private float duration = 0.8f;
+    [SerializeField] private float moveY = 30f;
+    [SerializeField] private float duration = 0.5f;
 
     private Vector3 startPos;
     private Color startColor;
@@ -132,7 +132,7 @@ public class GameManager : MonoBehaviour
 
     internal List<OptionPrefab> resultsOptions = new List<OptionPrefab>();
 
-    private float popScale = 1.15f;
+    private float popScale = 1.20f;
     private float animTime = 0.15f;
 
     internal int BetCounter;
@@ -274,9 +274,9 @@ public class GameManager : MonoBehaviour
                 max = socketManager.initialData.levelBetLimit.high_roller.max_bet_limit;
                 break;
         }
-        minBet_text.text = min.ToString();
-        uiManager.MinBet.text = min.ToString();
-        maxBet_text.text = max.ToString();
+        minBet_text.text = FormatHelper.FormatAmount(min);
+        uiManager.MinBet.text = FormatHelper.FormatAmount(min);
+        maxBet_text.text = FormatHelper.FormatAmount(max);
 
     }
     internal void SetCoinData()
@@ -307,15 +307,15 @@ public class GameManager : MonoBehaviour
 
         if (data == null) return;
 
-        uiManager.coinSelector.Chiptext.text = data[0].ToString();
+        uiManager.coinSelector.Chiptext.text = FormatHelper.FormatChipAmount(data[0]);
         uiManager.coinSelector.chipIndex = 0;
-        minBet_text.text = data[0].ToString();
-        uiManager.MinBet.text = data[0].ToString();
-        maxBet_text.text = data[uiManager.Coins.Count].ToString();
+        minBet_text.text = FormatHelper.FormatAmount(data[0]);
+        uiManager.MinBet.text = FormatHelper.FormatAmount(data[0]);
+        maxBet_text.text = FormatHelper.FormatAmount(data[uiManager.Coins.Count]);
 
         for (int i = 0; i < uiManager.Coins.Count; i++)
         {
-            uiManager.Coins[i].Chiptext.text = data[i + 1].ToString();
+            uiManager.Coins[i].Chiptext.text = FormatHelper.FormatChipAmount(data[i + 1]);
             uiManager.Coins[i].chipIndex = i + 1;
         }
     }
@@ -533,6 +533,7 @@ public class GameManager : MonoBehaviour
         {
             item.BG.SetActive(true);
             item.HighlightedBG.SetActive(false);
+            item.DisableWinRatioText();
         }
         currentTotalBet = 0;
 
@@ -635,6 +636,7 @@ public class GameManager : MonoBehaviour
         }
         else if (time == 24)
         {
+            EnableAllWinRatioTexts();
             audioManager.PlayGirlAudio("placeyourbet");
         }
         if (time % 5 == 4)
@@ -646,13 +648,19 @@ public class GameManager : MonoBehaviour
     bool firstTime = true;
     internal void SetNewRoundTimer(int i)
     {
-
+        int value = i >= 1000 ? i / 1000 : 0;
+        
+        // Disable win ratio when next round timer ends
+        if (value <= 0)
+        {
+            DisableAllWinRatioTexts();
+            return;
+        }
+        
         if (firstTime) RoundInfoAnim(3);
         firstTime = false;
         pulseText.gameObject.SetActive(true);
         RoundInfo_Text.text = "<size=30>Next Round</size>\n ";
-
-        int value = i >= 1000 ? i / 1000 : 0;
 
         pulseText.text = $"<color=#00AB15>{value}</color>";
     }
@@ -981,7 +989,7 @@ public class GameManager : MonoBehaviour
 
                 data.chip = SpawnChip(
                     findChipSprite(piece, roomChips),
-                    piece.ToString(),
+                    FormatHelper.FormatChipAmount(piece),
                     index,
                     RoundInfo_Text.transform,
                     winningOption,
@@ -1287,7 +1295,7 @@ public class GameManager : MonoBehaviour
             data.betoptions = FindOption(socketManager.BetChipData.payload.betOption);
 
             int index = findChipindex(chipAmount, roomChips);
-            string val = chipAmount.ToString();
+            string val = FormatHelper.FormatChipAmount(chipAmount);
 
             Debug.Log("Spawning Chip index=" + index + " amount=" + val);
 
@@ -1374,7 +1382,7 @@ public class GameManager : MonoBehaviour
         foreach (int piece in chipPieces)
         {
             int index = findChipindex(piece, roomChips);
-            string val = piece.ToString();
+            string val = FormatHelper.FormatChipAmount(piece);
 
             ChipData data = new ChipData();
             data.betId = chipdata.betId;
@@ -1712,7 +1720,7 @@ public class GameManager : MonoBehaviour
                 data.amount = piece;
                 data.betoptions = FindOption(bet.betOption);
 
-                string val = piece.ToString();
+                string val = FormatHelper.FormatChipAmount(piece);
                 int index = findChipindex(piece, roomChips);
 
                 if (index <= 5)   // your existing condition
@@ -1757,7 +1765,7 @@ public class GameManager : MonoBehaviour
                     data.amount = piece;
                     data.betoptions = FindOption(bet.betOption);
 
-                    string val = piece.ToString();
+                    string val = FormatHelper.FormatChipAmount(piece);
                     int index = findChipindex(piece, roomChips);
 
                     if (index <= 5)   // your existing condition
@@ -1813,10 +1821,10 @@ public class GameManager : MonoBehaviour
         {
             int newAmount = AllOptions[i].totalBet - AllOptions[i].playerBet;
             if (newAmount <= 0) AllOptions[i].TotalBetObj.SetActive(false);
-            AllOptions[i].TotalBetText.text = newAmount.ToString();
+            AllOptions[i].TotalBetText.text = FormatHelper.FormatAmount(newAmount);
             AllOptions[i].totalBet = newAmount;
             AllOptions[i].MyBetObj.SetActive(false);
-            AllOptions[i].MyBetText.text = "0";
+            AllOptions[i].MyBetText.text = FormatHelper.FormatAmount(0);
             AllOptions[i].playerBet = 0;
 
 
@@ -1825,10 +1833,10 @@ public class GameManager : MonoBehaviour
         {
             int newAmount = BiggerOptions[i].totalBet - BiggerOptions[i].playerBet;
             if (newAmount <= 0) BiggerOptions[i].TotalBetObj.SetActive(false);
-            BiggerOptions[i].TotalBetText.text = newAmount.ToString();
+            BiggerOptions[i].TotalBetText.text = FormatHelper.FormatAmount(newAmount);
             BiggerOptions[i].totalBet = newAmount;
             BiggerOptions[i].MyBetObj.SetActive(false);
-            BiggerOptions[i].MyBetText.text = "0";
+            BiggerOptions[i].MyBetText.text = FormatHelper.FormatAmount(0);
             BiggerOptions[i].playerBet = 0;
 
 
@@ -2436,7 +2444,18 @@ public class GameManager : MonoBehaviour
     }
     internal void playtheCoin(string winamount)
     {
-        coinAddText.text = winamount;
+        // Parse and format the win amount
+        string displayText = winamount;
+        bool hasPrefix = winamount.StartsWith("+") || winamount.StartsWith("-");
+        string prefix = hasPrefix ? winamount[0].ToString() : "+";
+        string amountStr = hasPrefix ? winamount.Substring(1) : winamount;
+        
+        if (double.TryParse(amountStr, out double amount))
+        {
+            displayText = prefix + FormatHelper.FormatAmount(amount);
+        }
+        
+        coinAddText.text = displayText;
 
         // Kill previous animation if running
         coinTween?.Kill();
@@ -2464,8 +2483,12 @@ public class GameManager : MonoBehaviour
     private IEnumerator PopupRoutine()
     {
         BlockerObj.transform.position = popStart.position;
+        BlockerObj.transform.localScale = Vector3.zero;
+        
         yield return Move(BlockerObj.transform, popCenter.position, moveDuration);
-
+        
+        BlockerObj.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack);
+        
         yield return new WaitForSeconds(holdDuration);
 
         yield return Move(BlockerObj.transform, popEnd.position, moveDuration);
@@ -2494,12 +2517,9 @@ public class GameManager : MonoBehaviour
         if (option == null) return;
         option.MyBetObj.SetActive(true);
 
-        // int prev = 0;
-        // int.TryParse(option.MyBetText.text, out prev);
-
         int newAmount = option.playerBet + amount;
         if (newAmount <= 0) option.MyBetObj.SetActive(false);
-        option.MyBetText.text = newAmount.ToString();
+        option.MyBetText.text = FormatHelper.FormatAmount(newAmount);
         option.playerBet = newAmount;
     }
     internal void UpdateTotalBetOnOption(string opt, int amount, OptionPrefab optn = null)
@@ -2510,12 +2530,9 @@ public class GameManager : MonoBehaviour
 
         option.TotalBetObj.SetActive(true);
 
-        // int prev = 0;
-        // int.TryParse(option.TotalBetText.text, out prev);
-
         int newAmount = option.totalBet + amount;
         if (newAmount <= 0) option.TotalBetObj.SetActive(false);
-        option.TotalBetText.text = newAmount.ToString();
+        option.TotalBetText.text = FormatHelper.FormatAmount(newAmount);
         option.totalBet = newAmount;
     }
 
@@ -2562,6 +2579,32 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    internal void DisableAllWinRatioTexts()
+    {
+        foreach (var opt in AllOptions)
+        {
+            opt.DisableWinRatioText();
+        }
+        foreach (var opt in BiggerOptions)
+        {
+            opt.DisableWinRatioText();
+        }
+        FirstThreeTxt.DisableWinRatioText();
+    }
+
+    internal void EnableAllWinRatioTexts()
+    {
+        foreach (var opt in AllOptions)
+        {
+            opt.EnableWinRatioText();
+        }
+        foreach (var opt in BiggerOptions)
+        {
+            opt.EnableWinRatioText();
+        }
+        // Always keep First 3 disabled
+        FirstThreeTxt.DisableWinRatioText();
+    }
 
     #endregion
     internal void SetPlayerCountOnReturn(Lobby lobby, double playerbalance)

@@ -69,4 +69,16 @@ public class OptionPrefab : MonoBehaviour
         Text.color = orignalColor;
 
     }
+
+    internal void DisableWinRatioText()
+    {
+        if (Text)
+            Text.gameObject.SetActive(false);
+    }
+
+    internal void EnableWinRatioText()
+    {
+        if (Text)
+            Text.gameObject.SetActive(true);
+    }
 }

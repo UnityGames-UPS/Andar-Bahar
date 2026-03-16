@@ -13,7 +13,8 @@ public class PlayerData : MonoBehaviour
     private float moveY = 23f;
     private float duration = 0.7f;
     private float delayBetween = 0.3f;
-    [SerializeField] private bool isAnimationNeeded = true;
+    [SerializeField] private bool isAnimationNeeded = true; 
+    [SerializeField] private bool isInGameName = false; 
     private Vector3 nameOriginalPos;
     private Vector3 balOriginalPos;
     private bool positionsCached = false;
@@ -25,8 +26,23 @@ public class PlayerData : MonoBehaviour
         gameObject.SetActive(true);
         PlayerIcon.sprite = icon;
         PlayerId = idz;
-        playername.text = PlayerId;
-        playerBalence.text = balance;
+        if (isInGameName){
+            playername.text = idz;
+        }
+        else{
+            playername.text = FormatHelper.FormatPlayerName(idz);
+        }
+        
+        // Parse balance and format it
+        if (double.TryParse(balance, out double balanceValue))
+        {
+            playerBalence.text = FormatHelper.FormatAmount(balanceValue);
+        }
+        else
+        {
+            playerBalence.text = balance;
+        }
+        
         if (isAnimationNeeded) PlayLoopAnimation();
     }
 
