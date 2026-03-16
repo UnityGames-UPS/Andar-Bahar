@@ -10,7 +10,7 @@ public class PlayerData : MonoBehaviour
     [SerializeField] internal TMP_Text playerBalence;
     [SerializeField] internal string PlayerId;
     [Header("Anim Settings")]
-    private float moveY = 20f;
+    private float moveY = 23f;
     private float duration = 0.7f;
     private float delayBetween = 0.3f;
     [SerializeField] private bool isAnimationNeeded = true;
@@ -47,8 +47,8 @@ public class PlayerData : MonoBehaviour
         nameRT.localPosition = nameOriginalPos;
         balRT.localPosition = balOriginalPos;
 
-        float fastDuration = 0.2f;     // Faster movement
-        float stayTime = 0.4f;         // Stay at top
+        float fastDuration = 0.45f;     // Faster movement
+        float stayTime = 0.8f;         // Stay at top
         float bottomDelay = 0.2f;      // Small delay before next
 
         loopSeq = DOTween.Sequence();
