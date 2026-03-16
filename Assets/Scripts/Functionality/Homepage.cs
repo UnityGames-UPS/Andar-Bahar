@@ -120,23 +120,23 @@ public class Homepage : MonoBehaviour
             HighRollerbutton.onClick.AddListener(() => OnClickARoom(gameData.levels[3]));
         }
 
-        CMinBet.text = socketManager.initialData.levelBetLimit.casual.min_bet_limit.ToString();
-        CMaxBet.text = socketManager.initialData.levelBetLimit.casual.max_bet_limit.ToString();
+        CMinBet.text = FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.casual.min_bet_limit);
+        CMaxBet.text = FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.casual.max_bet_limit);
         CPlayerCount.text = gameData.lobby.casual.ToString();
         CPlayerCountParent.gameObject.SetActive(gameData.lobby.casual != 0);
 
-        NMinBet.text = socketManager.initialData.levelBetLimit.novice.min_bet_limit.ToString();
-        NMaxBet.text = socketManager.initialData.levelBetLimit.novice.max_bet_limit.ToString();
+        NMinBet.text = FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.novice.min_bet_limit);
+        NMaxBet.text = FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.novice.max_bet_limit);
         NPlayerCount.text = gameData.lobby.novice.ToString();
         NPlayerCountParent.gameObject.SetActive(gameData.lobby.novice != 0);
 
-        EMinBet.text = socketManager.initialData.levelBetLimit.expert.min_bet_limit.ToString();
-        EMaxBet.text = socketManager.initialData.levelBetLimit.expert.max_bet_limit.ToString();
+        EMinBet.text = FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.expert.min_bet_limit);
+        EMaxBet.text = FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.expert.max_bet_limit);
         EPlayerCount.text = gameData.lobby.expert.ToString();
         EPlayerCountParent.gameObject.SetActive(gameData.lobby.expert != 0);
 
-        HMinBet.text = socketManager.initialData.levelBetLimit.high_roller.min_bet_limit.ToString();
-        HMaxBet.text = socketManager.initialData.levelBetLimit.high_roller.max_bet_limit.ToString();
+        HMinBet.text = FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.high_roller.min_bet_limit);
+        HMaxBet.text = FormatHelper.FormatAmount(socketManager.initialData.levelBetLimit.high_roller.max_bet_limit);
         HPlayerCount.text = gameData.lobby.high_roller.ToString();
         HPlayerCountParent.gameObject.SetActive(gameData.lobby.high_roller != 0);
 
