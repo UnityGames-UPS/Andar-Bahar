@@ -2617,10 +2617,73 @@ public class GameManager : MonoBehaviour
         homepage.TotalPlayerCount.text = (lobby.casual + lobby.novice + lobby.expert + lobby.high_roller).ToString();
         TotalPlayer_text.text = (lobby.casual + lobby.novice + lobby.expert + lobby.high_roller).ToString();
 
-        homepage.CPlayerCountParent.gameObject.SetActive(lobby.casual != 0);
-        homepage.NPlayerCountParent.gameObject.SetActive(lobby.novice != 0);
-        homepage.EPlayerCountParent.gameObject.SetActive(lobby.expert != 0);
-        homepage.HPlayerCountParent.gameObject.SetActive(lobby.high_roller != 0);
+        // Disable all hot game objects
+        if (homepage.CHotGame) homepage.CHotGame.SetActive(false);
+        if (homepage.NHotGame) homepage.NHotGame.SetActive(false);
+        if (homepage.EHotGame) homepage.EHotGame.SetActive(false);
+        if (homepage.HHotGame) homepage.HHotGame.SetActive(false);
+
+        // Check total players
+        int totalPlayers = lobby.casual + lobby.novice + lobby.expert + lobby.high_roller;
+
+        if (totalPlayers == 0)
+        {
+            // No players anywhere - disable all parent objects and hot objects
+            homepage.CPlayerCountParent.gameObject.SetActive(false);
+            homepage.NPlayerCountParent.gameObject.SetActive(false);
+            homepage.EPlayerCountParent.gameObject.SetActive(false);
+            homepage.HPlayerCountParent.gameObject.SetActive(false);
+        }
+        else
+        {
+            // Players exist - enable parents where count > 0 and set images
+            homepage.CPlayerCountParent.gameObject.SetActive(lobby.casual > 0);
+            homepage.NPlayerCountParent.gameObject.SetActive(lobby.novice > 0);
+            homepage.EPlayerCountParent.gameObject.SetActive(lobby.expert > 0);
+            homepage.HPlayerCountParent.gameObject.SetActive(lobby.high_roller > 0);
+
+            // Find room with highest player count
+            int maxPlayers = Mathf.Max(lobby.casual, lobby.novice, lobby.expert, lobby.high_roller);
+            
+            // Count how many rooms have the max player count
+            int roomsWithMax = 0;
+            if (lobby.casual == maxPlayers && lobby.casual > 0) roomsWithMax++;
+            if (lobby.novice == maxPlayers && lobby.novice > 0) roomsWithMax++;
+            if (lobby.expert == maxPlayers && lobby.expert > 0) roomsWithMax++;
+            if (lobby.high_roller == maxPlayers && lobby.high_roller > 0) roomsWithMax++;
+
+            // Only show hot if one room uniquely has the highest count (no ties)
+            bool hasHot = roomsWithMax == 1;
+
+            // Set images based on hot status
+            if (hasHot)
+            {
+                // One room is hot (red), others are normal (green)
+                if (lobby.casual == maxPlayers && homepage.CHotGame) homepage.CHotGame.SetActive(true);
+                if (lobby.casual == maxPlayers && homepage.CPlayerCountImage) homepage.CPlayerCountImage.sprite = homepage.HotGameRedSprite;
+                else if (lobby.casual > 0 && homepage.CPlayerCountImage) homepage.CPlayerCountImage.sprite = homepage.NormalGameGreenSprite;
+
+                if (lobby.novice == maxPlayers && homepage.NHotGame) homepage.NHotGame.SetActive(true);
+                if (lobby.novice == maxPlayers && homepage.NPlayerCountImage) homepage.NPlayerCountImage.sprite = homepage.HotGameRedSprite;
+                else if (lobby.novice > 0 && homepage.NPlayerCountImage) homepage.NPlayerCountImage.sprite = homepage.NormalGameGreenSprite;
+
+                if (lobby.expert == maxPlayers && homepage.EHotGame) homepage.EHotGame.SetActive(true);
+                if (lobby.expert == maxPlayers && homepage.EPlayerCountImage) homepage.EPlayerCountImage.sprite = homepage.HotGameRedSprite;
+                else if (lobby.expert > 0 && homepage.EPlayerCountImage) homepage.EPlayerCountImage.sprite = homepage.NormalGameGreenSprite;
+
+                if (lobby.high_roller == maxPlayers && homepage.HHotGame) homepage.HHotGame.SetActive(true);
+                if (lobby.high_roller == maxPlayers && homepage.HPlayerCountImage) homepage.HPlayerCountImage.sprite = homepage.HotGameRedSprite;
+                else if (lobby.high_roller > 0 && homepage.HPlayerCountImage) homepage.HPlayerCountImage.sprite = homepage.NormalGameGreenSprite;
+            }
+            else
+            {
+                // No hot (tie) - all green (only if they have players)
+                if (lobby.casual > 0 && homepage.CPlayerCountImage) homepage.CPlayerCountImage.sprite = homepage.NormalGameGreenSprite;
+                if (lobby.novice > 0 && homepage.NPlayerCountImage) homepage.NPlayerCountImage.sprite = homepage.NormalGameGreenSprite;
+                if (lobby.expert > 0 && homepage.EPlayerCountImage) homepage.EPlayerCountImage.sprite = homepage.NormalGameGreenSprite;
+                if (lobby.high_roller > 0 && homepage.HPlayerCountImage) homepage.HPlayerCountImage.sprite = homepage.NormalGameGreenSprite;
+            }
+        }
     }
     public void RoundInfoAnim(int spriteIndex)
     {

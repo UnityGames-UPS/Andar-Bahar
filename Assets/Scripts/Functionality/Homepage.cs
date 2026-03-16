@@ -25,6 +25,8 @@ public class Homepage : MonoBehaviour
     [SerializeField] private TMP_Text CMaxBet;
     [SerializeField] internal TMP_Text CPlayerCount;
     [SerializeField] internal GameObject CPlayerCountParent;
+    [SerializeField] internal Image CPlayerCountImage;
+    [SerializeField] internal GameObject CHotGame;
 
     [Header("Novice Room")]
     [SerializeField] Button Novicebutton;
@@ -32,6 +34,8 @@ public class Homepage : MonoBehaviour
     [SerializeField] private TMP_Text NMaxBet;
     [SerializeField] internal TMP_Text NPlayerCount;
     [SerializeField] internal GameObject NPlayerCountParent;
+    [SerializeField] internal Image NPlayerCountImage;
+    [SerializeField] internal GameObject NHotGame;
 
     [Header("Expert Room")]
     [SerializeField] Button Expertbutton;
@@ -39,6 +43,8 @@ public class Homepage : MonoBehaviour
     [SerializeField] private TMP_Text EMaxBet;
     [SerializeField] internal TMP_Text EPlayerCount;
     [SerializeField] internal GameObject EPlayerCountParent;
+    [SerializeField] internal Image EPlayerCountImage;
+    [SerializeField] internal GameObject EHotGame;
 
     [Header("HighRoller Room")]
     [SerializeField] Button HighRollerbutton;
@@ -46,6 +52,12 @@ public class Homepage : MonoBehaviour
     [SerializeField] private TMP_Text HMaxBet;
     [SerializeField] internal TMP_Text HPlayerCount;
     [SerializeField] internal GameObject HPlayerCountParent;
+    [SerializeField] internal Image HPlayerCountImage;
+    [SerializeField] internal GameObject HHotGame;
+
+    [Header("Hot Game Sprites")]
+    [SerializeField] internal Sprite HotGameRedSprite;
+    [SerializeField] internal Sprite NormalGameGreenSprite;
     /*[Header("anouncement panel")]
     [SerializeField] private GameObject textAnnouncement;
     [SerializeField] private Transform AnnouncementStartpos;

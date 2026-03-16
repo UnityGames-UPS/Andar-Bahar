@@ -148,4 +148,34 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    private void OnApplicationFocus(bool focus)
+    {
+        if (focus)
+        {
+            // Application gained focus - resume background music and enable SFX
+            if (bg_adudio && !bg_adudio.isPlaying)
+            {
+                bg_adudio.Play();
+            }
+            // Enable all SFX
+            audioPlayer_button.mute = false;
+            audioBet_button.mute = false;
+            audioPlayer_wl.mute = false;
+            audioWin.mute = false;
+        }
+        else
+        {
+            // Application lost focus - pause background music and disable SFX
+            if (bg_adudio && bg_adudio.isPlaying)
+            {
+                bg_adudio.Pause();
+            }
+            // Disable all SFX
+            audioPlayer_button.mute = true;
+            audioBet_button.mute = true;
+            audioPlayer_wl.mute = true;
+            audioWin.mute = true;
+        }
+    }
+
 }
