@@ -214,6 +214,7 @@ public class SocketIOManager : MonoBehaviour
         gameSocket.On<string>("game:bonus", OnGameBonus);
         gameSocket.On<string>("game:cashout", OnCashout);
         gameSocket.On<string>("game:lobby_count", OnLobbyCount);
+        gameSocket.On<string>("game:leaderboard_update", OnLeaderboardUpdate);
         gameSocket.On<string>("game:betting_timer", OnListenTimeEvent);
         gameSocket.On<string>("game:flush_result", OnListenFlush);
         gameSocket.On<string>("game:card_dealt", OnListenCardEvent);
@@ -679,7 +680,8 @@ public class SocketIOManager : MonoBehaviour
         gameManager.ClearAllBets();
         Debug.Log("Home Receved: " + json);
         ReturnHome = JsonUtility.FromJson<Root>(json);
-        gameManager.SetPlayerCountOnReturn(ReturnHome.payload.lobby, ReturnHome.payload.balance);
+        // Player count is updated via lobby_count broadcast, no need to update here
+        // gameManager.SetPlayerCountOnReturn(ReturnHome.payload.lobby, ReturnHome.payload.balance);
         playerdata.balance = ReturnHome.payload.balance;
         if (!gameManager.directJump) StartCoroutine(gameManager.ShowLoadingPage("Loading...."));
         else gameManager.LoadingPage.SetActive(true); gameManager.LoadingPage_text.text = "Loading....";
@@ -777,6 +779,7 @@ public class SocketIOManager : MonoBehaviour
         gameManager.SetCoinData();
         gameManager.SetBetLimit(gameManager.currentRoom);
         gameManager.SetOptionData();
+        gameManager.UpdateGamePlayerCount(roomData.payload.playerCount);
         gameManager.SetOtherplayerData(roomData.payload.leaderboards);
         uiManager.MenuMain_button.gameObject.SetActive(false);
         uiManager.MenuInGame_button.gameObject.SetActive(true);
@@ -851,10 +854,75 @@ public class SocketIOManager : MonoBehaviour
     }
     void OnLobbyCount(string data)
     {
-        Debug.Log("playerount\n" + data);
-        TotalPlayerCountData = JsonUtility.FromJson<Root>(data);
-        gameManager.SetPlayerCountOnReturn(TotalPlayerCountData.lobby, playerdata.balance);
+        Debug.Log("[LobbyCount] Raw Response: " + data);
 
+        TotalPlayerCountData = JsonUtility.FromJson<Root>(data);
+
+        if (TotalPlayerCountData == null)
+        {
+            Debug.LogError("[LobbyCount] Failed to parse lobby count data. Raw: " + data);
+            return;
+        }
+
+        if (TotalPlayerCountData.lobby != null)
+        {
+            Debug.Log($"[LobbyCount] Parsed Lobby Counts => " +
+                      $"Casual: {TotalPlayerCountData.lobby.casual} | " +
+                      $"Novice: {TotalPlayerCountData.lobby.novice} | " +
+                      $"Expert: {TotalPlayerCountData.lobby.expert} | " +
+                      $"HighRoller: {TotalPlayerCountData.lobby.high_roller} | " +
+                      $"Total: {TotalPlayerCountData.totalCount}");
+        }
+        else
+        {
+            Debug.LogWarning("[LobbyCount] Lobby object is null after parsing.");
+        }
+
+        if (gameManager != null)
+        {
+            Debug.Log("[LobbyCount] Forwarding to GameManager.UpdateHomeScreenPlayerCount");
+            gameManager.UpdateHomeScreenPlayerCount(TotalPlayerCountData.lobby, TotalPlayerCountData.totalCount);
+        }
+        else
+        {
+            Debug.LogError("[LobbyCount] GameManager reference is null. Cannot update home screen.");
+        }
+    }
+    void OnLeaderboardUpdate(string data)
+    {
+        Debug.Log("[LeaderboardUpdate] Raw Response: " + data);
+
+        Root leaderboardData = JsonUtility.FromJson<Root>(data);
+
+        if (leaderboardData == null)
+        {
+            Debug.LogError("[LeaderboardUpdate] Failed to parse leaderboard data. Raw: " + data);
+            return;
+        }
+
+        Debug.Log($"[LeaderboardUpdate] Parsed Player Count: {leaderboardData.playerCount}");
+
+        if (leaderboardData.leaderboards != null)
+        {
+            Debug.Log("[LeaderboardUpdate] Leaderboard data received successfully. Forwarding to GameManager.");
+        }
+        else
+        {
+            Debug.LogWarning("[LeaderboardUpdate] Leaderboards object is null after parsing.");
+        }
+
+        if (gameManager != null)
+        {
+            Debug.Log($"[LeaderboardUpdate] Calling UpdateGamePlayerCount with playerCount: {leaderboardData.playerCount}");
+            gameManager.UpdateGamePlayerCount(leaderboardData.playerCount);
+
+            Debug.Log("[LeaderboardUpdate] Calling SetOtherplayerData with leaderboard payload.");
+            gameManager.SetOtherplayerData(leaderboardData.leaderboards);
+        }
+        else
+        {
+            Debug.LogError("[LeaderboardUpdate] GameManager reference is null. Cannot update leaderboard.");
+        }
     }
     private void OnBetAcknowledged(string data)
     {
@@ -1232,6 +1300,7 @@ public class Root
     public Leaderboards leaderboards;
 
     public string bonus;
+    public int totalCount;
 
 }
 [Serializable]

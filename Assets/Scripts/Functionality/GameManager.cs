@@ -282,7 +282,7 @@ public class GameManager : MonoBehaviour
     internal void SetCoinData()
     {
         // ResetCoinsToDefault();
-        TotalPlayer_text.text = socketManager.roomData.payload.playerCount.ToString();
+        TotalPlayer_text.text = socketManager.roomData.playerCount.ToString();
         string room = currentRoom;
         List<int> data = null;
 
@@ -341,6 +341,7 @@ public class GameManager : MonoBehaviour
     }
     internal void SetOtherplayerData(Leaderboards leaderboard)
     {
+
         Debug.Log("Setting Leaderboard");
         if (leaderboard == null)
         {
@@ -2607,15 +2608,16 @@ public class GameManager : MonoBehaviour
     }
 
     #endregion
-    internal void SetPlayerCountOnReturn(Lobby lobby, double playerbalance)
+    internal void UpdateHomeScreenPlayerCount(Lobby lobby, int totalCount)
     {
-        homepage.PlayerBalance.text = playerbalance.ToString();
+        if (homepage == null) return;
+        if (lobby == null) return;
+
         homepage.CPlayerCount.text = lobby.casual.ToString();
         homepage.NPlayerCount.text = lobby.novice.ToString();
         homepage.EPlayerCount.text = lobby.expert.ToString();
         homepage.HPlayerCount.text = lobby.high_roller.ToString();
-        homepage.TotalPlayerCount.text = (lobby.casual + lobby.novice + lobby.expert + lobby.high_roller).ToString();
-        TotalPlayer_text.text = (lobby.casual + lobby.novice + lobby.expert + lobby.high_roller).ToString();
+        homepage.TotalPlayerCount.text = totalCount.ToString();
 
         // Disable all hot game objects
         if (homepage.CHotGame) homepage.CHotGame.SetActive(false);
@@ -2628,7 +2630,7 @@ public class GameManager : MonoBehaviour
 
         if (totalPlayers == 0)
         {
-            // No players anywhere - disable all parent objects and hot objects
+            // No players anywhere - disable all parent objects
             homepage.CPlayerCountParent.gameObject.SetActive(false);
             homepage.NPlayerCountParent.gameObject.SetActive(false);
             homepage.EPlayerCountParent.gameObject.SetActive(false);
@@ -2636,7 +2638,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // Players exist - enable parents where count > 0 and set images
+            // Players exist - enable parents where count > 0
             homepage.CPlayerCountParent.gameObject.SetActive(lobby.casual > 0);
             homepage.NPlayerCountParent.gameObject.SetActive(lobby.novice > 0);
             homepage.EPlayerCountParent.gameObject.SetActive(lobby.expert > 0);
@@ -2652,10 +2654,9 @@ public class GameManager : MonoBehaviour
             if (lobby.expert == maxPlayers && lobby.expert > 0) roomsWithMax++;
             if (lobby.high_roller == maxPlayers && lobby.high_roller > 0) roomsWithMax++;
 
-            // Only show hot if one room uniquely has the highest count (no ties)
+            // Only show hot if one room uniquely has the highest count
             bool hasHot = roomsWithMax == 1;
 
-            // Set images based on hot status
             if (hasHot)
             {
                 // One room is hot (red), others are normal (green)
@@ -2677,12 +2678,19 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                // No hot (tie) - all green (only if they have players)
+                // No hot (tie) - all green
                 if (lobby.casual > 0 && homepage.CPlayerCountImage) homepage.CPlayerCountImage.sprite = homepage.NormalGameGreenSprite;
                 if (lobby.novice > 0 && homepage.NPlayerCountImage) homepage.NPlayerCountImage.sprite = homepage.NormalGameGreenSprite;
                 if (lobby.expert > 0 && homepage.EPlayerCountImage) homepage.EPlayerCountImage.sprite = homepage.NormalGameGreenSprite;
                 if (lobby.high_roller > 0 && homepage.HPlayerCountImage) homepage.HPlayerCountImage.sprite = homepage.NormalGameGreenSprite;
             }
+        }
+    }
+    internal void UpdateGamePlayerCount(int playerCount)
+    {
+        if (TotalPlayer_text != null)
+        {
+            TotalPlayer_text.text = playerCount.ToString();
         }
     }
     public void RoundInfoAnim(int spriteIndex)
