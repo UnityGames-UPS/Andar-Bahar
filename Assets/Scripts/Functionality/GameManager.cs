@@ -1593,8 +1593,7 @@ public class GameManager : MonoBehaviour
                 }
             });
     }
-
-    private Transform FindPlayerTransform(string playerId)
+private Transform FindPlayerTransform(string playerId)
     {
         Debug.Log($"[FindPlayerTransform] Searching for PlayerId: {playerId}");
 
@@ -1623,7 +1622,7 @@ public class GameManager : MonoBehaviour
             }
 
             Debug.Log($"[Richest] ID: {p.PlayerId}");
-            if (p.playername.text == playerId)
+            if (p.PlayerId == playerId)
             {
                 Debug.Log("[RESULT] Found in RichestPlayers");
                 return p.transform;
@@ -1640,7 +1639,7 @@ public class GameManager : MonoBehaviour
             }
 
             Debug.Log($"[Winners] ID: {p.PlayerId}");
-            if (p.playername.text == playerId)
+            if (p.PlayerId == playerId)
             {
                 Debug.Log("[RESULT] Found in WinnerPlayers");
                 return p.transform;
@@ -1650,7 +1649,6 @@ public class GameManager : MonoBehaviour
         Debug.LogWarning($"[FindPlayerTransform] PlayerId {playerId} NOT FOUND!");
         return null;
     }
-
 
     public void DistributePayouts(List<Payout> payouts)
     {
@@ -2484,7 +2482,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator PopupRoutine()
     {
         BlockerObj.transform.position = popStart.position;
-        BlockerObj.transform.localScale = Vector3.zero;
+        BlockerObj.transform.localScale = Vector3.one;
         
         yield return Move(BlockerObj.transform, popCenter.position, moveDuration);
         
