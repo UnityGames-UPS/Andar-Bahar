@@ -160,6 +160,8 @@ public class GameManager : MonoBehaviour
 
     private Vector3 startPoscoin = new Vector3(0, -138, 0);
     private Vector3 endPos = new Vector3(0, -10, 0);
+    
+    private int previousNextRoundTimerValue = -1; // Track previous next round timer to detect actual end vs join mid-round
 
 
     private List<ChipData> PlayerChips = new List<ChipData>();
@@ -680,12 +682,22 @@ public class GameManager : MonoBehaviour
     {
         int value = i >= 1000 ? i / 1000 : 0;
         
-        // Disable win ratio when next round timer ends
+        // Only disable win ratio when timer actually ends (transitions from >0 to 0)
+        // Don't disable if player joins mid-round with timer already at 0
         if (value <= 0)
         {
-            DisableAllWinRatioTexts();
+            if (previousNextRoundTimerValue > 0)
+            {
+                // Timer actually ended (was running and reached 0)
+                DisableAllWinRatioTexts();
+            }
+            // Reset tracking for next round
+            previousNextRoundTimerValue = -1;
             return;
         }
+        
+        // Track the current value for next iteration
+        previousNextRoundTimerValue = value;
         
         if (firstTime) RoundInfoAnim(3);
         firstTime = false;
