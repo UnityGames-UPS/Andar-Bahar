@@ -323,12 +323,21 @@ public class UiManager : MonoBehaviour
         if (CloseAD_Button) CloseAD_Button.onClick.AddListener(CallOnExitFunction);
 
 
+        if (audioController)
+        {
+            // Initialize based on saved preferences
+            isMusic = !audioController.IsMusicMuted();
+            isSound = !audioController.IsSoundMuted();
 
-        if (audioController) audioController.ToggleMute(false);
-
-        isMusic = true;
-        isSound = true;
-
+            Debug.Log($"[UI] Loaded audio state - Music: {isMusic}, Sound: {isSound}");
+        }
+        else
+        {
+            // Fallback if no audio controller
+            isMusic = true;
+            isSound = true;
+        }
+        InitializeAudioButtons();
         if (Sound_Button)
         {
             Sound_Button.onClick.RemoveAllListeners();
@@ -563,7 +572,25 @@ public class UiManager : MonoBehaviour
         //  SpawnDummyStats(30);
         RegisterFullscreenListener();
     }
-
+private void InitializeAudioButtons()
+{
+    // Set music button state
+    if (Music_button && MusicMute_button)
+    {
+        Music_button.gameObject.SetActive(isMusic);
+        MusicMute_button.gameObject.SetActive(!isMusic);
+    }
+ 
+    // Set sound button state  
+    if (Sound_button && SoundMute_button)
+    {
+        Sound_button.gameObject.SetActive(isSound);
+        SoundMute_button.gameObject.SetActive(!isSound);
+    }
+ 
+    Debug.Log($"[UI] Audio buttons initialized - Music: {(isMusic ? "On" : "Off")}, Sound: {(isSound ? "On" : "Off")}");
+}
+ 
 
     private void SpawnDummyStats(int count)
     {

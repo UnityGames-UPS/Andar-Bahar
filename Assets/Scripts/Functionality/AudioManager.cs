@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using System;
 
@@ -10,19 +9,44 @@ public class AudioManager : MonoBehaviour
     [SerializeField] internal AudioSource audioBet_button;
     [SerializeField] internal AudioSource audioWin;
 
-
     [SerializeField] private AudioClip[] clips;
     [SerializeField] private AudioClip[] Voiceclips;
 
+    // PlayerPrefs keys
+    private const string PREF_MUSIC_MUTED = "AudioManager_MusicMuted";
+    private const string PREF_SOUND_MUTED = "AudioManager_SoundMuted";
+
+    // Track user's preference (not temporary focus state)
+    private bool userMusicMuted = false;
+    private bool userSoundMuted = false;
+
+    // Track if we're currently in background
+    private bool isInBackground = false;
+
+    private void Awake()
+    {
+        // Load saved preferences BEFORE Start()
+        LoadAudioPreferences();
+    }
+
     private void Start()
     {
-        if (bg_adudio) bg_adudio.Play();
+        // Set initial clips
         audioPlayer_button.clip = clips[7];
         audioBet_button.clip = clips[3];
         audioWin.clip = clips[4];
 
+        // Apply loaded preferences to audio sources
+        ApplyAudioPreferences();
+
+        // Start background music if not muted
+        if (bg_adudio && !userMusicMuted)
+        {
+            bg_adudio.Play();
+        }
     }
 
+    #region Audio Playback Methods
 
     internal void PlayWLAudio(string type)
     {
@@ -52,14 +76,11 @@ public class AudioManager : MonoBehaviour
             case "midCard":
                 index = 6;
                 break;
-
         }
         StopWLAaudio();
         audioPlayer_wl.clip = clips[index];
         audioPlayer_wl.Play();
-
     }
-
 
     internal void PlayButtonAudio()
     {
@@ -73,7 +94,6 @@ public class AudioManager : MonoBehaviour
 
     internal void PlayGirlAudio(string type)
     {
-        // audioWin.Play();
         audioWin.loop = false;
         int index = 0;
         switch (type)
@@ -100,14 +120,11 @@ public class AudioManager : MonoBehaviour
             case "midCard":
                 index = 6;
                 break;
-
         }
         StopWLAaudio();
         audioPlayer_wl.clip = Voiceclips[index];
         audioPlayer_wl.Play();
     }
-
-
 
     internal void StopWLAaudio()
     {
@@ -115,67 +132,230 @@ public class AudioManager : MonoBehaviour
         audioPlayer_wl.loop = false;
     }
 
-
     internal void StopBgAudio()
     {
         bg_adudio.Stop();
     }
 
-    internal void ToggleMute(bool toggle, string type = "all")
+    #endregion
+
+    #region Mute/Unmute with Persistence
+
+    /// <summary>
+    /// Toggle mute state for specific audio type or all audio.
+    /// This saves the preference to PlayerPrefs.
+    /// </summary>
+    internal void ToggleMute(bool mute, string type = "all")
     {
         switch (type)
         {
             case "bg":
-                bg_adudio.mute = toggle;
+                userMusicMuted = mute;
+                bg_adudio.mute = mute;
+                SaveMusicPreference();
+                
+                // ✅ FIX: If unmuting and music is paused/stopped, resume it
+                if (!mute && bg_adudio && !bg_adudio.isPlaying)
+                {
+                    bg_adudio.Play();
+                    Debug.Log("[AudioManager] Music unmuted - resuming playback");
+                }
                 break;
+
             case "button":
-                audioPlayer_button.mute = toggle;
+                audioPlayer_button.mute = mute;
+                UpdateSoundMutedState();
                 break;
+
             case "wl":
-                audioPlayer_wl.mute = toggle;
+                audioPlayer_wl.mute = mute;
+                UpdateSoundMutedState();
                 break;
+
             case "win":
-                audioWin.mute = toggle;
+                audioWin.mute = mute;
+                UpdateSoundMutedState();
                 break;
+
             case "bet":
-                audioBet_button.mute = toggle;
+                audioBet_button.mute = mute;
+                UpdateSoundMutedState();
                 break;
+
             case "all":
-                audioPlayer_wl.mute = toggle;
-                bg_adudio.mute = toggle;
-                audioPlayer_button.mute = toggle;
+                // This is for sound effects (not background music)
+                userSoundMuted = mute;
+                audioPlayer_wl.mute = mute;
+                audioPlayer_button.mute = mute;
+                audioBet_button.mute = mute;
+                audioWin.mute = mute;
+                SaveSoundPreference();
                 break;
         }
     }
 
-    private void OnApplicationFocus(bool focus)
+    /// <summary>
+    /// Update the overall sound muted state based on individual sources.
+    /// If all sound effects are muted, consider sound as muted.
+    /// </summary>
+    private void UpdateSoundMutedState()
     {
-        if (focus)
+        // Check if all sound sources are muted
+        bool allMuted = audioPlayer_button.mute && 
+                       audioPlayer_wl.mute && 
+                       audioWin.mute && 
+                       audioBet_button.mute;
+        
+        userSoundMuted = allMuted;
+        SaveSoundPreference();
+    }
+
+    /// <summary>
+    /// Get current music mute state
+    /// </summary>
+    internal bool IsMusicMuted()
+    {
+        return userMusicMuted;
+    }
+
+    /// <summary>
+    /// Get current sound mute state
+    /// </summary>
+    internal bool IsSoundMuted()
+    {
+        return userSoundMuted;
+    }
+
+    #endregion
+
+    #region PlayerPrefs Save/Load
+
+    private void LoadAudioPreferences()
+    {
+        // Load with default values (0 = not muted, 1 = muted)
+        userMusicMuted = PlayerPrefs.GetInt(PREF_MUSIC_MUTED, 0) == 1;
+        userSoundMuted = PlayerPrefs.GetInt(PREF_SOUND_MUTED, 0) == 1;
+
+        Debug.Log($"[AudioManager] Loaded preferences - Music: {(userMusicMuted ? "Muted" : "Unmuted")}, Sound: {(userSoundMuted ? "Muted" : "Unmuted")}");
+    }
+
+    private void ApplyAudioPreferences()
+    {
+        // Apply music preference
+        if (bg_adudio)
         {
-            // Application gained focus - resume background music and enable SFX
-            if (bg_adudio && !bg_adudio.isPlaying)
-            {
-                bg_adudio.Play();
-            }
-            // Enable all SFX
-            audioPlayer_button.mute = false;
-            audioBet_button.mute = false;
-            audioPlayer_wl.mute = false;
-            audioWin.mute = false;
+            bg_adudio.mute = userMusicMuted;
+        }
+
+        // Apply sound preferences
+        audioPlayer_button.mute = userSoundMuted;
+        audioBet_button.mute = userSoundMuted;
+        audioPlayer_wl.mute = userSoundMuted;
+        audioWin.mute = userSoundMuted;
+    }
+
+    private void SaveMusicPreference()
+    {
+        PlayerPrefs.SetInt(PREF_MUSIC_MUTED, userMusicMuted ? 1 : 0);
+        PlayerPrefs.Save();
+        Debug.Log($"[AudioManager] Music preference saved: {(userMusicMuted ? "Muted" : "Unmuted")}");
+    }
+
+    private void SaveSoundPreference()
+    {
+        PlayerPrefs.SetInt(PREF_SOUND_MUTED, userSoundMuted ? 1 : 0);
+        PlayerPrefs.Save();
+        Debug.Log($"[AudioManager] Sound preference saved: {(userSoundMuted ? "Muted" : "Unmuted")}");
+    }
+
+    #endregion
+
+    #region Application Focus Handling
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (hasFocus)
+        {
+            // ✅ FIXED: Restore to user's preference, not force unmute
+            OnApplicationGainedFocus();
         }
         else
         {
-            // Application lost focus - pause background music and disable SFX
-            if (bg_adudio && bg_adudio.isPlaying)
-            {
-                bg_adudio.Pause();
-            }
-            // Disable all SFX
-            audioPlayer_button.mute = true;
-            audioBet_button.mute = true;
-            audioPlayer_wl.mute = true;
-            audioWin.mute = true;
+            // ✅ FIXED: Just pause, don't change mute state
+            OnApplicationLostFocus();
         }
     }
 
+    private void OnApplicationGainedFocus()
+    {
+        isInBackground = false;
+
+        // Resume background music only if user hasn't muted it
+        if (bg_adudio && !userMusicMuted)
+        {
+            if (!bg_adudio.isPlaying)
+            {
+                bg_adudio.Play();
+            }
+        }
+        // ✅ FIX: If music is muted, ensure it stays paused
+        else if (bg_adudio && userMusicMuted)
+        {
+            // Ensure it's paused/stopped when muted
+            if (bg_adudio.isPlaying)
+            {
+                bg_adudio.Pause();
+            }
+        }
+
+        // Restore sound effects to user's preference (not force unmute)
+        audioPlayer_button.mute = userSoundMuted;
+        audioBet_button.mute = userSoundMuted;
+        audioPlayer_wl.mute = userSoundMuted;
+        audioWin.mute = userSoundMuted;
+
+        Debug.Log("[AudioManager] App gained focus - restored to user preferences");
+    }
+
+    private void OnApplicationLostFocus()
+    {
+        isInBackground = true;
+
+        // Pause background music (don't stop, so it can resume)
+        if (bg_adudio && bg_adudio.isPlaying)
+        {
+            bg_adudio.Pause();
+        }
+
+        // Mute all sound effects while in background
+        // (This is temporary, will restore to user preference when focus returns)
+        audioPlayer_button.mute = true;
+        audioBet_button.mute = true;
+        audioPlayer_wl.mute = true;
+        audioWin.mute = true;
+
+        Debug.Log("[AudioManager] App lost focus - paused audio");
+    }
+
+    #endregion
+
+    #region Optional: Clear Preferences (for testing)
+
+    /// <summary>
+    /// Call this from UIManager or debug menu to reset audio preferences
+    /// </summary>
+    internal void ResetAudioPreferences()
+    {
+        PlayerPrefs.DeleteKey(PREF_MUSIC_MUTED);
+        PlayerPrefs.DeleteKey(PREF_SOUND_MUTED);
+        PlayerPrefs.Save();
+
+        userMusicMuted = false;
+        userSoundMuted = false;
+        ApplyAudioPreferences();
+
+        Debug.Log("[AudioManager] Audio preferences reset to defaults");
+    }
+
+    #endregion
 }
