@@ -50317,6 +50317,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1063088671}
   m_CullTransparentMesh: 1
+--- !u!1 &1067195993
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1067195995}
+  - component: {fileID: 1067195994}
+  m_Layer: 0
+  m_Name: MouceClick
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1067195994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067195993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 622cab7c028ff42ad8fb75a1bc3a882f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ripplePrefab: {fileID: 4540355888109474494, guid: 1a54765415f8942ddbb29d3dd95dacb0, type: 3}
+  canvas: {fileID: 28159798}
+  duration: 0.5
+  startSize: 0
+  endSize: 80
+  rippleColor: {r: 1, g: 0.9, b: 0, a: 1}
+--- !u!4 &1067195995
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067195993}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 508.87238, y: 929.4987, z: 10.301526}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1070267460
 GameObject:
   m_ObjectHideFlags: 0
@@ -111111,3 +111161,4 @@ SceneRoots:
   - {fileID: 1508872096}
   - {fileID: 758483868956068563}
   - {fileID: 1519490011}
+  - {fileID: 1067195995}
