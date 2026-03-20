@@ -75,15 +75,6 @@ public class UiManager : MonoBehaviour
     [Header("Game Rules")]
     [SerializeField] private List<TMP_Text> PayoutText;
 
-
-
-
-
-
-
-
-
-
     [Header("Popus UI")]
     [SerializeField]
     private GameObject MainPopup_Object;
@@ -140,16 +131,22 @@ public class UiManager : MonoBehaviour
     [SerializeField]
     private GameObject LBPopup_Object;
     [Header("History Popup")]
-    [SerializeField]
-    private GameObject Pageparent;
-
-    [SerializeField] private GameObject HistoryPrefab;
+    [SerializeField] private GameObject Pageparent;
+    [SerializeField] private List<HistoryPrefab> HistoryPrefabsList; // List of 10 pre-attached prefabs
     [SerializeField] private TMP_Text HistoryNav;
+    [SerializeField] private TMP_Text NoHistoryText; // Text to show when no history
     [SerializeField] private int CurrentHistoryPage;
     [SerializeField] private int MaxHistoryPage;
-    [SerializeField] private Button HistoryLeft;
-    [SerializeField] private Button HistoryRight;
 
+    // Pagination buttons
+    [SerializeField] private Button HistoryPrevious5;  // -5 pages
+    [SerializeField] private Button HistoryPrevious1;  // -1 page
+    [SerializeField] private Button HistoryNext1;      // +1 page
+    [SerializeField] private Button HistoryNext5;      // +5 pages
+
+    // Match side sprites (A for Andar, B for Bahar)
+    [SerializeField] private Sprite AndarSideSprite;   // Sprite with "A"
+    [SerializeField] private Sprite BaharSideSprite;   // Sprite with "B"
     [Header("Quit Popup")]
     [SerializeField]
     private GameObject ExitButton;
@@ -518,7 +515,7 @@ public class UiManager : MonoBehaviour
 
         if (HistoryClose_button) HistoryClose_button.onClick.RemoveAllListeners();
         if (HistoryClose_button) HistoryClose_button.onClick.AddListener(delegate { PopAndDisable(HistoryPopup_Object); IsMenuPanelOpen = false; if (audioController) audioController.PlayButtonAudio(); });
-
+        SetupHistoryButtons();
 
         Repeatbtn.onClick.RemoveAllListeners();
         Repeatbtn.onClick.AddListener(delegate { socketManager.SendRepeat(); Repeatpanel.SetActive(false); });
@@ -532,11 +529,7 @@ public class UiManager : MonoBehaviour
         Doublebtn.onClick.RemoveAllListeners();
         Doublebtn.onClick.AddListener(delegate { socketManager.SendDouble(); });
 
-        HistoryLeft.onClick.RemoveAllListeners();
-        HistoryLeft.onClick.AddListener(delegate { if (CurrentHistoryPage - 1 > 0) socketManager.SendHistory(CurrentHistoryPage - 1); });
 
-        HistoryRight.onClick.RemoveAllListeners();
-        HistoryRight.onClick.AddListener(delegate { if (CurrentHistoryPage + 1 <= MaxHistoryPage) socketManager.SendHistory(CurrentHistoryPage + 1); });
 
         DontShowBtn.onClick.RemoveAllListeners();
         DontShowBtn.onClick.AddListener(delegate { OnClickDontShow(); if (audioController) audioController.PlayButtonAudio(); });
@@ -1165,7 +1158,7 @@ public class UiManager : MonoBehaviour
     internal void SetNetBetPanel(bool istrue, string totalbet = "-1")
     {
         if (totalbet == "0") return;
-        
+
         if (totalbet != "-1")
         {
             // Parse and format the total bet amount
@@ -1201,32 +1194,216 @@ public class UiManager : MonoBehaviour
 
     #region History Setup
 
-    internal void SetHistoryPage(Payload payload)
+
+    void SetupHistoryButtons()
     {
-        CurrentHistoryPage = payload.meta.page;
-        MaxHistoryPage = payload.meta.pages;
-        HistoryNav.text = payload.meta.page.ToString() + "/" + payload.meta.pages.ToString();
-        // 1. Remove old items
-        foreach (Transform child in Pageparent.transform)
+        // Previous 5 pages
+        if (HistoryPrevious5)
         {
-            Destroy(child.gameObject);
+            HistoryPrevious5.onClick.RemoveAllListeners();
+            HistoryPrevious5.onClick.AddListener(() => OnHistoryPageChange(-5));
         }
 
-        // 2. Spawn new items
-        for (int i = 0; i < payload.history.Count; i++)
+        // Previous 1 page
+        if (HistoryPrevious1)
         {
-            GameObject obj = Instantiate(HistoryPrefab, Pageparent.transform);
-            HistoryPrefab script = obj.GetComponent<HistoryPrefab>();
-            payload.history[i].middleCardParsed = JsonUtility.FromJson<Card>(payload.history[i].middle_card);
-            payload.history[i].matchingCardParsed = JsonUtility.FromJson<Card>(payload.history[i].matching_card);
+            HistoryPrevious1.onClick.RemoveAllListeners();
+            HistoryPrevious1.onClick.AddListener(() => OnHistoryPageChange(-1));
+        }
 
+        // Next 1 page
+        if (HistoryNext1)
+        {
+            HistoryNext1.onClick.RemoveAllListeners();
+            HistoryNext1.onClick.AddListener(() => OnHistoryPageChange(1));
+        }
 
-
-            Sprite middleCard = gameManager.CardSet(payload.history[i].middleCardParsed.suit, payload.history[i].middleCardParsed.rank);
-            Sprite sideCard = gameManager.CardSet(payload.history[i].matchingCardParsed.suit, payload.history[i].matchingCardParsed.rank);
-            script.SetData(i + 1, payload.history[i], middleCard, sideCard, payload.history[i].cards_dealt);
+        // Next 5 pages
+        if (HistoryNext5)
+        {
+            HistoryNext5.onClick.RemoveAllListeners();
+            HistoryNext5.onClick.AddListener(() => OnHistoryPageChange(5));
         }
     }
+
+    // ============================================================================
+    // REPLACE the existing SetHistoryPage method with this enhanced version:
+    // ============================================================================
+
+    internal void SetHistoryPage(Payload payload)
+    {
+        if (payload == null || payload.meta == null)
+        {
+            Debug.LogError("History payload or meta is null");
+            ShowNoHistory(true);
+            return;
+        }
+
+        CurrentHistoryPage = payload.meta.page;
+        MaxHistoryPage = payload.meta.pages;
+
+        // Update page navigation text
+        HistoryNav.text = $"{CurrentHistoryPage}/{MaxHistoryPage}";
+
+        // Check if there's any history
+        if (payload.history == null || payload.history.Count == 0)
+        {
+            ShowNoHistory(true);
+            UpdatePaginationButtons();
+            return;
+        }
+
+        ShowNoHistory(false);
+
+        // Update each prefab in the list
+        for (int i = 0; i < HistoryPrefabsList.Count; i++)
+        {
+            if (i < payload.history.Count)
+            {
+                // We have data for this prefab
+                HistoryPrefabsList[i].gameObject.SetActive(true);
+
+                History historyItem = payload.history[i];
+
+                // Parse card data
+                historyItem.middleCardParsed = JsonUtility.FromJson<Card>(historyItem.middle_card);
+                historyItem.matchingCardParsed = JsonUtility.FromJson<Card>(historyItem.matching_card);
+
+                // Get sprites from DISPLAY lists (CardSetHIS method)
+                Sprite middleCardSprite = gameManager.CardSetHIS(
+                    historyItem.middleCardParsed.suit,
+                    historyItem.middleCardParsed.rank
+                );
+
+                Sprite matchingCardSprite = gameManager.CardSetHIS(
+                    historyItem.matchingCardParsed.suit,
+                    historyItem.matchingCardParsed.rank
+                );
+
+                // Get match side sprite (A for andar, B for bahar)
+                Sprite matchSideSprite = GetMatchSideSprite(historyItem.match_side);
+
+                // Calculate the display number (1-based index accounting for pagination)
+                int displayNumber = ((CurrentHistoryPage - 1) * payload.meta.limit) + (i + 1);
+
+                // Set the data
+                HistoryPrefabsList[i].SetData(
+                    displayNumber,
+                    historyItem,
+                    middleCardSprite,
+                    matchingCardSprite,
+                    matchSideSprite,
+                    historyItem.cards_dealt
+                );
+            }
+            else
+            {
+                // No data for this prefab, hide it
+                HistoryPrefabsList[i].gameObject.SetActive(false);
+            }
+        }
+
+        // Update pagination button states
+        UpdatePaginationButtons();
+    }
+
+    // ============================================================================
+    // ADD these helper methods:
+    // ============================================================================
+
+    private Sprite GetMatchSideSprite(string matchSide)
+    {
+        if (string.IsNullOrEmpty(matchSide))
+        {
+            Debug.LogWarning("Match side is null or empty");
+            return AndarSideSprite; // default
+        }
+
+        switch (matchSide.ToLower())
+        {
+            case "andar":
+                return AndarSideSprite;
+            case "bahar":
+                return BaharSideSprite;
+            default:
+                Debug.LogWarning($"Unknown match side: {matchSide}");
+                return AndarSideSprite; // default
+        }
+    }
+
+    private void ShowNoHistory(bool show)
+    {
+        if (NoHistoryText)
+        {
+            NoHistoryText.gameObject.SetActive(show);
+        }
+
+        // Hide all prefabs when no history
+        if (show)
+        {
+            foreach (var prefab in HistoryPrefabsList)
+            {
+                prefab.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private void OnHistoryPageChange(int delta)
+    {
+        int newPage = CurrentHistoryPage + delta;
+
+        // Clamp to valid range
+        if (newPage < 1) newPage = 1;
+        if (newPage > MaxHistoryPage) newPage = MaxHistoryPage;
+
+        // Only request if page actually changed
+        if (newPage != CurrentHistoryPage)
+        {
+            socketManager.SendHistory(newPage);
+        }
+    }
+
+    private void UpdatePaginationButtons()
+    {
+        // Update button interactability based on current page
+        if (HistoryPrevious5)
+        {
+            HistoryPrevious5.interactable = CurrentHistoryPage > 5;
+        }
+
+        if (HistoryPrevious1)
+        {
+            HistoryPrevious1.interactable = CurrentHistoryPage > 1;
+        }
+
+        if (HistoryNext1)
+        {
+            HistoryNext1.interactable = CurrentHistoryPage < MaxHistoryPage;
+        }
+
+        if (HistoryNext5)
+        {
+            HistoryNext5.interactable = (CurrentHistoryPage + 5) <= MaxHistoryPage;
+        }
+    }
+
+    // ============================================================================
+    // CALL THIS in the History button click handler:
+    // ============================================================================
+
+    internal void OnClickHistoryButton()
+    {
+        // Request first page of history
+        CurrentHistoryPage = 1;
+        socketManager.SendHistory(1);
+
+        // Open history popup
+        OpenPopup(HistoryPopup_Object);
+    }
+
+    // ============================================================================
+    // END OF HISTORY ENHANCEMENT
+    // ============================================================================
 
 
 

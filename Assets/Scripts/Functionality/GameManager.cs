@@ -604,13 +604,13 @@ public class GameManager : MonoBehaviour
         if (time > 5)
         {
             // RoundInfo_Text.text = "<size=30>Place bet Now</size>\n " + "<size=50><color=yellow>" + time + "</color></size>";
-            RoundInfo_Text.text = "<size=30>Place bet Now</size>\n ";
+            RoundInfo_Text.text = "<size=30>Place Bet Now</size>\n ";
             pulseText.text = "<color=yellow>" + time.ToString() + "</color>";
             pulseText.gameObject.SetActive(true);
         }
         else
         {
-            RoundInfo_Text.text = "<size=30>Place bet Now</size>\n ";
+            RoundInfo_Text.text = "<size=30>Place Bet Now</size>\n ";
             pulseText.text = "<color=yellow>" + time.ToString() + "</color>";
             pulseText.gameObject.SetActive(true);
             PopTMP(pulseText);
@@ -799,7 +799,7 @@ public class GameManager : MonoBehaviour
         {
             int winInt = Mathf.FloorToInt((float)currentWin);
 
-            PlayPopup("You Won\n" + winInt);
+           // PlayPopup("You Won\n" + winInt);
             playtheCoin("+" + winInt);
         }
 

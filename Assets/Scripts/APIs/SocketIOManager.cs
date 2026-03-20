@@ -1367,12 +1367,31 @@ public class History
     public int cards_dealt;
     public string match_side;
     public string matching_card;
-    public DateTime created_at;
-
+    
+    // CHANGED: From DateTime to string to fix parsing issue
+    public string created_at;  // Was: public DateTime created_at;
+ 
     // Parsed objects
     public Card middleCardParsed;
     public Card matchingCardParsed;
+    
+    // NEW: Helper property to get parsed DateTime
+    public DateTime CreatedAtDateTime
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(created_at))
+                return DateTime.MinValue;
+            
+            // Try parsing ISO 8601 format
+            if (DateTime.TryParse(created_at, out DateTime result))
+                return result;
+            
+            return DateTime.MinValue;
+        }
+    }
 }
+ 
 [Serializable]
 public class Meta
 {
