@@ -85,8 +85,18 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<Sprite> pinkDrop;
 
     [Header("Chip")]
-    [SerializeField] private List<Sprite> PlayerChipSprite;
-    [SerializeField] private List<Sprite> otherChipSprite;
+    // Level-specific chip sprites (6 sprites per level)
+    [Header("Player Chip Sprites (6 sprites each level)")]
+    [SerializeField] private List<Sprite> PlayerChipSprite_Casual;
+    [SerializeField] private List<Sprite> PlayerChipSprite_Novice;
+    [SerializeField] private List<Sprite> PlayerChipSprite_Expert;
+    [SerializeField] private List<Sprite> PlayerChipSprite_HighRoller;
+
+    [Header("Other Player Chip Sprites (6 sprites each level)")]
+    [SerializeField] private List<Sprite> OtherChipSprite_Casual;
+    [SerializeField] private List<Sprite> OtherChipSprite_Novice;
+    [SerializeField] private List<Sprite> OtherChipSprite_Expert;
+    [SerializeField] private List<Sprite> OtherChipSprite_HighRoller;
     [SerializeField] private GameObject chipPrefab;
     [SerializeField] private int initialCount = 20;
     [SerializeField] private Transform poolParent;
@@ -318,16 +328,35 @@ public class GameManager : MonoBehaviour
             uiManager.Coins[i].Chiptext.text = FormatHelper.FormatChipAmount(data[i + 1]);
             uiManager.Coins[i].chipIndex = i + 1;
         }
+
+        // Update chip sprites to match current level
+        UpdateChipSprites();
     }
     public void ResetCoinsToDefault()
     {
+        // Use level-specific sprites
+        List<Sprite> currentChips = GetCurrentPlayerChipSprites();
+        
+        if (currentChips == null || currentChips.Count == 0)
+        {
+            Debug.LogError($"[GameManager] No chip sprites found for level: {currentRoom}");
+            return;
+        }
+
         // Force select 0 index
-        uiManager.coinSelector.chipImage.sprite = PlayerChipSprite[0];
+        if (currentChips.Count > 0)
+        {
+            uiManager.coinSelector.chipImage.sprite = currentChips[0];
+        }
 
         // Reset all coins visuals
         for (int i = 0; i < uiManager.Coins.Count; i++)
         {
-            uiManager.Coins[i].chipImage.sprite = PlayerChipSprite[i + 1];
+            int spriteIndex = i + 1;
+            if (spriteIndex < currentChips.Count)
+            {
+                uiManager.Coins[i].chipImage.sprite = currentChips[spriteIndex];
+            }
         }
 
     }
@@ -2175,6 +2204,82 @@ private Transform FindPlayerTransform(string playerId)
 
     #endregion
 
+    #region Level-Specific Chip Sprite Helpers
+
+    /// <summary>
+    /// Get the player chip sprite list for the current room/level
+    /// </summary>
+    private List<Sprite> GetCurrentPlayerChipSprites()
+    {
+        switch (currentRoom)
+        {
+            case "casual":
+                return PlayerChipSprite_Casual;
+            case "novice":
+                return PlayerChipSprite_Novice;
+            case "expert":
+                return PlayerChipSprite_Expert;
+            case "high_roller":
+                return PlayerChipSprite_HighRoller;
+            default:
+                Debug.LogWarning($"[GameManager] Unknown room: {currentRoom}, using casual sprites");
+                return PlayerChipSprite_Casual;
+        }
+    }
+
+    /// <summary>
+    /// Get the other player chip sprite list for the current room/level
+    /// </summary>
+    private List<Sprite> GetCurrentOtherChipSprites()
+    {
+        switch (currentRoom)
+        {
+            case "casual":
+                return OtherChipSprite_Casual;
+            case "novice":
+                return OtherChipSprite_Novice;
+            case "expert":
+                return OtherChipSprite_Expert;
+            case "high_roller":
+                return OtherChipSprite_HighRoller;
+            default:
+                Debug.LogWarning($"[GameManager] Unknown room: {currentRoom}, using casual sprites");
+                return OtherChipSprite_Casual;
+        }
+    }
+
+    /// <summary>
+    /// Update all chip selector sprites to match the current level
+    /// </summary>
+    private void UpdateChipSprites()
+    {
+        List<Sprite> currentChips = GetCurrentPlayerChipSprites();
+        
+        if (currentChips == null || currentChips.Count == 0)
+        {
+            Debug.LogError($"[GameManager] No chip sprites found for level: {currentRoom}");
+            return;
+        }
+
+        // Update main coin selector sprite (index 0)
+        if (currentChips.Count > 0)
+        {
+            uiManager.coinSelector.chipImage.sprite = currentChips[0];
+        }
+
+        // Update all coin option sprites (indices 1-5)
+        for (int i = 0; i < uiManager.Coins.Count; i++)
+        {
+            int spriteIndex = i + 1;
+            if (spriteIndex < currentChips.Count)
+            {
+                uiManager.Coins[i].chipImage.sprite = currentChips[spriteIndex];
+            }
+        }
+    }
+
+    #endregion
+
     #region Flush Animation
 
     void PlayFlushAnim(int type, Sprite fCard, Sprite sCard, Sprite tCard)
@@ -2314,26 +2419,44 @@ private Transform FindPlayerTransform(string playerId)
     }
     Sprite findChipSprite(int amount, List<int> betOptions)
     {
+        // Use level-specific sprites
+        List<Sprite> sprites = GetCurrentPlayerChipSprites();
+        
         for (int i = 0; i < betOptions.Count; i++)
         {
             if (betOptions[i] == amount)
             {
-                return PlayerChipSprite[i];
+                // Safety check
+                if (i < sprites.Count)
+                    return sprites[i];
+                else
+                    Debug.LogWarning($"[GameManager] Chip sprite index {i} out of range for {currentRoom}");
             }
         }
-        return PlayerChipSprite[0];
+        
+        // Return first sprite as fallback
+        return sprites.Count > 0 ? sprites[0] : null;
 
     }
     Sprite findOtherPlayerChipSprite(int amount, List<int> betOptions)
     {
+        // Use level-specific sprites
+        List<Sprite> sprites = GetCurrentOtherChipSprites();
+        
         for (int i = 0; i < betOptions.Count; i++)
         {
             if (betOptions[i] == amount)
             {
-                return otherChipSprite[i];
+                // Safety check
+                if (i < sprites.Count)
+                    return sprites[i];
+                else
+                    Debug.LogWarning($"[GameManager] Other chip sprite index {i} out of range for {currentRoom}");
             }
         }
-        return otherChipSprite[0];
+        
+        // Return first sprite as fallback
+        return sprites.Count > 0 ? sprites[0] : null;
 
     }
     int findChipindex(int amount, List<int> betOptions)

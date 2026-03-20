@@ -34,7 +34,7 @@ public class PlayerData : MonoBehaviour
         }
         
         // Parse balance and format it
-        if (double.TryParse(balance, out double balanceValue))
+        if (!isInGameName && double.TryParse(balance, out double balanceValue))
         {
             playerBalence.text = FormatHelper.FormatAmount(balanceValue);
         }

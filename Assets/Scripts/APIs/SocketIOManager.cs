@@ -536,10 +536,6 @@ public class SocketIOManager : MonoBehaviour
 #endif
     }
 
-
-
-
-
     private void setInitialData()
     {
         isLoaded = true;
