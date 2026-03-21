@@ -5441,40 +5441,68 @@ MonoBehaviour:
   - {fileID: 21300000, guid: f8686e84869404c5ba8928e93c4449e0, type: 3}
   - {fileID: 21300000, guid: 76ff7eaf2ba6f4906b27b7e70c241117, type: 3}
   PlayerChipSprite_Casual:
-  - {fileID: -7422482134762061418, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 7336299953864342102, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 2989673955108334260, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 5342761528478310060, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 1983220091103339745, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 1983220091103339745, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
+  - {fileID: 5307401623761367259, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: 5307401623761367259, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -5558892293155277213, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -721863460761105289, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -8727633853413467468, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -52489641526019942, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
   PlayerChipSprite_Novice:
-  - {fileID: -7422482134762061418, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 7336299953864342102, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 2989673955108334260, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 5342761528478310060, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 1983220091103339745, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 1983220091103339745, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
+  - {fileID: 5307401623761367259, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -5558892293155277213, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -721863460761105289, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -8727633853413467468, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -52489641526019942, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -52489641526019942, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
   PlayerChipSprite_Expert:
-  - {fileID: -7422482134762061418, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 7336299953864342102, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 2989673955108334260, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 5342761528478310060, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 1983220091103339745, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 1983220091103339745, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
+  - {fileID: -5558892293155277213, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -721863460761105289, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -8727633853413467468, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -52489641526019942, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -52489641526019942, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: 1931092358431094202, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
   PlayerChipSprite_HighRoller:
-  - {fileID: -7422482134762061418, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 7336299953864342102, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 2989673955108334260, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 5342761528478310060, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 1983220091103339745, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
-  - {fileID: 1983220091103339745, guid: de82e6be9e85f43d7b92d16d83fde65b, type: 3}
+  - {fileID: -8727633853413467468, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -52489641526019942, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -52489641526019942, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: 1931092358431094202, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: 220639218578042129, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  - {fileID: -2588985726372563696, guid: 0a62c2236da91496d9fcb06406812951, type: 3}
+  HighlightedChipSprite_Casual:
+  - {fileID: 2259100500647341507, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: 2259100500647341507, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: -6532936674517913672, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: 1129736348068416872, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: -122893945008929795, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: -1825543833448365932, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  HighlightedChipSprite_Novice:
+  - {fileID: 2259100500647341507, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: -6532936674517913672, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: 1129736348068416872, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: -122893945008929795, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: -1825543833448365932, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: -1825543833448365932, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  HighlightedChipSprite_Expert:
+  - {fileID: -6532936674517913672, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: 1129736348068416872, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: -122893945008929795, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: -1825543833448365932, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: -1825543833448365932, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: 4530231796671597106, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  HighlightedChipSprite_HighRoller:
+  - {fileID: -122893945008929795, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: -1825543833448365932, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: -1825543833448365932, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: 4530231796671597106, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: 877213867607610907, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
+  - {fileID: 7645404169707701179, guid: 5609f463791d048c9ab847414fe8e261, type: 3}
   OtherChipSprite_Casual:
-  - {fileID: -9088626397550996471, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: 8429955623203076255, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: 3760721915462241126, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: -4547924063756674019, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: -9176739637464095357, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: -9176739637464095357, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
+  - {fileID: 4475582593442984654, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: 4475582593442984654, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: 2066129706043366217, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: 4997430713233340271, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: -4842729641136308940, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: 880704287677428941, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
   OtherChipSprite_Novice:
   - {fileID: -9088626397550996471, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
   - {fileID: 8429955623203076255, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
@@ -5483,19 +5511,19 @@ MonoBehaviour:
   - {fileID: -9176739637464095357, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
   - {fileID: -9176739637464095357, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
   OtherChipSprite_Expert:
-  - {fileID: -9088626397550996471, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: 8429955623203076255, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: 3760721915462241126, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: -4547924063756674019, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: -9176739637464095357, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: -9176739637464095357, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
+  - {fileID: 4475582593442984654, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: 2066129706043366217, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: 4997430713233340271, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: -4842729641136308940, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: 880704287677428941, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: 880704287677428941, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
   OtherChipSprite_HighRoller:
-  - {fileID: -9088626397550996471, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: 8429955623203076255, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: 3760721915462241126, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: -4547924063756674019, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: -9176739637464095357, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
-  - {fileID: -9176739637464095357, guid: 45cda4771f4a44b86ba2decb9ae0ef8e, type: 3}
+  - {fileID: -4842729641136308940, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: 880704287677428941, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: 880704287677428941, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: 1727895933811577847, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: -4591977443782968038, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
+  - {fileID: 4268953342864864141, guid: ea9bd8e670c1c43b7ab8718cc058c933, type: 3}
   chipPrefab: {fileID: 6936810325967969954, guid: fe27c184ac9434347856d42772cd9254, type: 3}
   initialCount: 20
   poolParent: {fileID: 1657115145}
@@ -59001,7 +59029,7 @@ MonoBehaviour:
   uiManager: {fileID: 2115417990}
   MultiplierList: []
   JSManager: {fileID: 1519490010}
-  testToken: 6376933b6d524b61bcfeda7b73db6c77
+  testToken: 04ee2d24b62545f1bd5d60ead5ca4263
   RaycastBlocker: {fileID: 1127067818}
 --- !u!4 &1272847617
 Transform:

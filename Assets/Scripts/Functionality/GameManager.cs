@@ -91,6 +91,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<Sprite> PlayerChipSprite_Novice;
     [SerializeField] private List<Sprite> PlayerChipSprite_Expert;
     [SerializeField] private List<Sprite> PlayerChipSprite_HighRoller;
+    [Header(" Chip SelectionSprites (6 sprites each level)")]
+    [SerializeField] private List<Sprite> HighlightedChipSprite_Casual;
+    [SerializeField] private List<Sprite> HighlightedChipSprite_Novice;
+    [SerializeField] private List<Sprite> HighlightedChipSprite_Expert;
+    [SerializeField] private List<Sprite> HighlightedChipSprite_HighRoller;
 
     [Header("Other Player Chip Sprites (6 sprites each level)")]
     [SerializeField] private List<Sprite> OtherChipSprite_Casual;
@@ -160,7 +165,7 @@ public class GameManager : MonoBehaviour
 
     private Vector3 startPoscoin = new Vector3(0, -138, 0);
     private Vector3 endPos = new Vector3(0, -10, 0);
-    
+
     private int previousNextRoundTimerValue = -1; // Track previous next round timer to detect actual end vs join mid-round
 
 
@@ -338,7 +343,7 @@ public class GameManager : MonoBehaviour
     {
         // Use level-specific sprites
         List<Sprite> currentChips = GetCurrentPlayerChipSprites();
-        
+
         if (currentChips == null || currentChips.Count == 0)
         {
             Debug.LogError($"[GameManager] No chip sprites found for level: {currentRoom}");
@@ -631,7 +636,7 @@ public class GameManager : MonoBehaviour
             item.HighlightedBG.SetActive(false);
         }
 
-        int time = socketManager.TimeRemaining.timeRemaining / 1000;
+        int time = socketManager.TimeRemaining.timeRemaining;
         if (time > 5)
         {
             // RoundInfo_Text.text = "<size=30>Place bet Now</size>\n " + "<size=50><color=yellow>" + time + "</color></size>";
@@ -680,8 +685,9 @@ public class GameManager : MonoBehaviour
     bool firstTime = true;
     internal void SetNewRoundTimer(int i)
     {
-        int value = i >= 1000 ? i / 1000 : 0;
-        
+        // int value = i >= 1000 ? i / 1000 : 0;
+        int value = i;
+
         // Only disable win ratio when timer actually ends (transitions from >0 to 0)
         // Don't disable if player joins mid-round with timer already at 0
         if (value <= 0)
@@ -695,10 +701,10 @@ public class GameManager : MonoBehaviour
             previousNextRoundTimerValue = -1;
             return;
         }
-        
+
         // Track the current value for next iteration
         previousNextRoundTimerValue = value;
-        
+
         if (firstTime) RoundInfoAnim(3);
         firstTime = false;
         pulseText.gameObject.SetActive(true);
@@ -840,7 +846,7 @@ public class GameManager : MonoBehaviour
         {
             int winInt = Mathf.FloorToInt((float)currentWin);
 
-           // PlayPopup("You Won\n" + winInt);
+            // PlayPopup("You Won\n" + winInt);
             playtheCoin("+" + winInt);
         }
 
@@ -1634,7 +1640,7 @@ public class GameManager : MonoBehaviour
                 }
             });
     }
-private Transform FindPlayerTransform(string playerId)
+    private Transform FindPlayerTransform(string playerId)
     {
         Debug.Log($"[FindPlayerTransform] Searching for PlayerId: {playerId}");
 
@@ -2221,21 +2227,41 @@ private Transform FindPlayerTransform(string playerId)
     /// <summary>
     /// Get the player chip sprite list for the current room/level
     /// </summary>
-    private List<Sprite> GetCurrentPlayerChipSprites()
+    private List<Sprite> GetCurrentPlayerChipSprites(bool highlighted = true)
     {
-        switch (currentRoom)
+        if (highlighted)
         {
-            case "casual":
-                return PlayerChipSprite_Casual;
-            case "novice":
-                return PlayerChipSprite_Novice;
-            case "expert":
-                return PlayerChipSprite_Expert;
-            case "high_roller":
-                return PlayerChipSprite_HighRoller;
-            default:
-                Debug.LogWarning($"[GameManager] Unknown room: {currentRoom}, using casual sprites");
-                return PlayerChipSprite_Casual;
+            switch (currentRoom)
+            {
+                case "casual":
+                    return PlayerChipSprite_Casual;
+                case "novice":
+                    return PlayerChipSprite_Novice;
+                case "expert":
+                    return PlayerChipSprite_Expert;
+                case "high_roller":
+                    return PlayerChipSprite_HighRoller;
+                default:
+                    Debug.LogWarning($"[GameManager] Unknown room: {currentRoom}, using casual sprites");
+                    return PlayerChipSprite_Casual;
+            }
+        }
+        else
+        {
+            switch (currentRoom)
+            {
+                case "casual":
+                    return HighlightedChipSprite_Casual;
+                case "novice":
+                    return HighlightedChipSprite_Novice;
+                case "expert":
+                    return HighlightedChipSprite_Expert;
+                case "high_roller":
+                    return HighlightedChipSprite_HighRoller;
+                default:
+                    Debug.LogWarning($"[GameManager] Unknown room: {currentRoom}, using casual sprites");
+                    return HighlightedChipSprite_Casual;
+            }
         }
     }
 
@@ -2265,8 +2291,8 @@ private Transform FindPlayerTransform(string playerId)
     /// </summary>
     private void UpdateChipSprites()
     {
-        List<Sprite> currentChips = GetCurrentPlayerChipSprites();
-        
+        List<Sprite> currentChips = GetCurrentPlayerChipSprites(false);
+
         if (currentChips == null || currentChips.Count == 0)
         {
             Debug.LogError($"[GameManager] No chip sprites found for level: {currentRoom}");
@@ -2433,7 +2459,7 @@ private Transform FindPlayerTransform(string playerId)
     {
         // Use level-specific sprites
         List<Sprite> sprites = GetCurrentPlayerChipSprites();
-        
+
         for (int i = 0; i < betOptions.Count; i++)
         {
             if (betOptions[i] == amount)
@@ -2445,7 +2471,7 @@ private Transform FindPlayerTransform(string playerId)
                     Debug.LogWarning($"[GameManager] Chip sprite index {i} out of range for {currentRoom}");
             }
         }
-        
+
         // Return first sprite as fallback
         return sprites.Count > 0 ? sprites[0] : null;
 
@@ -2454,7 +2480,7 @@ private Transform FindPlayerTransform(string playerId)
     {
         // Use level-specific sprites
         List<Sprite> sprites = GetCurrentOtherChipSprites();
-        
+
         for (int i = 0; i < betOptions.Count; i++)
         {
             if (betOptions[i] == amount)
@@ -2466,7 +2492,7 @@ private Transform FindPlayerTransform(string playerId)
                     Debug.LogWarning($"[GameManager] Other chip sprite index {i} out of range for {currentRoom}");
             }
         }
-        
+
         // Return first sprite as fallback
         return sprites.Count > 0 ? sprites[0] : null;
 
@@ -2583,12 +2609,12 @@ private Transform FindPlayerTransform(string playerId)
         bool hasPrefix = winamount.StartsWith("+") || winamount.StartsWith("-");
         string prefix = hasPrefix ? winamount[0].ToString() : "+";
         string amountStr = hasPrefix ? winamount.Substring(1) : winamount;
-        
+
         if (double.TryParse(amountStr, out double amount))
         {
             displayText = prefix + FormatHelper.FormatAmount(amount);
         }
-        
+
         coinAddText.text = displayText;
 
         // Kill previous animation if running
@@ -2618,11 +2644,11 @@ private Transform FindPlayerTransform(string playerId)
     {
         BlockerObj.transform.position = popStart.position;
         BlockerObj.transform.localScale = Vector3.one;
-        
+
         yield return Move(BlockerObj.transform, popCenter.position, moveDuration);
-        
+
         BlockerObj.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack);
-        
+
         yield return new WaitForSeconds(holdDuration);
 
         yield return Move(BlockerObj.transform, popEnd.position, moveDuration);
@@ -2779,7 +2805,7 @@ private Transform FindPlayerTransform(string playerId)
 
             // Find room with highest player count
             int maxPlayers = Mathf.Max(lobby.casual, lobby.novice, lobby.expert, lobby.high_roller);
-            
+
             // Count how many rooms have the max player count
             int roomsWithMax = 0;
             if (lobby.casual == maxPlayers && lobby.casual > 0) roomsWithMax++;
