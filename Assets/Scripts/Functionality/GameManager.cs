@@ -657,9 +657,26 @@ public class GameManager : MonoBehaviour
             RoundInfoAnim(2);
             audioManager.PlayGirlAudio("timeisrunning");
         }
-        else if (time == 0)
+        else if (time == 1)
         {
-            pulseText.gameObject.SetActive(false);
+            StartCoroutine(WaitForBetLocked(1f));
+        }
+        else if (time == 25)
+        {
+            EnableAllWinRatioTexts();
+            audioManager.PlayGirlAudio("placeyourbet");
+        }
+        if (time % 5 == 4)
+        {
+            Handanimator.Play("NoHand");
+
+        }
+    }
+
+    IEnumerator WaitForBetLocked(float delay )
+    {
+        yield return new WaitForSeconds(delay);
+        pulseText.gameObject.SetActive(false);
             RoundInfoAnim(1);
             BetBlocker.gameObject.SetActive(true);
             audioManager.PlayGirlAudio("nomorebets");
@@ -670,17 +687,6 @@ public class GameManager : MonoBehaviour
 
             RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
             BetBlocker.gameObject.SetActive(true);
-        }
-        else if (time == 24)
-        {
-            EnableAllWinRatioTexts();
-            audioManager.PlayGirlAudio("placeyourbet");
-        }
-        if (time % 5 == 4)
-        {
-            Handanimator.Play("NoHand");
-
-        }
     }
     bool firstTime = true;
     internal void SetNewRoundTimer(int i)
