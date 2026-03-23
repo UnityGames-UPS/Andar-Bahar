@@ -984,7 +984,7 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
+    
 
     public void DistributePayoutsNew(List<Payout> payouts)
     {
@@ -1636,7 +1636,7 @@ public class GameManager : MonoBehaviour
 
     private void MoveChip(Chip chip, Transform target, bool returnToPool)
     {
-        chip.transform.DOMove(target.position, 1f)
+        chip.transform.DOMove(target.position, 2f)
             .SetEase(Ease.InOutCubic)
             .OnComplete(() =>
             {
@@ -2059,15 +2059,7 @@ public class GameManager : MonoBehaviour
 
 
 
-
-
     #region chip Pool
-
-
-
-
-
-
 
     GameObject AddChip()
     {
