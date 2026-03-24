@@ -117,6 +117,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform popCenter;
     [SerializeField] private Transform popEnd;
     [SerializeField] private TMP_Text coinAddText;
+      [SerializeField] private Image coinImage;
     [SerializeField] private float moveY = 30f;
     [SerializeField] private float duration = 0.5f;
 
@@ -163,7 +164,7 @@ public class GameManager : MonoBehaviour
     private Coroutine StartGameCorutine;
     private Coroutine EndGameCorutine;
 
-    private Vector3 startPoscoin = new Vector3(0, -138, 0);
+    private Vector3 startPoscoin ;
     private Vector3 endPos = new Vector3(0, -10, 0);
 
     private int previousNextRoundTimerValue = -1; // Track previous next round timer to detect actual end vs join mid-round
@@ -905,25 +906,36 @@ public class GameManager : MonoBehaviour
         // yield return null;
         resultsOptions.Add(ResultOption);
         MoveAllChipstohomeNew();
-        yield return new WaitForSeconds(0.8f);
+        ResetOptionPrefabs();
+        yield return new WaitForSeconds(2f);
 
         // 2️⃣ Spawn payout chips on winning options
         SpawnPayoutOnWinningOptions(socketManager.CashoutData.payouts);
         ResetAllBetUI();
 
-        yield return new WaitForSeconds(0.8f);
+        yield return new WaitForSeconds(1f);
 
         // 3️⃣ Move winning chips to players
         MoveWinningChipsToPlayers(socketManager.CashoutData.payouts);
 
         // 4️⃣ Update leaderboard
         SetOtherplayerData(socketManager.CashoutData.leaderboards);
-        yield return new WaitForSeconds(0.8f);
+        yield return new WaitForSeconds(1.5f);
         ResetAllChips();
         yield return new WaitForSeconds(1f);
         resultsOptions.Clear();
 
 
+    }
+    void ResetOptionPrefabs()
+    {
+        foreach (var item in AllOptions)
+        {
+            if (!resultsOptions.Contains(item))
+            {
+                item.DontShowText();
+            }
+        }
     }
     void MoveAllChipstohome()
     {
@@ -973,14 +985,14 @@ public class GameManager : MonoBehaviour
         {
             if (!resultsOptions.Contains(item.betoptions))
             {
-                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true);
+                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true ,1.5f);
             }
         }
         foreach (var item in OtherPlayerChips)
         {
             if (!resultsOptions.Contains(item.betoptions))
             {
-                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true);
+                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true ,1.5f);
             }
         }
     }
@@ -1048,7 +1060,7 @@ public class GameManager : MonoBehaviour
                     RoundInfo_Text.transform,
                     winningOption,
                     false,
-                    0.4f
+                    1f
                 );
 
                 if (uiManager.MainPlayers.playername.text == payout.username)
@@ -1279,7 +1291,7 @@ public class GameManager : MonoBehaviour
         AndarBtnHighLight.SetActive(andar);
         BaharBtnHighLight.SetActive(bahar);
     }
-    private void MoveChip(Transform chip, Transform startPos, Transform endPos, bool disableOnEnd, float duration = 0.6f)
+    private void MoveChip(Transform chip, Transform startPos, Transform endPos, bool disableOnEnd, float duration = 1f)
     {
         if (chip == null || startPos == null || endPos == null)
         {
@@ -1289,7 +1301,7 @@ public class GameManager : MonoBehaviour
 
         chip.position = startPos.position;
         chip.DOMove(endPos.position, duration)
-            .SetEase(Ease.InOutCubic)
+            .SetEase(Ease.InOutExpo)
             .OnComplete(() =>
             {
                 if (disableOnEnd)
@@ -1481,7 +1493,7 @@ public class GameManager : MonoBehaviour
     }
 
 
-    GameObject SpawnChip(Sprite sprite, string amount, int chipindex, Transform startPoint, OptionPrefab op, bool isPlayerbet = false, float moveTime = 0.4f)
+    GameObject SpawnChip(Sprite sprite, string amount, int chipindex, Transform startPoint, OptionPrefab op, bool isPlayerbet = false, float moveTime = 1f)
     {
         Chip chip = GetChip();
         chip.SetData(sprite, amount, chipindex);
@@ -1636,8 +1648,8 @@ public class GameManager : MonoBehaviour
 
     private void MoveChip(Chip chip, Transform target, bool returnToPool)
     {
-        chip.transform.DOMove(target.position, 2f)
-            .SetEase(Ease.InOutCubic)
+        chip.transform.DOMove(target.position, 1.5f)
+            .SetEase(Ease.InOutExpo)
             .OnComplete(() =>
             {
                 if (returnToPool)
@@ -2599,44 +2611,57 @@ public class GameManager : MonoBehaviour
             StopCoroutine(animRoutine);
 
         animRoutine = StartCoroutine(PopupRoutine());
-    }
-    internal void playtheCoin(string winamount)
+    }internal void playtheCoin(string winamount)
     {
-        // Parse and format the win amount
-        string displayText = winamount;
-        bool hasPrefix = winamount.StartsWith("+") || winamount.StartsWith("-");
-        string prefix = hasPrefix ? winamount[0].ToString() : "+";
-        string amountStr = hasPrefix ? winamount.Substring(1) : winamount;
+        coinAddText.text = winamount;
 
-        if (double.TryParse(amountStr, out double amount))
-        {
-            displayText = prefix + FormatHelper.FormatAmount(amount);
-        }
-
-        coinAddText.text = displayText;
-
-        // Kill previous animation if running
         coinTween?.Kill();
 
-        // Reset state
         coinAddText.rectTransform.localPosition = startPoscoin;
+        coinAddText.transform.localScale = Vector3.one;
         coinAddText.color = startColor;
         coinAddText.gameObject.SetActive(true);
 
-        // Animate
+        float moveDuration = 1.35f;
+        float scaleDuration = 0.75f;
+
         coinTween = DOTween.Sequence()
-            .Append(coinAddText.rectTransform
-                .DOLocalMoveY(startPos.y + moveY, duration))
-            .Join(coinAddText
-                .DOFade(0f, duration))
+
+            .Append(
+                coinAddText.rectTransform
+                    .DOLocalMoveY(startPoscoin.y + moveY, moveDuration)
+                    .SetEase(Ease.Linear)
+            )
+
+            .Append(
+                DOTween.Sequence()
+                    .Join(
+                        coinAddText.transform
+                            .DOScale(1.15f, scaleDuration)
+                    ).Join(
+                        coinImage.transform
+                            .DOScale(1.15f, scaleDuration)
+                    )
+                    .Join(
+                        coinAddText
+                            .DOFade(0f, scaleDuration)
+                    )
+                    .Join(
+                        coinImage
+                            .DOFade(0f, scaleDuration)
+                    )
+
+            )
+
             .OnComplete(() =>
             {
-                // Reset after animation
                 coinAddText.gameObject.SetActive(false);
-                coinAddText.rectTransform.localPosition = startPos;
+                coinAddText.rectTransform.localPosition = startPoscoin;
+                coinAddText.transform.localScale = Vector3.one;
                 coinAddText.color = startColor;
             });
     }
+
 
     private IEnumerator PopupRoutine()
     {
