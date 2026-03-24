@@ -5469,33 +5469,33 @@ MonoBehaviour:
   - {fileID: -65307496282541691, guid: a695ffdadcf02403692b036dc14a3ce0, type: 3}
   - {fileID: -8018824068341378540, guid: a695ffdadcf02403692b036dc14a3ce0, type: 3}
   HighlightedChipSprite_Casual:
-  - {fileID: 8512683102339311868, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: -2744041204054938859, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: 4721460068005870302, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: -7446886288484143457, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: 4469694178771032508, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: 4469694178771032508, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
+  - {fileID: -8630663600230776277, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: -2889754398991727145, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: 905870234929525508, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: 6992122328444658568, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: -8830194968436990523, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: -8830194968436990523, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
   HighlightedChipSprite_Novice:
-  - {fileID: -2744041204054938859, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: 4721460068005870302, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: -7446886288484143457, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: 4469694178771032508, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: 4469694178771032508, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: -7446886288484143457, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
+  - {fileID: -2889754398991727145, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: 905870234929525508, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: 6992122328444658568, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: -8830194968436990523, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: -8830194968436990523, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: 6992122328444658568, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
   HighlightedChipSprite_Expert:
-  - {fileID: 4469694178771032508, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: 4469694178771032508, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: -7446886288484143457, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: 1620750895830159419, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: 1620750895830159419, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: -2640104371788994410, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
+  - {fileID: -8830194968436990523, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: -8830194968436990523, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: 6992122328444658568, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: -8538125636190193951, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: -8538125636190193951, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: -2920717491452450866, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
   HighlightedChipSprite_HighRoller:
-  - {fileID: -7446886288484143457, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: 1620750895830159419, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: 1620750895830159419, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: -2640104371788994410, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: -2640104371788994410, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
-  - {fileID: -4158946285411969722, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
+  - {fileID: 6992122328444658568, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: -8538125636190193951, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: -8538125636190193951, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: -2920717491452450866, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: -2920717491452450866, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
+  - {fileID: 2544474553809975346, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
   OtherChipSprite_Casual:
   - {fileID: -1214558057414701265, guid: f9181235575674a578da1d9c160368e7, type: 3}
   - {fileID: 4111091205750169971, guid: f9181235575674a578da1d9c160368e7, type: 3}
@@ -8872,7 +8872,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 2, y: 0, z: 2, w: 0}
+  m_margin: {x: 2, y: 4.5, z: 2, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -20911,9 +20911,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -7446886288484143457, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
+  m_Sprite: {fileID: 6992122328444658568, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -25555,9 +25555,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -7446886288484143457, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
+  m_Sprite: {fileID: 6992122328444658568, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -30430,7 +30430,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 2, y: 0, z: 2, w: 0}
+  m_margin: {x: 2, y: 4.5, z: 2, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -34012,9 +34012,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -7446886288484143457, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
+  m_Sprite: {fileID: 6992122328444658568, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -34261,9 +34261,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -7446886288484143457, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
+  m_Sprite: {fileID: 6992122328444658568, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -39193,7 +39193,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 8512683102339311868, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
+  m_Sprite: {fileID: -8630663600230776277, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -52870,7 +52870,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1127067819
 RectTransform:
   m_ObjectHideFlags: 0
@@ -54425,7 +54425,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 2, y: 0, z: 2, w: 0}
+  m_margin: {x: 2, y: 4.5, z: 2, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -59017,7 +59017,7 @@ MonoBehaviour:
   uiManager: {fileID: 2115417990}
   MultiplierList: []
   JSManager: {fileID: 1519490010}
-  testToken: 65635b00cbf74658bc50e592969740df
+  testToken: 8d6f387d786045f6a12a63188d252f64
   RaycastBlocker: {fileID: 1127067818}
 --- !u!4 &1272847617
 Transform:
@@ -88867,7 +88867,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 2, y: 0, z: 2, w: 0}
+  m_margin: {x: 2, y: 4.5, z: 2, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -100729,7 +100729,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 2, y: 0, z: 2, w: 0}
+  m_margin: {x: 2, y: 4.5, z: 2, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -110110,9 +110110,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -7446886288484143457, guid: 5065206ed62b54d12841f37ff6d81a5c, type: 3}
+  m_Sprite: {fileID: 6992122328444658568, guid: 94d45c0c64eb7475987790dd81aec036, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
