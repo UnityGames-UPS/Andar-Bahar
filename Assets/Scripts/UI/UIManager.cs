@@ -1184,7 +1184,7 @@ private void InitializeAudioButtons()
     }
     internal void SetNetBetPanel(bool istrue, string totalbet = "-1")
     {
-        if (totalbet == "0") return;
+        //if (totalbet == "0") return;
 
         if (totalbet != "-1")
         {

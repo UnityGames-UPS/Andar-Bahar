@@ -29739,7 +29739,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &587812436
 RectTransform:
   m_ObjectHideFlags: 0
@@ -59017,7 +59017,7 @@ MonoBehaviour:
   uiManager: {fileID: 2115417990}
   MultiplierList: []
   JSManager: {fileID: 1519490010}
-  testToken: 1448067c35af407cb58e363bdf809fd7
+  testToken: 65635b00cbf74658bc50e592969740df
   RaycastBlocker: {fileID: 1127067818}
 --- !u!4 &1272847617
 Transform:
