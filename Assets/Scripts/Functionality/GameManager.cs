@@ -1807,6 +1807,7 @@ public class GameManager : MonoBehaviour
         }
         uiManager.SetChipoption(true);
     }
+
     internal void DoubleBets(List<Bet> bets)
     {
         audioManager.PlayWLAudio("double");
@@ -1817,9 +1818,8 @@ public class GameManager : MonoBehaviour
         {
             if (bet.delta > 0)
             {
-                int amount = bet.oldAmount;
+                int amount = bet.delta;  
 
-                // Break amount into multiple chips
                 List<int> chipPieces = BreakAmountIntoChips(amount, roomChips);
 
                 foreach (int piece in chipPieces)
@@ -1832,7 +1832,7 @@ public class GameManager : MonoBehaviour
                     string val = FormatHelper.FormatChipAmount(piece);
                     int index = findChipindex(piece, roomChips);
 
-                    if (index <= 5)   // your existing condition
+                    if (index <= 5) 
                     {
                         data.chip = SpawnChip(
                             findChipSprite(piece, roomChips),
@@ -1851,7 +1851,6 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
     internal void ClearAllBets()
     {
         StartCoroutine(CancleBets());
