@@ -264,6 +264,7 @@ public class SocketIOManager : MonoBehaviour
     }
     private void OnListenCardEvent(string data)
     {
+        Debug.Log("[BROADCAST] game:card_dealt : " + data);
         gameManager.OnGameLoaded();
         //  ParseResponse(data);
         CardDelt = JsonUtility.FromJson<Root>(data);
@@ -755,6 +756,14 @@ public class SocketIOManager : MonoBehaviour
         uiManager.sideMenuePanel.transform.position = new Vector3(uiManager.sideMenuePanel.transform.position.x, 271f, uiManager.sideMenuePanel.transform.position.z);
         uiManager.Rayid.text = "R.ID: " + roomData.payload.roomId;
         uiManager.InitializeStatsFromServer(roomData.payload.stats);
+        // Set correct win ratios and load mid-round bets if roundState exists (joining mid-round)
+        if (roomData.payload.roundState != null)
+        {
+            gameManager.ApplyMidRoundState(
+                roomData.payload.roundState,
+                roomData.payload.bets
+            );
+        }
     }
 
     void ManageOtherPlayerbets(string data)
@@ -920,6 +929,17 @@ public class SendRoom
 }
 
 [Serializable]
+public class RoundState
+{
+    public string roundId;
+    public MiddleCard middleCard;
+    public List<AndarCard> andarCards;
+    public List<BaharCard> baharCards;
+    public int cardsDealt;
+    public string phase;
+}
+
+[Serializable]
 public class Payload
 {
     public string level;
@@ -949,6 +969,7 @@ public class Payload
     public Lobby lobby;
     public List<string> stats;
 
+    public RoundState roundState;
 }
 [System.Serializable]
 public class Bet
@@ -960,6 +981,7 @@ public class Bet
     public string betOption;
     public int delta;
     public int amount;
+    public string username; // populated in JOIN_LEVEL ACK bets array
 }
 
 [System.Serializable]

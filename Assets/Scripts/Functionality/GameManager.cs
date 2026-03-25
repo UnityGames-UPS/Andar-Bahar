@@ -251,6 +251,7 @@ public class GameManager : MonoBehaviour
         AndarTxt.SetData(0, "andar", "", "main_bets");
         BaharTxt.SetData(1, "bahar", "", "main_bets");
 
+        // Payout index for first_1_andar/bahar is set per-round based on middle card color in SetMainCard
         FirstAndarTxt.SetData(2, "firstOneAndar", socketManager.initialData.wagers.op_bets.first_1_andar.payout[0].ToString(), "op_bets");
         FirstBaharTxt.SetData(3, "firstOneBahar", socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0].ToString(), "op_bets");
         FirstThreeTxt.SetData(4, "firstThree", socketManager.initialData.wagers.op_bets.first_3.payout.straight.ToString(), "op_bets");
@@ -593,18 +594,22 @@ public class GameManager : MonoBehaviour
         PlayMiddleCardAnim();
         // yield return new WaitForSeconds(2f);
 
-        bool startWithAndar = socketManager.gameLoopData.middleCard.color == "black";
-        if (startWithAndar)
+        // Black middle card: Andar deals first -> Andar payout[0], Bahar payout[1]
+        // Red middle card: Bahar deals first -> Bahar payout[0], Andar payout[1]
+        bool middleCardIsBlack = socketManager.gameLoopData.middleCard.color == "black";
+        if (middleCardIsBlack)
         {
             AndarTxt.SetData(0, "andar", socketManager.initialData.wagers.main_bets.andar.payout[0].ToString(), "main_bets");
-            BaharTxt.SetData(1, "bahar", "1", "main_bets");
-
+            BaharTxt.SetData(1, "bahar", socketManager.initialData.wagers.main_bets.bahar.payout[1].ToString(), "main_bets");
+            FirstAndarTxt.SetData(2, "firstOneAndar", socketManager.initialData.wagers.op_bets.first_1_andar.payout[0].ToString(), "op_bets");
+            FirstBaharTxt.SetData(3, "firstOneBahar", socketManager.initialData.wagers.op_bets.first_1_bahar.payout[1].ToString(), "op_bets");
         }
         else
         {
-            AndarTxt.SetData(0, "andar", "1", "main_bets");
+            AndarTxt.SetData(0, "andar", socketManager.initialData.wagers.main_bets.andar.payout[1].ToString(), "main_bets");
             BaharTxt.SetData(1, "bahar", socketManager.initialData.wagers.main_bets.bahar.payout[0].ToString(), "main_bets");
-
+            FirstAndarTxt.SetData(2, "firstOneAndar", socketManager.initialData.wagers.op_bets.first_1_andar.payout[1].ToString(), "op_bets");
+            FirstBaharTxt.SetData(3, "firstOneBahar", socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0].ToString(), "op_bets");
         }
 
     }
@@ -613,6 +618,26 @@ public class GameManager : MonoBehaviour
     {
         ResetCardHistory();
         BonusObject.gameObject.SetActive(false);
+        // Always apply correct win ratios from the current middle card color.
+        // This handles mid-round joins where SetMainCard was never called.
+        if (socketManager.TimeRemaining.middleCard != null)
+        {
+            bool isBlack = socketManager.TimeRemaining.middleCard.color == "black";
+            if (isBlack)
+            {
+                AndarTxt.SetData(0, "andar", socketManager.initialData.wagers.main_bets.andar.payout[0].ToString(), "main_bets");
+                BaharTxt.SetData(1, "bahar", socketManager.initialData.wagers.main_bets.bahar.payout[1].ToString(), "main_bets");
+                FirstAndarTxt.SetData(2, "firstOneAndar", socketManager.initialData.wagers.op_bets.first_1_andar.payout[0].ToString(), "op_bets");
+                FirstBaharTxt.SetData(3, "firstOneBahar", socketManager.initialData.wagers.op_bets.first_1_bahar.payout[1].ToString(), "op_bets");
+            }
+            else
+            {
+                AndarTxt.SetData(0, "andar", socketManager.initialData.wagers.main_bets.andar.payout[1].ToString(), "main_bets");
+                BaharTxt.SetData(1, "bahar", socketManager.initialData.wagers.main_bets.bahar.payout[0].ToString(), "main_bets");
+                FirstAndarTxt.SetData(2, "firstOneAndar", socketManager.initialData.wagers.op_bets.first_1_andar.payout[1].ToString(), "op_bets");
+                FirstBaharTxt.SetData(3, "firstOneBahar", socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0].ToString(), "op_bets");
+            }
+        }
         BetBlocker.gameObject.SetActive(false);
         RoundInfo_Text.gameObject.SetActive(true);
         animHand.MiddleCard.sprite = CardSet(socketManager.TimeRemaining.middleCard.suit, socketManager.TimeRemaining.middleCard.rank);
@@ -659,6 +684,12 @@ public class GameManager : MonoBehaviour
         {
             EnableAllWinRatioTexts();
             audioManager.PlayGirlAudio("placeyourbet");
+        }
+        // If joining mid-round during betting phase, ratios may not be enabled yet
+        // EnableAllWinRatioTexts is safe to call multiple times (idempotent)
+        if (time > 1 && time < 25)
+        {
+            EnableAllWinRatioTexts();
         }
         if (time % 5 == 4)
         {
@@ -895,7 +926,7 @@ public class GameManager : MonoBehaviour
         resultsOptions.Add(ResultOption);
         MoveAllChipstohomeNew();
         ResetOptionPrefabs();
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(3f);
 
         // 2️⃣ Spawn payout chips on winning options
         SpawnPayoutOnWinningOptions(socketManager.CashoutData.payouts);
@@ -910,6 +941,11 @@ public class GameManager : MonoBehaviour
         SetOtherplayerData(socketManager.CashoutData.leaderboards);
         yield return new WaitForSeconds(1.5f);
         ResetAllChips();
+        // Hide winning options bet text now that chips have moved
+        foreach (var item in resultsOptions)
+        {
+            if (item != null) item.DontShowText();
+        }
         yield return new WaitForSeconds(1f);
         resultsOptions.Clear();
 
@@ -917,11 +953,31 @@ public class GameManager : MonoBehaviour
     }
     void ResetOptionPrefabs()
     {
+        // Calculate total win amount per winning option from payouts
+        var payouts = socketManager.CashoutData.payouts;
+
         foreach (var item in AllOptions)
         {
             if (!resultsOptions.Contains(item))
             {
+                // Non-winning: hide all bet text
                 item.DontShowText();
+            }
+            else
+            {
+                // Winning option: show total win amount that will be distributed here
+                double totalWinForOption = 0;
+                if (payouts != null)
+                {
+                    foreach (var payout in payouts)
+                    {
+                        if (payout.win > 0)
+                            totalWinForOption += payout.win;
+                    }
+                }
+                item.TotalBetObj.SetActive(true);
+                item.TotalBetText.text = FormatHelper.FormatAmount(totalWinForOption);
+                item.MyBetObj.SetActive(false);
             }
         }
     }
@@ -1438,6 +1494,95 @@ public class GameManager : MonoBehaviour
             UpdateTotalBetOnOption(chipdata.betOption, piece);
         }
     }
+    /// <summary>
+    /// Called from OnRoomEnter when joining mid-round.
+    /// Sets correct win ratios based on middle card color, enables win ratio texts,
+    /// and defers chip spawning by one frame so UI layout is ready.
+    /// </summary>
+    internal void ApplyMidRoundState(RoundState roundState, List<Bet> bets)
+    {
+        // --- Fix win ratios based on middle card color ---
+        if (roundState.middleCard != null)
+        {
+            bool isBlack = roundState.middleCard.color == "black";
+            if (isBlack)
+            {
+                // Andar deals first: Andar/FirstAndar get payout[0], Bahar/FirstBahar get payout[1]
+                AndarTxt.SetData(0, "andar", socketManager.initialData.wagers.main_bets.andar.payout[0].ToString(), "main_bets");
+                BaharTxt.SetData(1, "bahar", socketManager.initialData.wagers.main_bets.bahar.payout[1].ToString(), "main_bets");
+                FirstAndarTxt.SetData(2, "firstOneAndar", socketManager.initialData.wagers.op_bets.first_1_andar.payout[0].ToString(), "op_bets");
+                FirstBaharTxt.SetData(3, "firstOneBahar", socketManager.initialData.wagers.op_bets.first_1_bahar.payout[1].ToString(), "op_bets");
+            }
+            else
+            {
+                // Bahar deals first: Bahar/FirstBahar get payout[0], Andar/FirstAndar get payout[1]
+                AndarTxt.SetData(0, "andar", socketManager.initialData.wagers.main_bets.andar.payout[1].ToString(), "main_bets");
+                BaharTxt.SetData(1, "bahar", socketManager.initialData.wagers.main_bets.bahar.payout[0].ToString(), "main_bets");
+                FirstAndarTxt.SetData(2, "firstOneAndar", socketManager.initialData.wagers.op_bets.first_1_andar.payout[1].ToString(), "op_bets");
+                FirstBaharTxt.SetData(3, "firstOneBahar", socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0].ToString(), "op_bets");
+            }
+        }
+
+        // --- Enable win ratio texts (player joined during betting phase) ---
+        if (roundState.phase == "betting")
+        {
+            EnableAllWinRatioTexts();
+        }
+
+        // --- Defer chip spawning by one frame so RectTransform layout is ready ---
+        if (bets != null && bets.Count > 0)
+        {
+            StartCoroutine(SpawnMidRoundChipsNextFrame(bets));
+        }
+    }
+
+    IEnumerator SpawnMidRoundChipsNextFrame(List<Bet> bets)
+    {
+        // Wait two frames: one for GamePage activation, one for Canvas layout rebuild
+        yield return null;
+        yield return null;
+
+        string mainPlayerName = uiManager.MainPlayers.playername.text;
+        List<int> roomChips = FindRoom();
+
+        foreach (var bet in bets)
+        {
+            if (string.IsNullOrEmpty(bet.username) || bet.username == mainPlayerName)
+                continue;
+
+            Transform spawnFrom = FindPlayerTransform(bet.username);
+            if (spawnFrom == null)
+                spawnFrom = TotalPlayer_text.transform;
+
+            int totalAmount = bet.amount;
+            List<int> chipPieces = BreakAmountIntoChips(totalAmount, roomChips);
+
+            foreach (int piece in chipPieces)
+            {
+                int index = findChipindex(piece, roomChips);
+                string val = FormatHelper.FormatChipAmount(piece);
+                OptionPrefab targetOption = FindOption(bet.betOption);
+
+                ChipData data = new ChipData();
+                data.betId = bet.betId;
+                data.amount = piece;
+                data.betoptions = targetOption;
+
+                data.chip = SpawnChip(
+                    findOtherPlayerChipSprite(piece, roomChips),
+                    val,
+                    index,
+                    spawnFrom,
+                    targetOption
+                );
+
+                data.chip.transform.SetParent(OtherPlayerChipPoolParent);
+                OtherPlayerChips.Add(data);
+                UpdateTotalBetOnOption(bet.betOption, piece);
+            }
+        }
+    }
+
     void ClearOtherPlayerbets(Root chipdata)
     {
 
@@ -2417,7 +2562,7 @@ public class GameManager : MonoBehaviour
                 // Safety check
                 if (i < sprites.Count)
                     return sprites[i];
-        
+
             }
         }
 
@@ -2437,7 +2582,7 @@ public class GameManager : MonoBehaviour
                 // Safety check
                 if (i < sprites.Count)
                     return sprites[i];
-             
+
             }
         }
 
