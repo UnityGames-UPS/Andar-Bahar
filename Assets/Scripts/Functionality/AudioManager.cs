@@ -153,12 +153,11 @@ public class AudioManager : MonoBehaviour
                 userMusicMuted = mute;
                 bg_adudio.mute = mute;
                 SaveMusicPreference();
-                
+
                 // ✅ FIX: If unmuting and music is paused/stopped, resume it
                 if (!mute && bg_adudio && !bg_adudio.isPlaying)
                 {
                     bg_adudio.Play();
-                    Debug.Log("[AudioManager] Music unmuted - resuming playback");
                 }
                 break;
 
@@ -201,11 +200,11 @@ public class AudioManager : MonoBehaviour
     private void UpdateSoundMutedState()
     {
         // Check if all sound sources are muted
-        bool allMuted = audioPlayer_button.mute && 
-                       audioPlayer_wl.mute && 
-                       audioWin.mute && 
+        bool allMuted = audioPlayer_button.mute &&
+                       audioPlayer_wl.mute &&
+                       audioWin.mute &&
                        audioBet_button.mute;
-        
+
         userSoundMuted = allMuted;
         SaveSoundPreference();
     }
@@ -236,7 +235,6 @@ public class AudioManager : MonoBehaviour
         userMusicMuted = PlayerPrefs.GetInt(PREF_MUSIC_MUTED, 0) == 1;
         userSoundMuted = PlayerPrefs.GetInt(PREF_SOUND_MUTED, 0) == 1;
 
-        Debug.Log($"[AudioManager] Loaded preferences - Music: {(userMusicMuted ? "Muted" : "Unmuted")}, Sound: {(userSoundMuted ? "Muted" : "Unmuted")}");
     }
 
     private void ApplyAudioPreferences()
@@ -258,14 +256,12 @@ public class AudioManager : MonoBehaviour
     {
         PlayerPrefs.SetInt(PREF_MUSIC_MUTED, userMusicMuted ? 1 : 0);
         PlayerPrefs.Save();
-        Debug.Log($"[AudioManager] Music preference saved: {(userMusicMuted ? "Muted" : "Unmuted")}");
     }
 
     private void SaveSoundPreference()
     {
         PlayerPrefs.SetInt(PREF_SOUND_MUTED, userSoundMuted ? 1 : 0);
         PlayerPrefs.Save();
-        Debug.Log($"[AudioManager] Sound preference saved: {(userSoundMuted ? "Muted" : "Unmuted")}");
     }
 
     #endregion
@@ -314,7 +310,6 @@ public class AudioManager : MonoBehaviour
         audioPlayer_wl.mute = userSoundMuted;
         audioWin.mute = userSoundMuted;
 
-        Debug.Log("[AudioManager] App gained focus - restored to user preferences");
     }
 
     private void OnApplicationLostFocus()
@@ -334,7 +329,6 @@ public class AudioManager : MonoBehaviour
         audioPlayer_wl.mute = true;
         audioWin.mute = true;
 
-        Debug.Log("[AudioManager] App lost focus - paused audio");
     }
 
     #endregion
@@ -354,7 +348,6 @@ public class AudioManager : MonoBehaviour
         userSoundMuted = false;
         ApplyAudioPreferences();
 
-        Debug.Log("[AudioManager] Audio preferences reset to defaults");
     }
 
     #endregion

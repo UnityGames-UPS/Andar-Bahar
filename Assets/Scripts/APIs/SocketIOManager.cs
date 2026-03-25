@@ -48,9 +48,7 @@ public class SocketIOManager : MonoBehaviour
     protected string nameSpace = "playground-multiplayer"; //BackendChanges
     private Socket gameSocket; //BackendChanges
 
-
     private SocketManager manager;
-
 
     protected string SocketURI = null;
     protected string TestSocketURI = "https://devrealtime.dingdinghouse.com/";
@@ -89,7 +87,6 @@ public class SocketIOManager : MonoBehaviour
     private void Awake()
     {
         Application.runInBackground = true;
-        //Debug.unityLogger.logEnabled = false;
         isLoaded = false;
         SetInit = false;
 
@@ -102,14 +99,11 @@ public class SocketIOManager : MonoBehaviour
     }
     void CloseGame()
     {
-        Debug.Log("Unity: Closing Game");
         StartCoroutine(CloseSocket());
     }
 
-
     void ReceiveAuthToken(string jsonData)
     {
-        Debug.Log("Received data: " + jsonData);
 
         // Parse the JSON data
         var data = JsonUtility.FromJson<AuthTokenData>(jsonData);
@@ -129,7 +123,6 @@ public class SocketIOManager : MonoBehaviour
         options.Reconnection = false;
         options.Timeout = TimeSpan.FromSeconds(3);
         options.ConnectWith = Best.SocketIO.Transports.TransportTypes.WebSocket; //BackendChanges
-
 
         //   Application.ExternalCall("window.parent.postMessage", "authToken", "*");
 
@@ -157,15 +150,12 @@ public class SocketIOManager : MonoBehaviour
         // Wait until myAuth is not null
         while (myAuth == null)
         {
-            Debug.Log("My Auth is null");
             yield return null;
         }
         while (SocketURI == null)
         {
-            Debug.Log("My Socket is null");
             yield return null;
         }
-        Debug.Log("My Auth is not null");
         // Once myAuth is set, configure the authFunction
         Func<SocketManager, Socket, object> authFunction = (manager, socket) =>
         {
@@ -177,7 +167,6 @@ public class SocketIOManager : MonoBehaviour
         };
         options.Auth = authFunction;
         savedToken = myAuth;
-        Debug.Log("Auth function configured with token: " + myAuth);
 
         // Proceed with connecting to the server
         SetupSocketManager(options);
@@ -229,7 +218,7 @@ public class SocketIOManager : MonoBehaviour
     // Connected event handler implementation
     void OnConnected(ConnectResponse resp) //Back2 Start
     {
-        Debug.Log("✅ Connected to server.");
+        Debug.Log("[CONNECT] Socket connected to server.");
 
         if (hasEverConnected)
         {
@@ -246,32 +235,29 @@ public class SocketIOManager : MonoBehaviour
 
     private void OnPongReceived(string data) //Back2 Start
     {
-        // Debug.Log("✅ Received pong from server.");
         waitingForPong = false;
         missedPongs = 0;
         lastPongTime = Time.time;
-        //  Debug.Log($"⏱️ Updated last pong time: {lastPongTime}");
-        //  Debug.Log($"📦 Pong payload: {data}");
     } //Back2 end
 
     private void OnDisconnected() //Back2 Start
     {
-        Debug.LogWarning("⚠️ Disconnected from server.");
+        Debug.LogWarning("[DISCONNECT] Socket disconnected from server.");
         isConnected = false;
         uiManager.DisconnectionPopup();
         ResetPingRoutine();
     } //Back2 end
     private void OnError(Error err)
     {
-        Debug.LogError("Socket Error Message: " + err);
+        Debug.LogError("[ERROR] Socket error: " + err);
 #if UNITY_WEBGL && !UNITY_EDITOR
     JSManager.SendCustomMessage("error");
 #endif
     }
     private void OnListenTimeEvent(string data)
     {
+        Debug.Log("[BROADCAST] game:betting_timer : " + data);
         gameManager.OnGameLoaded();
-        //        Debug.Log("Received timer:/n " + data);
         //  ParseResponse(data);
         TimeRemaining = JsonUtility.FromJson<Root>(data);
         gameManager.SetBetTimer();
@@ -279,14 +265,12 @@ public class SocketIOManager : MonoBehaviour
     private void OnListenCardEvent(string data)
     {
         gameManager.OnGameLoaded();
-        //   Debug.Log("Received Card:/n " + data);
         //  ParseResponse(data);
         CardDelt = JsonUtility.FromJson<Root>(data);
         gameManager.ManageCardDelt(CardDelt);
     }
     private void OnListenFlush(string data)
     {
-        //   Debug.Log("Received flush:/n " + data);
         FlushData = JsonUtility.FromJson<Root>(data);
         StartCoroutine(gameManager.ManageFlushAnimation());
         //  ParseResponse(data);
@@ -296,7 +280,7 @@ public class SocketIOManager : MonoBehaviour
     {
         if (state)
         {
-            Debug.Log("my state is " + state);
+            Debug.Log("[BROADCAST] socketState : " + state);
         }
         else
         {
@@ -305,11 +289,10 @@ public class SocketIOManager : MonoBehaviour
     }
     private void OnSocketError(string data)
     {
-        Debug.Log("Received error with data: " + data);
+        Debug.Log("[BROADCAST] internalError : " + data);
     }
     private void OnSocketAlert(string data)
     {
-        //        Debug.Log("Received alert with data: " + data);
     }
     private bool isFocused = true;
     private Coroutine focusCheckCoroutine;
@@ -317,7 +300,6 @@ public class SocketIOManager : MonoBehaviour
 
     void OnApplicationFocus(bool focus)
     {
-        Debug.Log("Focus: " + focus);
         isFocused = focus;
 
         if (!focus)
@@ -349,7 +331,6 @@ public class SocketIOManager : MonoBehaviour
         {
             // disconnectionShown = true;  // Prevent future runs
             //  uiManager.DisconnectionPopup();
-            Debug.Log("Disconnected: No Focus for 120 seconds");
         }
 
         focusCheckCoroutine = null;
@@ -357,7 +338,7 @@ public class SocketIOManager : MonoBehaviour
 
     private void OnSocketOtherDevice(string data)
     {
-        Debug.Log("Received Device Error with data: " + data);
+        Debug.Log("[BROADCAST] AnotherDevice : " + data);
         uiManager.ADfunction();
     }
 
@@ -380,7 +361,6 @@ public class SocketIOManager : MonoBehaviour
     {
         while (true)
         {
-            //  Debug.Log($"🟡 PingCheck | waitingForPong: {waitingForPong}, missedPongs: {missedPongs}, timeSinceLastPong: {Time.time - lastPongTime}");
 
             if (missedPongs == 0)
             {
@@ -395,11 +375,9 @@ public class SocketIOManager : MonoBehaviour
                     uiManager.ReconnectionPopup();
                 }
                 missedPongs++;
-                //  Debug.LogWarning($"⚠️ Pong missed #{missedPongs}/{MaxMissedPongs}");
 
                 if (missedPongs >= MaxMissedPongs)
                 {
-                    //  Debug.LogError("❌ Unable to connect to server — 5 consecutive pongs missed.");
                     isConnected = false;
                     uiManager.DisconnectionPopup();
                     yield break;
@@ -409,7 +387,6 @@ public class SocketIOManager : MonoBehaviour
             // Send next ping
             waitingForPong = true;
             lastPongTime = Time.time;
-            //  Debug.Log("📤 Sending ping...");
             SendDataWithNamespace("ping");
             yield return new WaitForSeconds(pingInterval);
         }
@@ -427,7 +404,7 @@ public class SocketIOManager : MonoBehaviour
             if (json != null)
             {
                 gameSocket.Emit(eventName, json);
-                Debug.Log("JSON data sent: " + json);
+                Debug.Log("[EMIT] " + eventName + " : " + json);
             }
             else
             {
@@ -436,7 +413,7 @@ public class SocketIOManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Socket is not connected.");
+            Debug.LogWarning("[EMIT] Failed — socket not connected.");
         }
     }
 
@@ -452,16 +429,16 @@ public class SocketIOManager : MonoBehaviour
         RaycastBlocker.SetActive(true);
         ResetPingRoutine();
 
-        Debug.Log("Closing Socket");
+        Debug.Log("[CONNECT] Closing socket...");
 
         manager?.Close();
         manager = null;
 
-        Debug.Log("Waiting for socket to close");
+
 
         yield return new WaitForSeconds(0.5f);
 
-        Debug.Log("Socket Closed");
+        Debug.Log("[CONNECT] Socket closed.");
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     JSManager.SendCustomMessage("OnExit"); //Telling the react platform user wants to quit and go back to homepage
@@ -469,7 +446,7 @@ public class SocketIOManager : MonoBehaviour
     }
     public void Reconnect()
     {
-        Debug.Log("Reconnecting using saved token...");
+        Debug.Log("[CONNECT] Reconnecting with saved token...");
 
         SocketOptions options = new SocketOptions();
         options.AutoConnect = false;
@@ -511,16 +488,16 @@ public class SocketIOManager : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogError("Failed to deserialize JSON. Exception: " + ex.Message + "\nJSON: " + jsonObject);
+            Debug.LogError("[BROADCAST] game:init parse error: " + ex.Message);
             return;
         }
 
         if (myData == null)
         {
-            Debug.LogError("ParseResponse: myData is null. JSON = " + jsonObject);
+            Debug.LogError("[BROADCAST] game:init : null payload received.");
             return;
         }
-        Debug.Log("ParseResponse: " + jsonObject);
+        Debug.Log("[BROADCAST] game:init : " + jsonObject);
 
         string id = myData.id;
         initialData = myData.gameData;
@@ -529,7 +506,6 @@ public class SocketIOManager : MonoBehaviour
         setInitialData();
         // if (initialData.bets != null)
         // else
-        //     Debug.LogWarning("initData: bets list is null.");
 
 #if UNITY_WEBGL && !UNITY_EDITOR
             JSManager.SendCustomMessage("OnEnter");
@@ -553,14 +529,14 @@ public class SocketIOManager : MonoBehaviour
 
     internal void SendRoomSelection(string Room)
     {
-        Debug.Log("*** send Data ***" + Room);
+        Debug.Log("[EMIT] request : JOIN_LEVEL => " + Room);
         SendRoom message = new SendRoom();
         message.payload = new Payload();
         message.type = "JOIN_LEVEL";
         message.payload.level = Room;
 
         string json = JsonUtility.ToJson(message);
-        Debug.Log("*** send Data ***" + json);
+
         // SendDataWithNamespace("request", json);
         gameSocket.ExpectAcknowledgement<string>(OnRoomEnter).Emit("request", json);
     }
@@ -570,12 +546,10 @@ public class SocketIOManager : MonoBehaviour
 
         if (double.TryParse(uiManager.coinSelector.Chiptext.text, out chipValue))
         {
-            Debug.Log("XXXXXXXX" + chipValue + "    " + playerdata.balance);
             if (chipValue > playerdata.balance)
             {
                 gameManager.PlayPopup("Low Balance");
                 // Low balance logic here
-                Debug.Log("Insufficient balance");
 
                 return;
             }
@@ -589,7 +563,7 @@ public class SocketIOManager : MonoBehaviour
         message.payload.betOption = betOption;
 
         string json = JsonUtility.ToJson(message);
-        Debug.Log("Bet JSON: " + json);
+        Debug.Log("[EMIT] request : PLACE_BET => " + json);
 
         gameSocket.ExpectAcknowledgement<string>(OnBetAcknowledged).Emit("request", json);
     }
@@ -652,7 +626,7 @@ public class SocketIOManager : MonoBehaviour
         NormalStart = false;
         DontDisplayDisconected = true;
         string json = JsonUtility.ToJson(message);
-        Debug.Log("Return home: " + json);
+        Debug.Log("[EMIT] request : HOME => " + json);
         // SendDataWithNamespace("request", json);
         gameSocket.ExpectAcknowledgement<string>(OnHome).Emit("request", json);
     }
@@ -665,7 +639,7 @@ public class SocketIOManager : MonoBehaviour
         message.payload.page = Pages;
 
         string json = JsonUtility.ToJson(message);
-        Debug.Log("Hestory sent: " + json);
+        Debug.Log("[EMIT] request : BET_HISTORY => " + json);
 
         // SendDataWithNamespace("request", json);
         gameSocket.ExpectAcknowledgement<string>(OnHistory).Emit("request", json);
@@ -674,7 +648,7 @@ public class SocketIOManager : MonoBehaviour
     void OnHome(string json)
     {
         gameManager.ClearAllBets();
-        Debug.Log("Home Receved: " + json);
+        Debug.Log("[ACK] HOME : " + json);
         ReturnHome = JsonUtility.FromJson<Root>(json);
         // Player count is updated via lobby_count broadcast, no need to update here
         // gameManager.SetPlayerCountOnReturn(ReturnHome.payload.lobby, ReturnHome.payload.balance);
@@ -697,14 +671,14 @@ public class SocketIOManager : MonoBehaviour
     }
     void OnHistory(string json)
     {
-        Debug.Log("**History Receved**" + json);
+        Debug.Log("[ACK] BET_HISTORY : " + json);
         HistoryPageData = JsonUtility.FromJson<Root>(json);
         uiManager.SetHistoryPage(HistoryPageData.payload);
     }
 
     void OnDouble(string json)
     {
-        Debug.Log(json);
+        Debug.Log("[ACK] DOUBLE_BET : " + json);
         doubleBetData = JsonUtility.FromJson<Root>(json);
         if (doubleBetData.success)
         {
@@ -720,7 +694,7 @@ public class SocketIOManager : MonoBehaviour
     }
     void OnRepeat(string json)
     {
-        Debug.Log("RepeatBet" + json);
+        Debug.Log("[ACK] REPEAT_BET : " + json);
         doubleBetData = JsonUtility.FromJson<Root>(json);
         if (doubleBetData.success)
         {
@@ -736,7 +710,7 @@ public class SocketIOManager : MonoBehaviour
     }
     void OnCancle(string json)
     {
-        Debug.Log("cancle :" + json);
+        Debug.Log("[ACK] CANCEL_BET : " + json);
         CancleBetData = JsonUtility.FromJson<Root>(json);
         if (CancleBetData.success == true)
         {
@@ -749,8 +723,7 @@ public class SocketIOManager : MonoBehaviour
     }
     void OnUndo(string json)
     {
-        Debug.Log("undo :" + json);
-        //  Debug.Log(json);
+        Debug.Log("[ACK] UNDO_BET : " + json);
         doubleBetData = JsonUtility.FromJson<Root>(json);
         // StartCoroutine(gameManager.UnduBets(doubleBetData.payload.bet.betId));
         gameManager.UndoBetsFast(doubleBetData.payload.bet.betId);
@@ -761,7 +734,7 @@ public class SocketIOManager : MonoBehaviour
     }
     void OnRoomEnter(string json)
     {
-        Debug.Log(json);
+        Debug.Log("[ACK] JOIN_LEVEL : " + json);
         roomData = JsonUtility.FromJson<Root>(json);
         if (roomData.success == false)
         {
@@ -786,14 +759,14 @@ public class SocketIOManager : MonoBehaviour
 
     void ManageOtherPlayerbets(string data)
     {
-        Debug.Log("Bet Placed OtherPlayer\n" + data);
+        Debug.Log("[BROADCAST] game:bet_placed : " + data);
         OtherChipData = JsonUtility.FromJson<Root>(data);
         gameManager.ManageBrodcastBetsOtherPlayers(OtherChipData);
 
     }
     void OnCashoutTimer(string json)
     {
-        Debug.Log("New Round Timer\n" + json);
+        Debug.Log("[BROADCAST] game:cashout_timer : " + json);
         TimeRemaining = JsonUtility.FromJson<Root>(json);
         gameManager.SetNewRoundTimer(TimeRemaining.timeRemaining);
     }
@@ -805,7 +778,7 @@ public class SocketIOManager : MonoBehaviour
             gameManager.OnGameLoaded();
         }
         NormalStart = true;
-        Debug.Log("Loop Started\n" + json);
+        Debug.Log("[BROADCAST] game:round_start : " + json);
         gameLoopData = JsonUtility.FromJson<Root>(json);
         gameManager.SetMainCard();
         gameManager.RestRoundText();
@@ -815,8 +788,7 @@ public class SocketIOManager : MonoBehaviour
     {
         gameLoopData = JsonUtility.FromJson<Root>(data);
 
-        Debug.Log("Loop end\n" + data);
-
+        Debug.Log("[BROADCAST] game:round_end : " + data);
 
         // if (!NormalStart)
         // {
@@ -828,13 +800,11 @@ public class SocketIOManager : MonoBehaviour
 
         gameManager.EndLoop();
 
-
-
         // Only start game AFTER validating
     }
     void OnCashout(string data)
     {
-        Debug.Log("CashOut\n" + data);
+        Debug.Log("[BROADCAST] game:cashout : " + data);
         CashoutData = JsonUtility.FromJson<Root>(data);
 
         gameManager.ManagePayouts();
@@ -842,7 +812,7 @@ public class SocketIOManager : MonoBehaviour
     }
     void OnGameBonus(string data)
     {
-        Debug.Log("Bonus\n" + data);
+        Debug.Log("[BROADCAST] game:bonus : " + data);
         BonusData = JsonUtility.FromJson<Root>(data);
 
         gameManager.ManageBonus();
@@ -850,80 +820,75 @@ public class SocketIOManager : MonoBehaviour
     }
     void OnLobbyCount(string data)
     {
-        Debug.Log("[LobbyCount] Raw Response: " + data);
+        Debug.Log("[BROADCAST] game:lobby_count : " + data);
 
         TotalPlayerCountData = JsonUtility.FromJson<Root>(data);
 
         if (TotalPlayerCountData == null)
         {
-            Debug.LogError("[LobbyCount] Failed to parse lobby count data. Raw: " + data);
+            Debug.LogError("[BROADCAST] game:lobby_count parse error.");
             return;
         }
 
         if (TotalPlayerCountData.lobby != null)
         {
-            Debug.Log($"[LobbyCount] Parsed Lobby Counts => " +
-                      $"Casual: {TotalPlayerCountData.lobby.casual} | " +
-                      $"Novice: {TotalPlayerCountData.lobby.novice} | " +
-                      $"Expert: {TotalPlayerCountData.lobby.expert} | " +
-                      $"HighRoller: {TotalPlayerCountData.lobby.high_roller} | " +
-                      $"Total: {TotalPlayerCountData.totalCount}");
+
         }
         else
         {
-            Debug.LogWarning("[LobbyCount] Lobby object is null after parsing.");
+            Debug.LogWarning("[BROADCAST] game:lobby_count : lobby object is null.");
         }
 
         if (gameManager != null)
         {
-            Debug.Log("[LobbyCount] Forwarding to GameManager.UpdateHomeScreenPlayerCount");
+
             gameManager.UpdateHomeScreenPlayerCount(TotalPlayerCountData.lobby, TotalPlayerCountData.totalCount);
         }
         else
         {
-            Debug.LogError("[LobbyCount] GameManager reference is null. Cannot update home screen.");
+            Debug.LogError("[BROADCAST] game:lobby_count : GameManager reference is null.");
         }
     }
     void OnLeaderboardUpdate(string data)
     {
-        Debug.Log("[LeaderboardUpdate] Raw Response: " + data);
+        Debug.Log("[BROADCAST] game:leaderboard_update : " + data);
 
         Root leaderboardData = JsonUtility.FromJson<Root>(data);
 
         if (leaderboardData == null)
         {
-            Debug.LogError("[LeaderboardUpdate] Failed to parse leaderboard data. Raw: " + data);
+            Debug.LogError("[BROADCAST] game:leaderboard_update parse error.");
             return;
         }
 
-        Debug.Log($"[LeaderboardUpdate] Parsed Player Count: {leaderboardData.playerCount}");
+
 
         if (leaderboardData.leaderboards != null)
         {
-            Debug.Log("[LeaderboardUpdate] Leaderboard data received successfully. Forwarding to GameManager.");
+
         }
         else
         {
-            Debug.LogWarning("[LeaderboardUpdate] Leaderboards object is null after parsing.");
+            Debug.LogWarning("[BROADCAST] game:leaderboard_update : leaderboards object is null.");
         }
 
         if (gameManager != null)
         {
-            Debug.Log($"[LeaderboardUpdate] Calling UpdateGamePlayerCount with playerCount: {leaderboardData.playerCount}");
+
             gameManager.UpdateGamePlayerCount(leaderboardData.playerCount);
 
-            Debug.Log("[LeaderboardUpdate] Calling SetOtherplayerData with leaderboard payload.");
+
             gameManager.SetOtherplayerData(leaderboardData.leaderboards);
         }
         else
         {
-            Debug.LogError("[LeaderboardUpdate] GameManager reference is null. Cannot update leaderboard.");
+            Debug.LogError("[BROADCAST] game:leaderboard_update : GameManager reference is null.");
         }
     }
     private void OnBetAcknowledged(string data)
     {
 
-        Debug.Log("Bet Acknowledgement: " + data);
+        Debug.Log("[ACK] PLACE_BET : " + data);
         BetChipData = JsonUtility.FromJson<Root>(data);
         if (BetChipData.success)
         {
@@ -937,9 +902,7 @@ public class SocketIOManager : MonoBehaviour
             gameManager.PlayPopup(BetChipData.payload.message);
         }
 
-
     }
-
 
 }
 
@@ -966,17 +929,14 @@ public class Payload
     public int playerCount;
     public Leaderboards leaderboards;
 
-
     public string betId;
     public string betOption;
     public string message;
     public int amount;
     public int totalBet;
 
-
     public double balance;
     public List<Bet> bets;
-
 
     public int refundAmount;
     public Bet bet;
@@ -1001,7 +961,6 @@ public class Bet
     public int delta;
     public int amount;
 }
-
 
 [System.Serializable]
 public class BetPayload
@@ -1198,7 +1157,6 @@ public class HandCode
     public int ROYAL_FLUSH;
 }
 
-
 [Serializable]
 public class Lobby
 {
@@ -1268,7 +1226,6 @@ public class Root
 
     public long startedAt;
 
-
     public string username;
     public string betId;
     public string betType;
@@ -1278,19 +1235,15 @@ public class Root
 
     public Lobby lobby;
 
-
     //new
 
     public long serverTime;
     public long bettingEndTime;
     public int timeRemaining;
 
-
-
     public Card card;
     public string side;
     public int cardsDealt;
-
 
     public List<Card> cards;
     public Leaderboards leaderboards;
@@ -1363,14 +1316,14 @@ public class History
     public int cards_dealt;
     public string match_side;
     public string matching_card;
-    
+
     // CHANGED: From DateTime to string to fix parsing issue
     public string created_at;  // Was: public DateTime created_at;
- 
+
     // Parsed objects
     public Card middleCardParsed;
     public Card matchingCardParsed;
-    
+
     // NEW: Helper property to get parsed DateTime
     public DateTime CreatedAtDateTime
     {
@@ -1378,16 +1331,16 @@ public class History
         {
             if (string.IsNullOrEmpty(created_at))
                 return DateTime.MinValue;
-            
+
             // Try parsing ISO 8601 format
             if (DateTime.TryParse(created_at, out DateTime result))
                 return result;
-            
+
             return DateTime.MinValue;
         }
     }
 }
- 
+
 [Serializable]
 public class Meta
 {

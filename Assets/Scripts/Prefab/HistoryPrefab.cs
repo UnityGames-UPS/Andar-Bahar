@@ -18,41 +18,41 @@ public class HistoryPrefab : MonoBehaviour
     [SerializeField] private Image MatchSideImage;
 
     internal void SetData(
-        int index, 
-        History item, 
-        Sprite middle, 
-        Sprite matchCard, 
+        int index,
+        History item,
+        Sprite middle,
+        Sprite matchCard,
         Sprite matchSideSprite,
         int cardDelt)
     {
         // Set index
         Index.text = index.ToString();
-        
+
         // Set round ID (full)
         RoundId.text = item.round_id;
-        
+
         // Format and set bet time: dd/mm/yyyy \n hh:mm:ss
         // FIXED: Now parsing from string instead of using DateTime directly
         BetTime.text = FormatBetTime(item.created_at);
-        
+
         // Set stake
         Stake.text = FormatHelper.FormatAmount(item.bet_amount);
-        
+
         // Set win
         Win.text = FormatHelper.FormatAmount(item.win_amount);
-        
+
         // Calculate and set P/L with + or - sign
         double pl = item.win_amount - item.bet_amount;
         string plSign = pl >= 0 ? "+" : "";
         PL.text = plSign + FormatHelper.FormatAmount(pl);
-        
+
         // Set card dealt count
         CardDelt.text = cardDelt.ToString();
-        
+
         // Set card sprites
         Middlecard.sprite = middle;
         MatchCard.sprite = matchCard;
-        
+
         // Set match side image (A for andar, B for bahar)
         MatchSideImage.sprite = matchSideSprite;
     }
@@ -66,11 +66,10 @@ public class HistoryPrefab : MonoBehaviour
         }
 
         DateTime dateTime;
-        
+
         // Try to parse the ISO 8601 format (e.g., "2026-03-20T06:31:33.367Z")
         if (!DateTime.TryParse(createdAtString, out dateTime))
         {
-            Debug.LogWarning($"Failed to parse date: {createdAtString}");
             return "Invalid Date\nInvalid Time";
         }
 

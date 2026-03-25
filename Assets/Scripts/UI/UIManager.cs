@@ -275,7 +275,6 @@ public class UiManager : MonoBehaviour
         {
             // OpenPopup(QuitPopup_Object);
             SetQuitPopupAnimation(true);
-            Debug.Log("Quit event: pressed Big_X button");
             if (audioController) audioController.PlayButtonAudio();
 
         });
@@ -287,7 +286,6 @@ public class UiManager : MonoBehaviour
             {
                 //ClosePopup(QuitPopup_Object);
                 StartCoroutine(OnCliqQuitBtn(false));
-                Debug.Log("quit event: pressed NO Button ");
                 if (audioController) audioController.PlayButtonAudio();
             }
         });
@@ -298,7 +296,6 @@ public class UiManager : MonoBehaviour
             if (!isExit)
             {
                 ClosePopup(QuitPopup_Object);
-                Debug.Log("quit event: pressed Small_X Button ");
                 if (audioController) audioController.PlayButtonAudio();
             }
         });
@@ -312,7 +309,6 @@ public class UiManager : MonoBehaviour
             StartCoroutine(OnCliqQuitBtn(true));
             if (audioController) audioController.PlayButtonAudio();
             // CallOnExitFunction();
-            // Debug.Log("quit event: pressed YES Button ");
             // socketManager.ReactNativeCallOnFailedToConnect();
         });
 
@@ -329,7 +325,6 @@ public class UiManager : MonoBehaviour
             isMusic = !audioController.IsMusicMuted();
             isSound = !audioController.IsSoundMuted();
 
-            Debug.Log($"[UI] Loaded audio state - Music: {isMusic}, Sound: {isSound}");
         }
         else
         {
@@ -572,25 +567,24 @@ public class UiManager : MonoBehaviour
         //  SpawnDummyStats(30);
         RegisterFullscreenListener();
     }
-private void InitializeAudioButtons()
-{
-    // Set music button state
-    if (Music_button && MusicMute_button)
+    private void InitializeAudioButtons()
     {
-        Music_button.gameObject.SetActive(isMusic);
-        MusicMute_button.gameObject.SetActive(!isMusic);
+        // Set music button state
+        if (Music_button && MusicMute_button)
+        {
+            Music_button.gameObject.SetActive(isMusic);
+            MusicMute_button.gameObject.SetActive(!isMusic);
+        }
+
+        // Set sound button state  
+        if (Sound_button && SoundMute_button)
+        {
+            Sound_button.gameObject.SetActive(isSound);
+            SoundMute_button.gameObject.SetActive(!isSound);
+        }
+
     }
- 
-    // Set sound button state  
-    if (Sound_button && SoundMute_button)
-    {
-        Sound_button.gameObject.SetActive(isSound);
-        SoundMute_button.gameObject.SetActive(!isSound);
-    }
- 
-    Debug.Log($"[UI] Audio buttons initialized - Music: {(isMusic ? "On" : "Off")}, Sound: {(isSound ? "On" : "Off")}");
-}
- 
+
 
     private void SpawnDummyStats(int count)
     {
@@ -979,7 +973,6 @@ private void InitializeAudioButtons()
         int tempIndex = selectorChip.chipIndex;
         selectorChip.chipIndex = selectedChip.chipIndex;
         selectedChip.chipIndex = tempIndex;
-        // Debug.Log("mmmmmmmmmmmmmmmmm" + selectorChip.chipIndex);
         RetractCoins();
         SortCoinsByIndex();
         SetgameRulePanel();
@@ -1088,7 +1081,6 @@ private void InitializeAudioButtons()
         var stats = GetStats();
         int total = stats.Count;
 
-        //  Debug.Log($"[Percentage] Total Stats = {total}");
         if (total == 0) return;
 
         int andarCount = 0;
@@ -1096,7 +1088,6 @@ private void InitializeAudioButtons()
 
         foreach (var s in stats)
         {
-            //  Debug.Log($"[Percentage] Card={s.cardnumber.text}, winner={s.winner}");
 
             if (s.winner == "andar")
                 andarCount++;
@@ -1105,7 +1096,6 @@ private void InitializeAudioButtons()
                 baharCount++;
         }
 
-        //  Debug.Log($"[Percentage] Andar={andarCount}, Bahar={baharCount}");
 
         float andarPercent = (andarCount * 100f) / total;
         float baharPercent = (baharCount * 100f) / total;
@@ -1121,7 +1111,6 @@ private void InitializeAudioButtons()
 
     internal void CalculateStringProbability(string card)
     {
-        //  Debug.Log($"[Probability] Checking for card = {card}");
         cardProb.text = card;
 
         var stats = GetStats();
@@ -1129,7 +1118,6 @@ private void InitializeAudioButtons()
 
         if (total == 0)
         {
-            //    Debug.Log("[Probability] No stats found.");
             return;
         }
 
@@ -1138,11 +1126,9 @@ private void InitializeAudioButtons()
 
         foreach (var s in stats)
         {
-            //  Debug.Log($"[Probability] Card={s.cardnumber.text}, Winner={s.winner}");
 
             if (s.cardnumber.text == card)
             {
-                //    Debug.Log("[Probability] -> Card matched!");
 
                 if (s.winner == "andar")
                     andarMatch++;
@@ -1152,7 +1138,6 @@ private void InitializeAudioButtons()
             }
         }
 
-        //   Debug.Log($"[Probability] Matches: Andar={andarMatch}, Bahar={baharMatch}");
 
         float andarProbVal = (andarMatch * 100f) / total;
         float baharProbVal = (baharMatch * 100f) / total;
@@ -1261,7 +1246,6 @@ private void InitializeAudioButtons()
     {
         if (payload == null || payload.meta == null)
         {
-            Debug.LogError("History payload or meta is null");
             ShowNoHistory(true);
             return;
         }
@@ -1342,7 +1326,6 @@ private void InitializeAudioButtons()
     {
         if (string.IsNullOrEmpty(matchSide))
         {
-            Debug.LogWarning("Match side is null or empty");
             return AndarSideSprite; // default
         }
 
@@ -1353,7 +1336,6 @@ private void InitializeAudioButtons()
             case "bahar":
                 return BaharSideSprite;
             default:
-                Debug.LogWarning($"Unknown match side: {matchSide}");
                 return AndarSideSprite; // default
         }
     }
@@ -1467,7 +1449,6 @@ private void InitializeAudioButtons()
 
     void SetQuitPopupAnimation(bool isShowing)
     {
-        Debug.Log("_________________OOOOOOOOOOOOO");
         QuitpopupAnim.StopAnimation();
         QuitpopupAnim.textureArray.Clear();
         QuitpopupAnim.textureArray.TrimExcess();
@@ -1531,7 +1512,6 @@ private void InitializeAudioButtons()
             if (!homepopup)
             {
                 CallOnExitFunction();
-                Debug.Log("quit event: pressed YES Button ");
                 socketManager.ReactNativeCallOnFailedToConnect();
             }
             else
@@ -1712,14 +1692,12 @@ private void InitializeAudioButtons()
     internal void OnFullscreenChanged(string isFullscreen)
     {
         bool newExpandedState = isFullscreen == "1";
-        Debug.Log($"[UI] OnFullscreenChanged callback: isFullscreen={isFullscreen}, newState={newExpandedState}");
 
         // Only update if state actually changed
         if (isExpanded != newExpandedState)
         {
             isExpanded = newExpandedState;
             SetExpandShrinkButtons(isExpanded);
-            Debug.Log($"[UI] Button states synced to fullscreen: {(isExpanded ? "EXPANDED" : "SHRINK")}");
         }
     }
     #endregion

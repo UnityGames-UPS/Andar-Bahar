@@ -117,7 +117,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform popCenter;
     [SerializeField] private Transform popEnd;
     [SerializeField] private TMP_Text coinAddText;
-      [SerializeField] private Image coinImage;
+    [SerializeField] private Image coinImage;
     [SerializeField] private float moveY = 30f;
     [SerializeField] private float duration = 0.5f;
 
@@ -164,7 +164,7 @@ public class GameManager : MonoBehaviour
     private Coroutine StartGameCorutine;
     private Coroutine EndGameCorutine;
 
-    private Vector3 startPoscoin ;
+    private Vector3 startPoscoin;
     private Vector3 endPos = new Vector3(0, -10, 0);
 
     private int previousNextRoundTimerValue = -1; // Track previous next round timer to detect actual end vs join mid-round
@@ -347,7 +347,6 @@ public class GameManager : MonoBehaviour
 
         if (currentChips == null || currentChips.Count == 0)
         {
-            Debug.LogError($"[GameManager] No chip sprites found for level: {currentRoom}");
             return;
         }
 
@@ -379,10 +378,8 @@ public class GameManager : MonoBehaviour
     internal void SetOtherplayerData(Leaderboards leaderboard)
     {
 
-        Debug.Log("Setting Leaderboard");
         if (leaderboard == null)
         {
-            Debug.Log("Leaderboards is NULL");
             return;
         }
 
@@ -392,7 +389,6 @@ public class GameManager : MonoBehaviour
         // ------------------- RICHEST -------------------
         if (leaderboard.richest == null || leaderboard.richest.Count == 0)
         {
-            Debug.Log("richest is null");
             foreach (var item in uiManager.RichestPlayers)
                 item.gameObject.SetActive(false);
 
@@ -424,7 +420,6 @@ public class GameManager : MonoBehaviour
         // ------------------- WINNERS -------------------
         if (leaderboard.winners == null || leaderboard.winners.Count == 0)
         {
-            Debug.Log("winner is null");
             foreach (var item in uiManager.WinnerPlayers)
                 item.gameObject.SetActive(false);
 
@@ -601,14 +596,12 @@ public class GameManager : MonoBehaviour
         bool startWithAndar = socketManager.gameLoopData.middleCard.color == "black";
         if (startWithAndar)
         {
-            Debug.Log("Started with andar");
             AndarTxt.SetData(0, "andar", socketManager.initialData.wagers.main_bets.andar.payout[0].ToString(), "main_bets");
             BaharTxt.SetData(1, "bahar", "1", "main_bets");
 
         }
         else
         {
-            Debug.Log("Started with bahar");
             AndarTxt.SetData(0, "andar", "1", "main_bets");
             BaharTxt.SetData(1, "bahar", socketManager.initialData.wagers.main_bets.bahar.payout[0].ToString(), "main_bets");
 
@@ -674,20 +667,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    IEnumerator WaitForBetLocked(float delay )
+    IEnumerator WaitForBetLocked(float delay)
     {
         yield return new WaitForSeconds(delay);
         pulseText.gameObject.SetActive(false);
-            RoundInfoAnim(1);
-            BetBlocker.gameObject.SetActive(true);
-            audioManager.PlayGirlAudio("nomorebets");
-            //RoundInfo_Text.gameObject.SetActive(false);
-            uiManager.SetChipoption(false);
-            uiManager.setCoins(false);
-            uiManager.Repeatpanel.SetActive(false);
+        RoundInfoAnim(1);
+        BetBlocker.gameObject.SetActive(true);
+        audioManager.PlayGirlAudio("nomorebets");
+        //RoundInfo_Text.gameObject.SetActive(false);
+        uiManager.SetChipoption(false);
+        uiManager.setCoins(false);
+        uiManager.Repeatpanel.SetActive(false);
 
-            RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
-            BetBlocker.gameObject.SetActive(true);
+        RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
+        BetBlocker.gameObject.SetActive(true);
     }
     bool firstTime = true;
     internal void SetNewRoundTimer(int i)
@@ -815,21 +808,17 @@ public class GameManager : MonoBehaviour
             {
                 FirstAndarTxt.HighlightedBG.SetActive(true);
                 resultsOptions.Add(FirstAndarTxt);
-                Debug.Log("$$$$firstandar");
             }
             resultsOptions.Add(AndarTxt);
-            Debug.Log("$$$$andar");
 
         }
         else
         {
             resultsOptions.Add(BaharTxt);
-            Debug.Log("$$$$Bahar");
             if (delivered < 3)
             {
                 FirstBaharTxt.HighlightedBG.SetActive(true);
                 resultsOptions.Add(FirstBaharTxt);
-                Debug.Log("$$$$firstBahar");
 
             }
             uiManager.UpdateStats(socketManager.gameLoopData.middleCard.rank, false, delivered.ToString());
@@ -870,7 +859,6 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(4f);
         MainFlushObj.SetActive(false);
         resultsOptions.Add(FirstThreeTxt);
-        Debug.Log("$$$$first3");
     }
     internal void ManagePayouts()
     {
@@ -985,18 +973,18 @@ public class GameManager : MonoBehaviour
         {
             if (!resultsOptions.Contains(item.betoptions))
             {
-                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true ,1.5f);
+                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true, 1.5f);
             }
         }
         foreach (var item in OtherPlayerChips)
         {
             if (!resultsOptions.Contains(item.betoptions))
             {
-                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true ,1.5f);
+                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true, 1.5f);
             }
         }
     }
-    
+
 
     public void DistributePayoutsNew(List<Payout> payouts)
     {
@@ -1010,7 +998,6 @@ public class GameManager : MonoBehaviour
 
                 currentWin = newBalance - oldBalance;
                 uiManager.MainPlayers.playerBalence.text = payout.balance.ToString();
-                Debug.Log("Managing playerBet" + payout.balance);
                 socketManager.playerdata.balance = payout.balance;
             }
             if (target == null)
@@ -1024,7 +1011,6 @@ public class GameManager : MonoBehaviour
     {
         List<OptionPrefab> validOptions = GetValidWinningOptions();
 
-        //        Debug.Log("@@@@@@@" + validOptions.Count);
         if (validOptions.Count == 0)
         {
             validOptions.Add(resultsOptions[0]);
@@ -1107,17 +1093,12 @@ public class GameManager : MonoBehaviour
 
     // List<OptionPrefab> GetValidWinningOptions()
     // {
-    //     //  Debug.Log("@@@ GetValidWinningOptions CALLED");
 
     //     if (resultsOptions == null)
     //     {
-    //         Debug.Log("@@@ resultsOptions is NULL");
     //         return new List<OptionPrefab>();
     //     }
 
-    //     //  Debug.Log("@@@ resultsOptions Count: " + resultsOptions.Count);
-    //     //  Debug.Log("@@@ PlayerChips Count: " + PlayerChips.Count);
-    //     //  Debug.Log("@@@ OtherPlayerChips Count: " + OtherPlayerChips.Count);
 
     //     List<OptionPrefab> validOptions = new List<OptionPrefab>();
 
@@ -1125,7 +1106,6 @@ public class GameManager : MonoBehaviour
     //     {
     //         OptionPrefab option = resultsOptions[i];
 
-    //         //  Debug.Log("@@@ Checking Option Index: " + i + " | Name: " + option.name);
 
     //         bool foundInPlayer = false;
     //         bool foundInOther = false;
@@ -1133,12 +1113,10 @@ public class GameManager : MonoBehaviour
     //         // 🔹 Check PlayerChips
     //         for (int j = 0; j < PlayerChips.Count; j++)
     //         {
-    //             //    Debug.Log("@@@   PlayerChip[" + j + "] betOption: " + PlayerChips[j].betoptions?.name);
 
     //             if (PlayerChips[j].betoptions == option)
     //             {
     //                 foundInPlayer = true;
-    //                 //   Debug.Log("@@@   MATCH FOUND IN PlayerChips");
     //                 break;
     //             }
     //         }
@@ -1146,28 +1124,23 @@ public class GameManager : MonoBehaviour
     //         // 🔹 Check OtherPlayerChips
     //         for (int k = 0; k < OtherPlayerChips.Count; k++)
     //         {
-    //             //  Debug.Log("@@@   OtherChip[" + k + "] betOption: " + OtherPlayerChips[k].betoptions?.name);
 
     //             if (OtherPlayerChips[k].betoptions == option)
     //             {
     //                 foundInOther = true;
-    //                 //    Debug.Log("@@@   MATCH FOUND IN OtherPlayerChips");
     //                 break;
     //             }
     //         }
 
     //         if (foundInPlayer || foundInOther)
     //         {
-    //             //  Debug.Log("@@@   ADDING OPTION: " + option.name);
     //             validOptions.Add(option);
     //         }
     //         else
     //         {
-    //             // Debug.Log("@@@   NO MATCH FOR OPTION: " + option.name);
     //         }
     //     }
 
-    //     //  Debug.Log("@@@ FINAL validOptions Count: " + validOptions.Count);
 
     //     return validOptions;
     // }
@@ -1232,7 +1205,6 @@ public class GameManager : MonoBehaviour
 
         int optionIndex = (count - 1) / 5;
 
-        //  Debug.Log("Highlight option index = " + optionIndex);
 
         HighlightOption(optionIndex);
         ResultOption = AllOptions[optionIndex];
@@ -1255,7 +1227,6 @@ public class GameManager : MonoBehaviour
         // animHand.MiddleCard.gameObject.SetActive(false);
         Handanimator.Play("MiddleCard");
         uiManager.CalculateStringProbability(socketManager.gameLoopData.middleCard.rank);
-        // Debug.Log(socketManager.gameLoopData.middleCard.suit);
     }
     void PlayAndarCardAnim(int cardCount)
     {
@@ -1295,7 +1266,6 @@ public class GameManager : MonoBehaviour
     {
         if (chip == null || startPos == null || endPos == null)
         {
-            Debug.LogError("ChipMover: One of the transforms is null!");
             return;
         }
 
@@ -1331,7 +1301,6 @@ public class GameManager : MonoBehaviour
             {
                 PlayPopup("Low Balance");
                 // Low balance logic here
-                Debug.Log("Insufficient balance");
 
                 return;
             }
@@ -1363,7 +1332,6 @@ public class GameManager : MonoBehaviour
             int index = findChipindex(chipAmount, roomChips);
             string val = FormatHelper.FormatChipAmount(chipAmount);
 
-            Debug.Log("Spawning Chip index=" + index + " amount=" + val);
 
             data.chip = SpawnChip(
                 findChipSprite(chipAmount, roomChips),
@@ -1604,11 +1572,11 @@ public class GameManager : MonoBehaviour
 
            .AppendInterval(0.01f)
             .AppendCallback(() =>
-           {
-               NewRoundAnim.StopAnimation();
-               NewRoundAnim.StartAnimation();
+            {
+                NewRoundAnim.StopAnimation();
+                NewRoundAnim.StartAnimation();
 
-           })
+            })
            .AppendInterval(1.5f)
            .AppendCallback(() =>
            {
@@ -1660,21 +1628,17 @@ public class GameManager : MonoBehaviour
     }
     private Transform FindPlayerTransform(string playerId)
     {
-        Debug.Log($"[FindPlayerTransform] Searching for PlayerId: {playerId}");
 
         // --- Check Main Player ---
         if (uiManager.MainPlayers != null)
         {
-            Debug.Log($"[MainPlayer] ID: {uiManager.MainPlayers.playername.text}");
             if (uiManager.MainPlayers.playername.text == playerId)
             {
-                Debug.Log("[RESULT] Found in MainPlayers");
                 return uiManager.MainPlayers.transform;
             }
         }
         else
         {
-            Debug.LogWarning("[FindPlayerTransform] MainPlayers is NULL!");
         }
 
         // --- Check Richest Players ---
@@ -1682,14 +1646,11 @@ public class GameManager : MonoBehaviour
         {
             if (p == null)
             {
-                Debug.LogWarning("[RichestPlayers] One entry is NULL!");
                 continue;
             }
 
-            Debug.Log($"[Richest] ID: {p.PlayerId}");
             if (p.PlayerId == playerId)
             {
-                Debug.Log("[RESULT] Found in RichestPlayers");
                 return p.transform;
             }
         }
@@ -1699,19 +1660,15 @@ public class GameManager : MonoBehaviour
         {
             if (p == null)
             {
-                Debug.LogWarning("[WinnerPlayers] One entry is NULL!");
                 continue;
             }
 
-            Debug.Log($"[Winners] ID: {p.PlayerId}");
             if (p.PlayerId == playerId)
             {
-                Debug.Log("[RESULT] Found in WinnerPlayers");
                 return p.transform;
             }
         }
 
-        Debug.LogWarning($"[FindPlayerTransform] PlayerId {playerId} NOT FOUND!");
         return null;
     }
 
@@ -1727,7 +1684,6 @@ public class GameManager : MonoBehaviour
 
                 currentWin = newBalance - oldBalance;
                 uiManager.MainPlayers.playerBalence.text = payout.balance.ToString();
-                Debug.Log("Managing playerBet" + payout.balance);
                 socketManager.playerdata.balance = payout.balance;
             }
             if (target == null)
@@ -1765,7 +1721,6 @@ public class GameManager : MonoBehaviour
     internal void RepeAtBet(List<Bet> bets)
     {
         audioManager.PlayWLAudio("double");
-        Debug.Log("RepeatBet started");
 
         List<int> roomChips = FindRoom(); // chip denominations
 
@@ -1818,7 +1773,7 @@ public class GameManager : MonoBehaviour
         {
             if (bet.delta > 0)
             {
-                int amount = bet.delta;  
+                int amount = bet.delta;
 
                 List<int> chipPieces = BreakAmountIntoChips(amount, roomChips);
 
@@ -1832,7 +1787,7 @@ public class GameManager : MonoBehaviour
                     string val = FormatHelper.FormatChipAmount(piece);
                     int index = findChipindex(piece, roomChips);
 
-                    if (index <= 5) 
+                    if (index <= 5)
                     {
                         data.chip = SpawnChip(
                             findChipSprite(piece, roomChips),
@@ -2173,12 +2128,8 @@ public class GameManager : MonoBehaviour
                 tempSprite = GetCardSprite(SpadeSpriteList, value);
                 break;
             default:
-                Debug.LogError("Invalid Suit: " + suit);
                 break;
         }
-        //  Debug.Log("#----------------------------------------------------_# ");   // <== ADD
-        //   Debug.Log("##SUIT = " + suit);     // <== ADD
-        //   Debug.Log("##VALUE = " + value);   // <== ADD
 
         return tempSprite;
     }
@@ -2202,12 +2153,8 @@ public class GameManager : MonoBehaviour
                 tempSprite = GetCardSprite(SpadeSpriteListDisplay, value);
                 break;
             default:
-                Debug.LogError("Invalid Suit: " + suit);
                 break;
         }
-        //  Debug.Log("#----------------------------------------------------_# ");   // <== ADD
-        //   Debug.Log("##SUIT = " + suit);     // <== ADD
-        //   Debug.Log("##VALUE = " + value);   // <== ADD
 
         return tempSprite;
     }
@@ -2223,8 +2170,6 @@ public class GameManager : MonoBehaviour
             case "J": return spriteList[10];
             default:
                 int myval = int.Parse(value);
-                //      Debug.Log("##index = " + (myval - 1));   // <== ADD
-                //  Debug.Log("#----------------------------------------------------_# ");   // <== ADD
                 return spriteList[myval - 1];
         }
     }
@@ -2251,7 +2196,6 @@ public class GameManager : MonoBehaviour
                 case "high_roller":
                     return PlayerChipSprite_HighRoller;
                 default:
-                    Debug.LogWarning($"[GameManager] Unknown room: {currentRoom}, using casual sprites");
                     return PlayerChipSprite_Casual;
             }
         }
@@ -2268,7 +2212,6 @@ public class GameManager : MonoBehaviour
                 case "high_roller":
                     return HighlightedChipSprite_HighRoller;
                 default:
-                    Debug.LogWarning($"[GameManager] Unknown room: {currentRoom}, using casual sprites");
                     return HighlightedChipSprite_Casual;
             }
         }
@@ -2290,7 +2233,6 @@ public class GameManager : MonoBehaviour
             case "high_roller":
                 return OtherChipSprite_HighRoller;
             default:
-                Debug.LogWarning($"[GameManager] Unknown room: {currentRoom}, using casual sprites");
                 return OtherChipSprite_Casual;
         }
     }
@@ -2304,7 +2246,6 @@ public class GameManager : MonoBehaviour
 
         if (currentChips == null || currentChips.Count == 0)
         {
-            Debug.LogError($"[GameManager] No chip sprites found for level: {currentRoom}");
             return;
         }
 
@@ -2476,8 +2417,7 @@ public class GameManager : MonoBehaviour
                 // Safety check
                 if (i < sprites.Count)
                     return sprites[i];
-                else
-                    Debug.LogWarning($"[GameManager] Chip sprite index {i} out of range for {currentRoom}");
+        
             }
         }
 
@@ -2497,8 +2437,7 @@ public class GameManager : MonoBehaviour
                 // Safety check
                 if (i < sprites.Count)
                     return sprites[i];
-                else
-                    Debug.LogWarning($"[GameManager] Other chip sprite index {i} out of range for {currentRoom}");
+             
             }
         }
 
@@ -2550,7 +2489,6 @@ public class GameManager : MonoBehaviour
 
     OptionPrefab FindOption(string opt)
     {
-        // Debug.Log("789 _____________" + opt);
         switch (opt)
         {
             case "s_1_5":
@@ -2610,7 +2548,8 @@ public class GameManager : MonoBehaviour
             StopCoroutine(animRoutine);
 
         animRoutine = StartCoroutine(PopupRoutine());
-    }internal void playtheCoin(string winamount)
+    }
+    internal void playtheCoin(string winamount)
     {
         coinAddText.text = winamount;
 
