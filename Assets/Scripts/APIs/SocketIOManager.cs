@@ -1,15 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 using System;
-
 using UnityEngine.Networking;
-
 using Newtonsoft.Json;
 using Best.SocketIO;
 using Best.SocketIO.Events;
-
 using System.Runtime.Serialization;
 using Best.HTTP.Shared;
 
@@ -20,6 +16,7 @@ public class SocketIOManager : MonoBehaviour
 
     [SerializeField]
     private UiManager uiManager;
+    [SerializeField] private LoadingScreenManager loadingScreenManager;
 
     internal Root roomData;
     internal Root gameLoopData;
@@ -77,7 +74,7 @@ public class SocketIOManager : MonoBehaviour
     private float pongTimeout = 3f;
     private bool waitingForPong = false;
     private int missedPongs = 0;
-    private const int MaxMissedPongs = 5;
+    private const int MaxMissedPongs = 15;
     internal bool loadingPageLoading = false;
     internal bool NormalStart = false;
     internal bool DontDisplayDisconected = false;
@@ -123,7 +120,8 @@ public class SocketIOManager : MonoBehaviour
         options.Reconnection = false;
         options.Timeout = TimeSpan.FromSeconds(3);
         options.ConnectWith = Best.SocketIO.Transports.TransportTypes.WebSocket; //BackendChanges
-
+        RaycastBlocker.SetActive(true);
+        loadingScreenManager.ShowLoading(LoadingScreenManager.LoadingType.InitWaiting, null);
         //   Application.ExternalCall("window.parent.postMessage", "authToken", "*");
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -238,6 +236,11 @@ public class SocketIOManager : MonoBehaviour
         waitingForPong = false;
         missedPongs = 0;
         lastPongTime = Time.time;
+
+        if (loadingScreenManager.IsLoading())
+        {
+            loadingScreenManager.HideLoading();
+        }
     } //Back2 end
 
     private void OnDisconnected() //Back2 Start
@@ -245,6 +248,7 @@ public class SocketIOManager : MonoBehaviour
         Debug.LogWarning("[DISCONNECT] Socket disconnected from server.");
         isConnected = false;
         uiManager.DisconnectionPopup();
+        RaycastBlocker.SetActive(true);
         ResetPingRoutine();
     } //Back2 end
     private void OnError(Error err)
@@ -362,36 +366,40 @@ public class SocketIOManager : MonoBehaviour
     {
         while (true)
         {
-
             if (missedPongs == 0)
             {
                 uiManager.CheckAndClosePopups();
             }
 
-            // If waiting for pong, and timeout passed
             if (waitingForPong)
             {
                 if (missedPongs == 2)
                 {
-                    uiManager.ReconnectionPopup();
+                    // REPLACE: uiManager.ReconnectionPopup();
+                    // WITH:
+                    loadingScreenManager.ShowLoading(
+                        LoadingScreenManager.LoadingType.Connecting,
+                        null
+                    );
                 }
                 missedPongs++;
 
                 if (missedPongs >= MaxMissedPongs)
                 {
                     isConnected = false;
+                    loadingScreenManager.ForceHideLoading(); // ADD THIS LINE
                     uiManager.DisconnectionPopup();
                     yield break;
                 }
             }
 
-            // Send next ping
             waitingForPong = true;
             lastPongTime = Time.time;
             SendDataWithNamespace("ping");
             yield return new WaitForSeconds(pingInterval);
         }
-    } //Back2 end
+    }
+
     private void AliveRequest()
     {
         SendDataWithNamespace("YES I AM ALIVE");
@@ -440,7 +448,7 @@ public class SocketIOManager : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
 
         Debug.Log("[CONNECT] Socket closed.");
-
+        RaycastBlocker.SetActive(true);
 #if UNITY_WEBGL && !UNITY_EDITOR
     JSManager.SendCustomMessage("OnExit"); //Telling the react platform user wants to quit and go back to homepage
 #endif
@@ -507,7 +515,8 @@ public class SocketIOManager : MonoBehaviour
         setInitialData();
         // if (initialData.bets != null)
         // else
-
+        RaycastBlocker.SetActive(false);
+        loadingScreenManager.HideLoading();
 #if UNITY_WEBGL && !UNITY_EDITOR
             JSManager.SendCustomMessage("OnEnter");
 #endif
@@ -535,11 +544,12 @@ public class SocketIOManager : MonoBehaviour
         message.payload = new Payload();
         message.type = "JOIN_LEVEL";
         message.payload.level = Room;
-
         string json = JsonUtility.ToJson(message);
 
-        // SendDataWithNamespace("request", json);
-        gameSocket.ExpectAcknowledgement<string>(OnRoomEnter).Emit("request", json);
+        loadingScreenManager.ShowLoading(
+            LoadingScreenManager.LoadingType.JoiningTable,
+            () => gameSocket.ExpectAcknowledgement<string>(OnRoomEnter).Emit("request", json)
+        );
     }
     internal void BetPlaced(int amountIndex, string betType, string betOption)
     {
@@ -622,14 +632,16 @@ public class SocketIOManager : MonoBehaviour
         SendRoom message = new SendRoom();
         message.payload = new Payload();
         message.type = "HOME";
-        // message.payload.level = Room;
         loadingPageLoading = false;
         NormalStart = false;
         DontDisplayDisconected = true;
         string json = JsonUtility.ToJson(message);
         Debug.Log("[EMIT] request : HOME => " + json);
-        // SendDataWithNamespace("request", json);
-        gameSocket.ExpectAcknowledgement<string>(OnHome).Emit("request", json);
+
+        loadingScreenManager.ShowLoading(
+            LoadingScreenManager.LoadingType.LeavingTable,
+            () => gameSocket.ExpectAcknowledgement<string>(OnHome).Emit("request", json)
+        );
     }
 
     internal void SendHistory(int Pages)
@@ -638,24 +650,23 @@ public class SocketIOManager : MonoBehaviour
         message.payload = new Payload();
         message.type = "BET_HISTORY";
         message.payload.page = Pages;
-
         string json = JsonUtility.ToJson(message);
         Debug.Log("[EMIT] request : BET_HISTORY => " + json);
 
-        // SendDataWithNamespace("request", json);
-        gameSocket.ExpectAcknowledgement<string>(OnHistory).Emit("request", json);
+        loadingScreenManager.ShowLoading(
+            LoadingScreenManager.LoadingType.LoadingHistory,
+            () => gameSocket.ExpectAcknowledgement<string>(OnHistory).Emit("request", json)
+        );
     }
-
     void OnHome(string json)
     {
         gameManager.ClearAllBets();
         Debug.Log("[ACK] HOME : " + json);
+        loadingScreenManager.HideLoading();
         ReturnHome = JsonUtility.FromJson<Root>(json);
         // Player count is updated via lobby_count broadcast, no need to update here
         // gameManager.SetPlayerCountOnReturn(ReturnHome.payload.lobby, ReturnHome.payload.balance);
         playerdata.balance = ReturnHome.payload.balance;
-        if (!gameManager.directJump) StartCoroutine(gameManager.ShowLoadingPage("Loading...."));
-        else gameManager.LoadingPage.SetActive(true); gameManager.LoadingPage_text.text = "Loading....";
         gameManager.GamePage.SetActive(false);
         gameManager.HomePage.SetActive(true);
         uiManager.MenuMain_button.gameObject.SetActive(true);
@@ -673,6 +684,7 @@ public class SocketIOManager : MonoBehaviour
     void OnHistory(string json)
     {
         Debug.Log("[ACK] BET_HISTORY : " + json);
+        loadingScreenManager.HideLoading();
         HistoryPageData = JsonUtility.FromJson<Root>(json);
         uiManager.SetHistoryPage(HistoryPageData.payload);
     }
@@ -736,12 +748,11 @@ public class SocketIOManager : MonoBehaviour
     void OnRoomEnter(string json)
     {
         Debug.Log("[ACK] JOIN_LEVEL : " + json);
+     
         roomData = JsonUtility.FromJson<Root>(json);
         if (roomData.success == false)
         {
-            StartCoroutine(gameManager.ShowLoadingPage("Loading...."));
             gameManager.HomePage.SetActive(true);
-            // gameManager.LoadingPage.SetActive(false);
             gameManager.GamePage.SetActive(false);
             return;
 
@@ -756,6 +767,8 @@ public class SocketIOManager : MonoBehaviour
         uiManager.sideMenuePanel.transform.position = new Vector3(uiManager.sideMenuePanel.transform.position.x, 271f, uiManager.sideMenuePanel.transform.position.z);
         uiManager.Rayid.text = "R.ID: " + roomData.payload.roomId;
         uiManager.InitializeStatsFromServer(roomData.payload.stats);
+
+        
         // Set correct win ratios and load mid-round bets if roundState exists (joining mid-round)
         if (roomData.payload.roundState != null)
         {
@@ -764,6 +777,8 @@ public class SocketIOManager : MonoBehaviour
                 roomData.payload.bets
             );
         }
+        
+        loadingScreenManager.HideLoading();
     }
 
     void ManageOtherPlayerbets(string data)

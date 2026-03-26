@@ -12,7 +12,6 @@ using System.Linq;
 public class GameManager : MonoBehaviour
 {
     [Header("Pages")]
-    [SerializeField] internal GameObject LoadingPage;
     [SerializeField] internal GameObject HomePage;
     [SerializeField] internal GameObject GamePage;
 
@@ -24,7 +23,6 @@ public class GameManager : MonoBehaviour
 
 
     [Header("Texts")]
-    [SerializeField] internal TMP_Text LoadingPage_text;
     [SerializeField] private TMP_Text RoundInfo_Text;
     [SerializeField] private TMP_Text CardCount_Text;
     [SerializeField] private TMP_Text TotalPlayer_text;
@@ -185,7 +183,6 @@ public class GameManager : MonoBehaviour
         //  Handanimator.Play("MiddleCard");
         BetCounter = 0;
         HomePage.SetActive(true);
-        LoadingPage.SetActive(false);
         GamePage.SetActive(false);
         uiManager.MenuInGame_button.gameObject.SetActive(false);
         BetBlocker.onClick.RemoveAllListeners();
@@ -205,43 +202,14 @@ public class GameManager : MonoBehaviour
         homepage.SetInitHomedata(socketManager.initialData);
         SetPlayerData(socketManager.playerdata);
     }
-    internal IEnumerator ShowLoadingPage(string loadingPageText, int activeTime = 6, bool active = false)
-    {
-        ImageAnimation anim = LoadingPage.GetComponentInChildren<ImageAnimation>();
-        anim.StopAnimation();
-        anim.StartAnimation();
-        LoadingPage_text.text = loadingPageText;
-        LoadingPage.SetActive(true);
-        yield return new WaitForSeconds(activeTime);
-        LoadingPage.SetActive(active);
+ 
 
-    }
-    internal void SetLoadingPage(bool isActive)
-    {
-        ImageAnimation anim = LoadingPage.GetComponentInChildren<ImageAnimation>();
-        anim.StopAnimation();
-        anim.StartAnimation();
 
-        LoadingPage.SetActive(isActive);
-        if (isActive) LoadingPage_text.text = "Joining A Table....."; ;
-    }
-    IEnumerator ManageloadingPageText()
-    {
-        for (int i = 0; i < 10; i++)
-        {
-            if (i < 8) LoadingPage_text.text = "Joining A Table.....";
-            else LoadingPage_text.text = "Waiting For New Round To Start.....";
-
-            yield return new WaitForSeconds(1f);
-        }
-    }
     internal void OnGameLoaded()
     {
         GamePage.SetActive(true);
 
-        // SetOptionData();
-        //  SetCoinData();
-        SetLoadingPage(false);
+      
 
     }
 

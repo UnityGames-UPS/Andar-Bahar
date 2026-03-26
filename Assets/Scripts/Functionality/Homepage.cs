@@ -157,7 +157,6 @@ public class Homepage : MonoBehaviour
         audioManager.PlayButtonAudio();
         socketManager.SendRoomSelection(room);
         gameManager.currentRoom = room;
-        gameManager.SetLoadingPage(true);
     }
 
 
