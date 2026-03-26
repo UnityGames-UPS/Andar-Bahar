@@ -163,6 +163,10 @@ public class GameManager : MonoBehaviour
     private Coroutine EndGameCorutine;
     private Coroutine repeatPanelCoroutine; // controls the 5-sec repeat panel window
 
+    // Card animation queue — ensures zero gap between consecutive dealt-card animations
+    private Queue<System.Action> cardAnimQueue = new Queue<System.Action>();
+    private Coroutine cardAnimCoroutine = null;
+
     private Vector3 startPoscoin;
     private Vector3 endPos = new Vector3(0, -10, 0);
 
@@ -603,6 +607,9 @@ public class GameManager : MonoBehaviour
         AndarBtnHighLight.SetActive(false);
         BaharBtnHighLight.SetActive(false);
         firstTime = true;
+        // Clear any stale card animations from the previous round
+        cardAnimQueue.Clear();
+        if (cardAnimCoroutine != null) { StopCoroutine(cardAnimCoroutine); cardAnimCoroutine = null; }
         PlayMiddleCardAnim();
         // yield return new WaitForSeconds(2f);
 
@@ -789,17 +796,6 @@ public class GameManager : MonoBehaviour
 
         pulseText.text = $"<color=#00AB15>{value}</color>";
 
-        // value==2: slide the Andar/Bahar reset panel in — 1 sec before new round anim
-        if (value == 2)
-        {
-            PlayResetAnimation();
-        }
-        // value==1: fire the new round sprite animation on the bet area
-        if (value == 1)
-        {
-            NewRoundAnim.StopAnimation();
-            NewRoundAnim.StartAnimation();
-        }
     }
     public void PopTMP(TMP_Text tmp)
     {
@@ -874,13 +870,12 @@ public class GameManager : MonoBehaviour
     }
     internal void EndLoop()
     {
-
         EndGameCorutine = StartCoroutine(GameLoop());
     }
 
+
     IEnumerator GameLoop()
     {
-
         CancelRepeatPanel();
         RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
         if (StartGameCorutine != null)
@@ -890,34 +885,46 @@ public class GameManager : MonoBehaviour
         }
         int delivered = socketManager.CardDelt.cardsDealt;
 
+        // ✅ ADD WIN SOUNDS HERE:
         if (socketManager.gameLoopData.matchSide == "andar")
         {
             uiManager.UpdateStats(socketManager.gameLoopData.middleCard.rank, true, delivered.ToString());
+
+            // ✅ NEW: Play Andar win sound
+            if (audioManager != null)
+            {
+                audioManager.PlayWinSound("andar");
+            }
+
             if (delivered < 3)
             {
                 FirstAndarTxt.HighlightedBG.SetActive(true);
                 resultsOptions.Add(FirstAndarTxt);
             }
             resultsOptions.Add(AndarTxt);
-
         }
         else
         {
             resultsOptions.Add(BaharTxt);
+
+            // ✅ NEW: Play Bahar win sound
+            if (audioManager != null)
+            {
+                audioManager.PlayWinSound("bahar");
+            }
+
             if (delivered < 3)
             {
                 FirstBaharTxt.HighlightedBG.SetActive(true);
                 resultsOptions.Add(FirstBaharTxt);
-
             }
             uiManager.UpdateStats(socketManager.gameLoopData.middleCard.rank, false, delivered.ToString());
         }
+
         uiManager.CalculateAndShowPercentage();
         PlayWinAnimations();
 
-
         yield return new WaitForSeconds(1f);
-
 
         Handanimator.Play("RemoveAllCard");
         ResetCardHistory();
@@ -925,9 +932,10 @@ public class GameManager : MonoBehaviour
         BaharHighLight.SetActive(false);
         AndarBtnHighLight.SetActive(false);
         BaharBtnHighLight.SetActive(false);
+
         yield return new WaitForSeconds(3f);
-        // FIX: PlayResetAnimation is now triggered in SetNewRoundTimer at value==2
-        // so the sliding panel fires exactly 1 tick before NewRoundAnim at value==1
+
+        // PlayResetAnimation is triggered in RestRoundText on game:round_start
         if (currentWin >= 1)
         {
             int winInt = Mathf.FloorToInt((float)currentWin);
@@ -936,9 +944,8 @@ public class GameManager : MonoBehaviour
 
         currentWin = 0;
         ResetAllBetUI();
-        // RoundInfoAnim(1);
-        // animHand.MiddleCard.gameObject.SetActive(false);
     }
+
     internal IEnumerator ManageFlushAnimation()
     {
         PlayFlushAnim(socketManager.FlushData.firstThreeResult, animHand.LeftSprite, animHand.MiddleSprite, animHand.RightSprite);
@@ -960,6 +967,8 @@ public class GameManager : MonoBehaviour
         pulseText.text = " ";
         // Stop new round animation when the next round actually begins
         NewRoundAnim.StopAnimation();
+        // Slide in the Andar/Bahar reset panel — fires exactly on round_start event
+        PlayResetAnimation();
     }
     IEnumerator ManagePayout()
     {
@@ -1366,31 +1375,70 @@ public class GameManager : MonoBehaviour
         Handanimator.Play("MiddleCard");
         uiManager.CalculateStringProbability(socketManager.gameLoopData.middleCard.rank);
     }
+    // ─── Card animation queue helpers ─────────────────────────────────────────
+    // Each dealt card is pushed onto the queue; the drain coroutine plays them
+    // back-to-back with zero extra delay between sequential cards.
+
+    void EnqueueCardAnim(bool isAndar, int cardCount, Sprite cardSprite)
+    {
+        cardAnimQueue.Enqueue(() => ExecuteCardAnim(isAndar, cardCount, cardSprite));
+        if (cardAnimCoroutine == null)
+            cardAnimCoroutine = StartCoroutine(DrainCardAnimQueue());
+    }
+
+    IEnumerator DrainCardAnimQueue()
+    {
+        while (cardAnimQueue.Count > 0)
+        {
+            System.Action next = cardAnimQueue.Dequeue();
+            next?.Invoke();
+
+            // Wait exactly as long as the Animator clip takes (0.3 s deal + small buffer)
+            // so the next card starts the instant the current flip finishes.
+            yield return new WaitForSeconds(0.35f);
+        }
+        cardAnimCoroutine = null;
+    }
+
+    void ExecuteCardAnim(bool isAndar, int cardCount, Sprite cardSprite)
+    {
+        if (isAndar)
+        {
+            if (cardCount > 2)
+            {
+                AndarHighLight.SetActive(true);
+                BaharHighLight.SetActive(false);
+                AndarBtnHighLight.SetActive(true);
+                BaharBtnHighLight.SetActive(false);
+            }
+            else StartCoroutine(delayedactive(true, false));
+            animHand.LeftSprite = cardSprite;
+            Handanimator.Play("LeftCard");
+        }
+        else
+        {
+            if (cardCount > 2)
+            {
+                AndarHighLight.SetActive(false);
+                BaharHighLight.SetActive(true);
+                AndarBtnHighLight.SetActive(false);
+                BaharBtnHighLight.SetActive(true);
+            }
+            else StartCoroutine(delayedactive(false, true));
+            animHand.RightSprite = cardSprite;
+            Handanimator.Play("RightCard");
+        }
+    }
+
     void PlayAndarCardAnim(int cardCount)
     {
-        if (cardCount > 2)
-        {
-            AndarHighLight.SetActive(true);
-            BaharHighLight.SetActive(false);
-            AndarBtnHighLight.SetActive(true);
-            BaharBtnHighLight.SetActive(false);
-        }
-        else StartCoroutine(delayedactive(true, false));
-        animHand.LeftSprite = CardSet(socketManager.CardDelt.card.suit, socketManager.CardDelt.card.rank);
-        Handanimator.Play("LeftCard");
+        Sprite s = CardSet(socketManager.CardDelt.card.suit, socketManager.CardDelt.card.rank);
+        EnqueueCardAnim(true, cardCount, s);
     }
     void PlayBagarCardAnim(int cardCount)
     {
-        if (cardCount > 2)
-        {
-            AndarHighLight.SetActive(false);
-            BaharHighLight.SetActive(true);
-            AndarBtnHighLight.SetActive(false);
-            BaharBtnHighLight.SetActive(true);
-        }
-        else StartCoroutine(delayedactive(false, true));
-        animHand.RightSprite = CardSet(socketManager.CardDelt.card.suit, socketManager.CardDelt.card.rank);
-        Handanimator.Play("RightCard");
+        Sprite s = CardSet(socketManager.CardDelt.card.suit, socketManager.CardDelt.card.rank);
+        EnqueueCardAnim(false, cardCount, s);
     }
     IEnumerator delayedactive(bool andar, bool bahar)
     {
@@ -1592,7 +1640,6 @@ public class GameManager : MonoBehaviour
             bool isBlack = roundState.middleCard.color == "black";
             if (isBlack)
             {
-                // Andar deals first: Andar/FirstAndar get payout[0], Bahar/FirstBahar get payout[1]
                 AndarTxt.SetData(0, "andar", socketManager.initialData.wagers.main_bets.andar.payout[0].ToString(), "main_bets");
                 BaharTxt.SetData(1, "bahar", socketManager.initialData.wagers.main_bets.bahar.payout[1].ToString(), "main_bets");
                 FirstAndarTxt.SetData(2, "firstOneAndar", socketManager.initialData.wagers.op_bets.first_1_andar.payout[0].ToString(), "op_bets");
@@ -1600,35 +1647,76 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                // Bahar deals first: Bahar/FirstBahar get payout[0], Andar/FirstAndar get payout[1]
                 AndarTxt.SetData(0, "andar", socketManager.initialData.wagers.main_bets.andar.payout[1].ToString(), "main_bets");
                 BaharTxt.SetData(1, "bahar", socketManager.initialData.wagers.main_bets.bahar.payout[0].ToString(), "main_bets");
                 FirstAndarTxt.SetData(2, "firstOneAndar", socketManager.initialData.wagers.op_bets.first_1_andar.payout[1].ToString(), "op_bets");
                 FirstBaharTxt.SetData(3, "firstOneBahar", socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0].ToString(), "op_bets");
             }
+
+            // Always show middle card regardless of phase
+            animHand.MiddleCard.sprite = CardSet(roundState.middleCard.suit, roundState.middleCard.rank);
+            animHand.MiddleCard.gameObject.SetActive(true);
         }
 
-        // --- Enable win ratio texts (player joined during betting phase) ---
+        // ── Phase-specific UI ──────────────────────────────────────────────────
         if (roundState.phase == "betting")
         {
+            // Bet open — show timer text, correct sprite, unlock UI
             EnableAllWinRatioTexts();
-            // FIX 1: Unlock bet UI for mid-round join during betting phase
             BetBlocker.gameObject.SetActive(false);
             uiManager.setCoins(true);
-            // Show repeat panel briefly if player has a prior bet (same rule as time==25)
+            animHand.LeftCard.gameObject.SetActive(false);
+            animHand.RightCard.gameObject.SetActive(false);
+
+            int time = roundState.timeRemaining;
+
+            RoundInfo_Text.gameObject.SetActive(true);
+            RoundInfo_Text.text = "<size=30>Place Bet Now</size>\n ";
+            pulseText.text = "<color=yellow>" + time + "</color>";
+            pulseText.gameObject.SetActive(true);
+
+            if (time <= 5)
+            {
+                RoundInfoAnim(2);
+                PopTMP(pulseText);
+            }
+            else
+            {
+                RoundInfoAnim(0);   // "Place Bet" sprite
+            }
+
+            // Show repeat panel briefly if the player already has a saved bet
             if (isRepeatbetActive && !uiManager.isExpanded)
             {
                 if (repeatPanelCoroutine != null) StopCoroutine(repeatPanelCoroutine);
                 repeatPanelCoroutine = StartCoroutine(ShowRepeatPanelBriefly());
             }
         }
-        else
+        else if (roundState.phase == "dealing")
         {
-            // FIX 1: Keep bet locked for dealing/other phases on mid-round join
+            // Cards are being dealt — bets locked, hide coins
             BetBlocker.gameObject.SetActive(true);
             uiManager.setCoins(false);
             uiManager.SetChipoption(false);
             CancelRepeatPanel();
+
+            RoundInfo_Text.gameObject.SetActive(true);
+            RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
+            pulseText.gameObject.SetActive(false);
+            RoundInfoAnim(1);   // "Bet Locked" sprite
+        }
+        else
+        {
+            // bonus / cashout / any other post-deal phase — fully locked
+            BetBlocker.gameObject.SetActive(true);
+            uiManager.setCoins(false);
+            uiManager.SetChipoption(false);
+            CancelRepeatPanel();
+
+            RoundInfo_Text.gameObject.SetActive(true);
+            RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
+            pulseText.gameObject.SetActive(false);
+            RoundInfoAnim(1);
         }
 
         // --- Defer chip spawning by one frame so RectTransform layout is ready ---
@@ -1775,6 +1863,7 @@ public class GameManager : MonoBehaviour
 
         }
     }
+
     void PlayResetAnimation()
     {
         audioManager.PlayGirlAudio("newround");
@@ -1785,36 +1874,44 @@ public class GameManager : MonoBehaviour
 
         Sequence seq = DOTween.Sequence();
 
-        seq.Append(rt.DOAnchorPosX(targetX, 0.8f).SetEase(Ease.OutBounce))
-
+        // 1️⃣ Slide IN slower (0.8f → 0.9f for smoother animation)
+        seq.Append(rt.DOAnchorPosX(targetX, 1.2f).SetEase(Ease.OutBounce))
 
            .AppendInterval(0.01f)
-            .AppendCallback(() =>
-            {
-                // FIX 2: NewRoundAnim is now triggered in SetNewRoundTimer(value==1)
-                // so it fires precisely when cashout timer hits 1, not here
-                SparkAnim.StopAnimation(); // pre-stop so the interval below starts clean
-            })
+           .AppendCallback(() =>
+           {
+               // Stop any running animations before starting new ones
+               NewRoundAnim.StopAnimation();
+               SparkAnim.StopAnimation();
+           })
+
            .AppendInterval(1.5f)
            .AppendCallback(() =>
            {
-               SparkAnim.StopAnimation();
-               SparkAnim.StartAnimation();
-
+               // Clear all text and UI elements BEFORE starting animations
                CardCount_Text.text = "";
                RoundInfo_Text.text = "";
-               //   AndarTxt.SetData(0, "andar", "", "main_bets");
-               //   BaharTxt.SetData(1, "bahar", "", "main_bets");
                AndarTxt.DontShowText();
                BaharTxt.DontShowText();
                AndarTxt.winAnimation.StopAnimation();
                BaharTxt.winAnimation.StopAnimation();
+
+               // Start NewRound animation but NOT spark yet
+               // Spark will start AFTER slide-out completes
+               NewRoundAnim.StartAnimation();
            })
 
+           // 2️⃣ Slide OUT slower (0.6f → 0.8f for better visual flow)
+           .Append(rt.DOAnchorPosX(startX, 0.8f).SetEase(Ease.InOutSine))
 
-           .Append(rt.DOAnchorPosX(startX, 0.6f).SetEase(Ease.InOutSine));
+           // 3️⃣ CRITICAL FIX: Start spark animation ONLY AFTER slide-out completes
+           // This prevents the spark from appearing too early during the slide-out
+           .AppendCallback(() =>
+           {
+               SparkAnim.StartAnimation();
+           });
 
-
+        // Reset all option backgrounds
         foreach (var item in AllOptions)
         {
             item.BG.SetActive(true);
@@ -1822,7 +1919,6 @@ public class GameManager : MonoBehaviour
         }
         BonusObject.gameObject.SetActive(false);
     }
-
 
     private Chip SpawnChipFromPool()
     {

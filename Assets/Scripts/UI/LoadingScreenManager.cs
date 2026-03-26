@@ -15,6 +15,7 @@ public class LoadingScreenManager : MonoBehaviour
     [SerializeField] private TMP_Text loadingText;
     [SerializeField] private ImageAnimation loadingAnimation;
 
+    
     private Coroutine currentLoadingCoroutine;
     private bool isWaitingForAck = false;
     private float minimumLoadingTime = 0.5f;
@@ -112,6 +113,8 @@ public class LoadingScreenManager : MonoBehaviour
         {
             loadingAnimation.StartAnimation();
         }
+
+   
     }
 
     private void HideLoadingScreen()
@@ -136,7 +139,7 @@ public class LoadingScreenManager : MonoBehaviour
             case LoadingType.LeavingTable:
                 return "Leaving table";
             case LoadingType.InitWaiting:
-                return ""; // Empty text for init waiting
+                return "";
             case LoadingType.LoadingHistory:
                 return "Loading history";
             case LoadingType.Connecting:

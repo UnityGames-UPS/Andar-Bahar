@@ -11,7 +11,11 @@ public class AudioManager : MonoBehaviour
 
     [SerializeField] private AudioClip[] clips;
     [SerializeField] private AudioClip[] Voiceclips;
-
+    [Header("New Sound Effects")]
+    [SerializeField] private AudioClip levelButtonClickClip;   
+    [SerializeField] private AudioClip whooshClip;            
+    [SerializeField] private AudioClip andarWinClip;      
+    [SerializeField] private AudioClip baharWinClip;
     // PlayerPrefs keys
     private const string PREF_MUSIC_MUTED = "AudioManager_MusicMuted";
     private const string PREF_SOUND_MUTED = "AudioManager_SoundMuted";
@@ -348,6 +352,80 @@ public class AudioManager : MonoBehaviour
         userSoundMuted = false;
         ApplyAudioPreferences();
 
+    }
+
+    #endregion
+
+
+    #region New Sound Effects
+
+    /// <summary>
+    /// Play level button click sound when user selects Casual/Novice/Expert/HighRoller
+    /// </summary>
+    internal void PlayLevelButtonClick()
+    {
+        if (levelButtonClickClip != null && audioPlayer_button != null)
+        {
+            // Use PlayOneShot to allow multiple clicks without cutting off previous sound
+            audioPlayer_button.PlayOneShot(levelButtonClickClip);
+        }
+        else
+        {
+            Debug.LogWarning("Level button click clip or audio player is missing!");
+        }
+    }
+
+    /// <summary>
+    /// Play whoosh sound when loading screen appears after level selection
+    /// </summary>
+    internal void PlayWhooshSound()
+    {
+        if (whooshClip != null && audioPlayer_wl != null)
+        {
+            // Stop any current sound and play whoosh
+            audioPlayer_wl.Stop();
+            audioPlayer_wl.PlayOneShot(whooshClip);
+        }
+        else
+        {
+            Debug.LogWarning("Whoosh clip or audio player is missing!");
+        }
+    }
+
+    /// <summary>
+    /// Play win sound based on who won (andar or bahar)
+    /// </summary>
+    /// <param name="winner">String: "andar" or "bahar"</param>
+    internal void PlayWinSound(string winner)
+    {
+        if (audioWin == null)
+        {
+            Debug.LogWarning("AudioWin source is missing!");
+            return;
+        }
+
+        // Stop any previous win sound
+        audioWin.Stop();
+
+        // Play appropriate win sound based on winner
+        string winnerLower = winner.ToLower();
+
+        if (winnerLower == "andar" && andarWinClip != null)
+        {
+            audioWin.clip = andarWinClip;
+            audioWin.Play();
+            Debug.Log("Playing Andar win sound");
+        }
+        else if (winnerLower == "bahar" && baharWinClip != null)
+        {
+            audioWin.clip = baharWinClip;
+            audioWin.Play();
+            Debug.Log("Playing Bahar win sound");
+        }
+        else
+        {
+            Debug.LogWarning($"Win sound clip missing for winner: {winner}");
+        }
     }
 
     #endregion

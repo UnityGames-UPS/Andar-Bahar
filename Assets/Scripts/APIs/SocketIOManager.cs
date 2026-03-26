@@ -971,6 +971,7 @@ public class RoundState
     public List<BaharCard> baharCards;
     public int cardsDealt;
     public string phase;
+    public int timeRemaining;   // seconds left in betting window at join time
 }
 
 [Serializable]

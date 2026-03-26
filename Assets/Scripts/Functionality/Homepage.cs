@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
-
+using System.Collections;
 using System.Collections.Generic;
 
 public class Homepage : MonoBehaviour
@@ -154,13 +154,19 @@ public class Homepage : MonoBehaviour
 
     internal void OnClickARoom(string room)
     {
-        audioManager.PlayButtonAudio();
+        audioManager.PlayLevelButtonClick();
         socketManager.SendRoomSelection(room);
         gameManager.currentRoom = room;
+        StartCoroutine(PlayLodingAudio());
     }
 
 
-
+    IEnumerator PlayLodingAudio()
+    {
+        yield return new WaitForSeconds(0.2f);
+        audioManager.PlayWhooshSound();
+        StopCoroutine (PlayLodingAudio());
+    }
 
 
     /*void AnnouncementScrollAnim()
