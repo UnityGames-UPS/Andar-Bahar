@@ -161,6 +161,7 @@ public class GameManager : MonoBehaviour
     internal bool isRepeatbetActive = false;
     private Coroutine StartGameCorutine;
     private Coroutine EndGameCorutine;
+    private Coroutine repeatPanelCoroutine; // controls the 5-sec repeat panel window
 
     private Vector3 startPoscoin;
     private Vector3 endPos = new Vector3(0, -10, 0);
@@ -580,10 +581,12 @@ public class GameManager : MonoBehaviour
         }
         currentTotalBet = 0;
 
-        BetBlocker.gameObject.SetActive(false);
-        uiManager.setCoins(true);
+        // FIX 1: Keep bet LOCKED at round start. Bet unlock happens only when
+        // the betting_timer broadcast fires (SetBetTimer). Do NOT unlock here.
+        BetBlocker.gameObject.SetActive(true);
+        uiManager.setCoins(false);
         uiManager.SetChipoption(false);
-        if (isRepeatbetActive && !uiManager.isExpanded) uiManager.Repeatpanel.SetActive(true);
+        CancelRepeatPanel();
         uiManager.SetNetBetPanel(false);
         MainFlushObj.SetActive(false);
         ResetAllBetUI();
@@ -647,7 +650,10 @@ public class GameManager : MonoBehaviour
                 FirstBaharTxt.SetData(3, "firstOneBahar", socketManager.initialData.wagers.op_bets.first_1_bahar.payout[0].ToString(), "op_bets");
             }
         }
+        // FIX 1: Unlock bets here - this fires when betting timer starts
         BetBlocker.gameObject.SetActive(false);
+        uiManager.setCoins(true);
+        // Repeat panel is NOT shown here - it only appears at time==25 for 5 sec
         RoundInfo_Text.gameObject.SetActive(true);
         animHand.MiddleCard.sprite = CardSet(socketManager.TimeRemaining.middleCard.suit, socketManager.TimeRemaining.middleCard.rank);
         animHand.MiddleCard.gameObject.SetActive(true);
@@ -693,6 +699,12 @@ public class GameManager : MonoBehaviour
         {
             EnableAllWinRatioTexts();
             audioManager.PlayGirlAudio("placeyourbet");
+            // Show Repeat panel for 5 seconds if player has a previous bet
+            if (isRepeatbetActive && !uiManager.isExpanded)
+            {
+                if (repeatPanelCoroutine != null) StopCoroutine(repeatPanelCoroutine);
+                repeatPanelCoroutine = StartCoroutine(ShowRepeatPanelBriefly());
+            }
         }
         // If joining mid-round during betting phase, ratios may not be enabled yet
         // EnableAllWinRatioTexts is safe to call multiple times (idempotent)
@@ -717,10 +729,35 @@ public class GameManager : MonoBehaviour
         //RoundInfo_Text.gameObject.SetActive(false);
         uiManager.SetChipoption(false);
         uiManager.setCoins(false);
-        uiManager.Repeatpanel.SetActive(false);
+        CancelRepeatPanel();
 
         RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
         BetBlocker.gameObject.SetActive(true);
+    }
+
+    /// <summary>
+    /// Shows the Repeat panel at betting start (time==25) for 5 seconds then hides it.
+    /// Cancelled automatically if the player places a bet or bets lock.
+    /// </summary>
+    IEnumerator ShowRepeatPanelBriefly()
+    {
+        uiManager.Repeatpanel.SetActive(true);
+        yield return new WaitForSeconds(5f);
+        uiManager.Repeatpanel.SetActive(false);
+        repeatPanelCoroutine = null;
+    }
+
+    /// <summary>
+    /// Call this whenever the repeat panel must be force-hidden (bet placed, locked, etc.)
+    /// </summary>
+    void CancelRepeatPanel()
+    {
+        if (repeatPanelCoroutine != null)
+        {
+            StopCoroutine(repeatPanelCoroutine);
+            repeatPanelCoroutine = null;
+        }
+        uiManager.Repeatpanel.SetActive(false);
     }
     bool firstTime = true;
     internal void SetNewRoundTimer(int i)
@@ -751,6 +788,18 @@ public class GameManager : MonoBehaviour
         RoundInfo_Text.text = "<size=30>Next Round</size>\n ";
 
         pulseText.text = $"<color=#00AB15>{value}</color>";
+
+        // value==2: slide the Andar/Bahar reset panel in — 1 sec before new round anim
+        if (value == 2)
+        {
+            PlayResetAnimation();
+        }
+        // value==1: fire the new round sprite animation on the bet area
+        if (value == 1)
+        {
+            NewRoundAnim.StopAnimation();
+            NewRoundAnim.StartAnimation();
+        }
     }
     public void PopTMP(TMP_Text tmp)
     {
@@ -773,7 +822,7 @@ public class GameManager : MonoBehaviour
         BetBlocker.gameObject.SetActive(true);
         uiManager.SetChipoption(false);
         uiManager.setCoins(false);
-        uiManager.Repeatpanel.SetActive(false);
+        CancelRepeatPanel();
         uiManager.SetNetBetPanel(true, currentTotalBet.ToString());
         RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
 
@@ -832,7 +881,7 @@ public class GameManager : MonoBehaviour
     IEnumerator GameLoop()
     {
 
-        uiManager.Repeatpanel.SetActive(false);
+        CancelRepeatPanel();
         RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
         if (StartGameCorutine != null)
         {
@@ -877,12 +926,11 @@ public class GameManager : MonoBehaviour
         AndarBtnHighLight.SetActive(false);
         BaharBtnHighLight.SetActive(false);
         yield return new WaitForSeconds(3f);
-        PlayResetAnimation();
+        // FIX: PlayResetAnimation is now triggered in SetNewRoundTimer at value==2
+        // so the sliding panel fires exactly 1 tick before NewRoundAnim at value==1
         if (currentWin >= 1)
         {
             int winInt = Mathf.FloorToInt((float)currentWin);
-
-            // PlayPopup("You Won\n" + winInt);
             playtheCoin("+" + winInt);
         }
 
@@ -907,20 +955,11 @@ public class GameManager : MonoBehaviour
     }
     internal void RestRoundText()
     {
-        // pulseText.gameObject.SetActive(true);
-        // RoundInfoAnim(3);
-        // for (int i = time; i >= 0; i--)
-        // {
-        //     RoundInfo_Text.text = "<size=30>Next Round</size>\n ";
-
-        //     pulseText.text = $"<color=#00AB15>{i}</color>";
-
-        //     yield return new WaitForSeconds(1f);
-        // }
         RoundInfoAnim(0);
         RoundInfo_Text.text = "  ";
-
         pulseText.text = " ";
+        // Stop new round animation when the next round actually begins
+        NewRoundAnim.StopAnimation();
     }
     IEnumerator ManagePayout()
     {
@@ -939,7 +978,10 @@ public class GameManager : MonoBehaviour
 
         // 2️⃣ Spawn payout chips on winning options
         SpawnPayoutOnWinningOptions(socketManager.CashoutData.payouts);
-        ResetAllBetUI();
+        // FIX 3: Only reset non-winning bet areas here.
+        // Winning options must keep TotalBetObj visible so the win amount
+        // shows while chips are animating in.
+        ResetNonWinningBetUI();
 
         yield return new WaitForSeconds(1.5f);
 
@@ -950,19 +992,22 @@ public class GameManager : MonoBehaviour
         SetOtherplayerData(socketManager.CashoutData.leaderboards);
         yield return new WaitForSeconds(1.5f);
         ResetAllChips();
-        // Hide winning options bet text now that chips have moved
+        // Extra wait so TotalBetObj stays visible after chips land before hiding
+        yield return new WaitForSeconds(0.75f);
+        // FIX 3: Now that chips have fully animated to players, hide winning areas
         foreach (var item in resultsOptions)
         {
             if (item != null) item.DontShowText();
         }
         yield return new WaitForSeconds(1f);
+        // FIX 3: Full reset only after everything is done
+        ResetAllBetUI();
         resultsOptions.Clear();
 
 
     }
     void ResetOptionPrefabs()
     {
-        // Calculate total win amount per winning option from payouts
         var payouts = socketManager.CashoutData.payouts;
 
         foreach (var item in AllOptions)
@@ -974,18 +1019,26 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                // Winning option: show total win amount that will be distributed here
-                double totalWinForOption = 0;
-                if (payouts != null)
-                {
-                    foreach (var payout in payouts)
-                    {
-                        if (payout.win > 0)
-                            totalWinForOption += payout.win;
-                    }
-                }
-                item.TotalBetObj.SetActive(true);
-                item.TotalBetText.text = FormatHelper.FormatAmount(totalWinForOption);
+                // FIX 3: Show the existing totalBet (chips already on this option)
+                // so TotalBetObj displays the bet amount while win chips fly in.
+                // We keep whatever totalBet was accumulated during the round.
+                item.TotalBetObj.SetActive(item.totalBet > 0);
+                item.TotalBetText.text = FormatHelper.FormatAmount(item.totalBet);
+                item.MyBetObj.SetActive(false);
+            }
+        }
+
+        // Also handle BiggerOptions (Andar/Bahar live here in some setups)
+        foreach (var item in BiggerOptions)
+        {
+            if (!resultsOptions.Contains(item))
+            {
+                item.DontShowText();
+            }
+            else
+            {
+                item.TotalBetObj.SetActive(item.totalBet > 0);
+                item.TotalBetText.text = FormatHelper.FormatAmount(item.totalBet);
                 item.MyBetObj.SetActive(false);
             }
         }
@@ -1038,14 +1091,14 @@ public class GameManager : MonoBehaviour
         {
             if (!resultsOptions.Contains(item.betoptions))
             {
-                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true, 1.5f);
+                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true, 1f);
             }
         }
         foreach (var item in OtherPlayerChips)
         {
             if (!resultsOptions.Contains(item.betoptions))
             {
-                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true, 1.5f);
+                MoveChip(item.chip.transform, item.chip.transform, RoundInfo_Text.transform, true, 1f);
             }
         }
     }
@@ -1083,6 +1136,10 @@ public class GameManager : MonoBehaviour
 
         int totalCount = validOptions.Count;
         int resultIndex = 0;
+
+        // FIX 3: Tally the total win amount per winning option so we can
+        // display it in TotalBetText as win chips land there.
+        Dictionary<OptionPrefab, double> winPerOption = new Dictionary<OptionPrefab, double>();
 
         foreach (var payout in payouts)
         {
@@ -1125,11 +1182,27 @@ public class GameManager : MonoBehaviour
                 else
                     OtherPlayerChips.Add(data);
 
+                // FIX 3: Accumulate win amount per winning option
+                if (!winPerOption.ContainsKey(winningOption))
+                    winPerOption[winningOption] = 0;
+                winPerOption[winningOption] += piece;
+
                 // rotate safely
                 resultIndex++;
                 if (resultIndex >= totalCount)
                     resultIndex = 0;
             }
+        }
+
+        // FIX 3: Update TotalBetText on each winning option to show
+        // existing bet amount + incoming win amount, keeping TotalBetObj visible
+        foreach (var kvp in winPerOption)
+        {
+            OptionPrefab opt = kvp.Key;
+            double winAmount = kvp.Value;
+            double displayTotal = opt.totalBet + winAmount;
+            opt.TotalBetObj.SetActive(true);
+            opt.TotalBetText.text = FormatHelper.FormatAmount(displayTotal);
         }
     }
     List<OptionPrefab> GetValidWinningOptions()
@@ -1373,12 +1446,13 @@ public class GameManager : MonoBehaviour
         socketManager.BetPlaced(index, optionprefab.VaridontWant, socketManager.initialData.betOptions[optionprefab.Optionindex]);
         uiManager.RetractCoins();
         isRepeatbetActive = true;
+        CancelRepeatPanel(); // hide repeat panel once player is actively placing bets
 
     }
     internal void ManageBrodcastBetsPlayer()
     {
         uiManager.SetChipoption(true);
-        uiManager.Repeatpanel.SetActive(false);
+        CancelRepeatPanel();
         int totalAmount = socketManager.BetChipData.payload.amount;
 
         // Get chip denominations for current room
@@ -1538,10 +1612,27 @@ public class GameManager : MonoBehaviour
         if (roundState.phase == "betting")
         {
             EnableAllWinRatioTexts();
+            // FIX 1: Unlock bet UI for mid-round join during betting phase
+            BetBlocker.gameObject.SetActive(false);
+            uiManager.setCoins(true);
+            // Show repeat panel briefly if player has a prior bet (same rule as time==25)
+            if (isRepeatbetActive && !uiManager.isExpanded)
+            {
+                if (repeatPanelCoroutine != null) StopCoroutine(repeatPanelCoroutine);
+                repeatPanelCoroutine = StartCoroutine(ShowRepeatPanelBriefly());
+            }
+        }
+        else
+        {
+            // FIX 1: Keep bet locked for dealing/other phases on mid-round join
+            BetBlocker.gameObject.SetActive(true);
+            uiManager.setCoins(false);
+            uiManager.SetChipoption(false);
+            CancelRepeatPanel();
         }
 
         // --- Defer chip spawning by one frame so RectTransform layout is ready ---
-        if (bets != null && bets.Count > 0 && (roundState.phase == "betting"  || roundState.phase == "dealing"))
+        if (bets != null && bets.Count > 0 && (roundState.phase == "betting" || roundState.phase == "dealing"))
         {
             StartCoroutine(SpawnMidRoundChipsNextFrame(bets));
         }
@@ -1700,9 +1791,9 @@ public class GameManager : MonoBehaviour
            .AppendInterval(0.01f)
             .AppendCallback(() =>
             {
-                NewRoundAnim.StopAnimation();
-                NewRoundAnim.StartAnimation();
-
+                // FIX 2: NewRoundAnim is now triggered in SetNewRoundTimer(value==1)
+                // so it fires precisely when cashout timer hits 1, not here
+                SparkAnim.StopAnimation(); // pre-stop so the interval below starts clean
             })
            .AppendInterval(1.5f)
            .AppendCallback(() =>
@@ -1743,7 +1834,7 @@ public class GameManager : MonoBehaviour
 
     private void MoveChip(Chip chip, Transform target, bool returnToPool)
     {
-        chip.transform.DOMove(target.position, 1.5f)
+        chip.transform.DOMove(target.position, 1.2f)
             .SetEase(Ease.InOutExpo)
             .OnComplete(() =>
             {
@@ -2795,6 +2886,34 @@ public class GameManager : MonoBehaviour
         // Hide Total Bet
         option.TotalBetObj.SetActive(false);
         option.TotalBetText.text = "0";
+    }
+
+    /// <summary>
+    /// FIX 3: Resets bet UI only for non-winning options.
+    /// Winning options (in resultsOptions) are skipped so TotalBetObj stays
+    /// visible with the win amount while payout chips are animating in.
+    /// </summary>
+    void ResetNonWinningBetUI()
+    {
+        // Build a flat list of every option prefab
+        var allOpts = new List<OptionPrefab>();
+        allOpts.AddRange(AllOptions);
+        allOpts.AddRange(BiggerOptions);
+        allOpts.Add(AndarTxt);
+        allOpts.Add(BaharTxt);
+        allOpts.Add(FirstAndarTxt);
+        allOpts.Add(FirstBaharTxt);
+        allOpts.Add(FirstThreeTxt);
+
+        foreach (var opt in allOpts)
+        {
+            if (opt == null) continue;
+            // Skip winning options — they need to keep showing the win total
+            if (resultsOptions.Contains(opt)) continue;
+            ResetBetUI(opt);
+            opt.totalBet = 0;
+            opt.playerBet = 0;
+        }
     }
     internal void ResetAllBetUI()
     {
