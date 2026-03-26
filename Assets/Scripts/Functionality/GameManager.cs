@@ -176,6 +176,9 @@ public class GameManager : MonoBehaviour
     private List<ChipData> PlayerChips = new List<ChipData>();
     private List<ChipData> OtherPlayerChips = new List<ChipData>();
 
+    // ✅ Persistent player icon - selected once at initialization, stays throughout session
+    private Sprite selectedPlayerIcon;
+
 
     void Awake()
     {
@@ -203,6 +206,13 @@ public class GameManager : MonoBehaviour
     #region  DataSetup
     internal void SetInitialData()
     {
+        // ✅ Select a random player icon ONCE at initialization
+        // This icon will be used throughout the entire session
+        if (selectedPlayerIcon == null && uiManager.UserIcons.Count > 0)
+        {
+            selectedPlayerIcon = uiManager.UserIcons[UnityEngine.Random.Range(0, uiManager.UserIcons.Count)];
+        }
+
         uiManager.SetgameRulePanel();
         homepage.SetInitHomedata(socketManager.initialData);
         SetPlayerData(socketManager.playerdata);
@@ -384,10 +394,11 @@ public class GameManager : MonoBehaviour
     }
 
 
-    void SetPlayerData(Player player)
+    internal void SetPlayerData(Player player)
     {
-        homepage.setPlayerData(socketManager.playerdata);
-        uiManager.MainPlayers.SetData(player.username, player.balance.ToString(), uiManager.UserIcons[0]);
+        // ✅ Pass the same persistent player icon to both home and game screens
+        homepage.setPlayerData(socketManager.playerdata, selectedPlayerIcon);
+        uiManager.MainPlayers.SetData(player.username, player.balance.ToString(), selectedPlayerIcon);
         uiManager.Username.text = "ID: " + player.username;
     }
     internal void SetOtherplayerData(Leaderboards leaderboard)

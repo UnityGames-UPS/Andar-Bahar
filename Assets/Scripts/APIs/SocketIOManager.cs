@@ -692,6 +692,7 @@ public class SocketIOManager : MonoBehaviour
             uiManager.sideMenuePanel.transform.position = new Vector3(
                 uiManager.sideMenuePanel.transform.position.x, 451f,
                 uiManager.sideMenuePanel.transform.position.z);
+            gameManager.SetPlayerData(playerdata);
         }
     }
 

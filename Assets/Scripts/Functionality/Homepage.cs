@@ -1,4 +1,3 @@
-
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,7 +14,7 @@ public class Homepage : MonoBehaviour
     [Header("Player Details")]
     [SerializeField] private TMP_Text Playername;
     [SerializeField] internal TMP_Text PlayerBalance;
-    [SerializeField] private Image PlayerImage;
+    [SerializeField] internal Image PlayerImage;  // Made internal so GameManager can set it
     [Header("top Panel Details")]
     [SerializeField] internal TMP_Text TotalPlayerCount;
 
@@ -143,10 +142,16 @@ public class Homepage : MonoBehaviour
         TotalPlayerCount.text = (gameData.lobby.casual + gameData.lobby.novice + gameData.lobby.expert + gameData.lobby.high_roller).ToString();
 
     }
-    internal void setPlayerData(Player player)
+    internal void setPlayerData(Player player, Sprite playerIcon)
     {
-        PlayerBalance.text = player.balance.ToString();
+        PlayerBalance.text = player.balance.ToString("F2");
         Playername.text = player.username.ToString();
+
+        // Set the player icon - this will be the same sprite used in game screen
+        if (PlayerImage != null && playerIcon != null)
+        {
+            PlayerImage.sprite = playerIcon;
+        }
     }
 
 
@@ -165,7 +170,7 @@ public class Homepage : MonoBehaviour
     {
         yield return new WaitForSeconds(0.2f);
         audioManager.PlayWhooshSound();
-        StopCoroutine (PlayLodingAudio());
+        StopCoroutine(PlayLodingAudio());
     }
 
 
