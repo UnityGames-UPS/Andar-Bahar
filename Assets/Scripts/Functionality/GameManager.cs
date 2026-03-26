@@ -943,7 +943,11 @@ public class GameManager : MonoBehaviour
         }
 
         currentWin = 0;
-        ResetAllBetUI();
+        // NOTE: Do NOT call ResetAllBetUI() here.
+        // ManagePayout() (triggered by game:cashout) owns the full bet UI reset
+        // and does it only after all chip animations complete. Calling it here
+        // races with win chips flying into the bet area and hides TotalBetObj
+        // prematurely, right as chips land.
     }
 
     internal IEnumerator ManageFlushAnimation()
@@ -999,17 +1003,10 @@ public class GameManager : MonoBehaviour
 
         // 4️⃣ Update leaderboard
         SetOtherplayerData(socketManager.CashoutData.leaderboards);
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(2f);
         ResetAllChips();
-        // Extra wait so TotalBetObj stays visible after chips land before hiding
-        yield return new WaitForSeconds(0.75f);
-        // FIX 3: Now that chips have fully animated to players, hide winning areas
-        foreach (var item in resultsOptions)
-        {
-            if (item != null) item.DontShowText();
-        }
-        yield return new WaitForSeconds(1f);
-        // FIX 3: Full reset only after everything is done
+        yield return new WaitForSeconds(1.5f);
+        // Full reset after everything is done (halfway callbacks already hid TotalBetObj)
         ResetAllBetUI();
         resultsOptions.Clear();
 
@@ -1293,41 +1290,70 @@ public class GameManager : MonoBehaviour
     // }
     void MoveWinningChipsToPlayers(List<Payout> payouts)
     {
+        // ── PASS 1: Collect every (chip, target, opt) triple across ALL payouts ──
+        // We need to know which chip is the LAST one leaving each option so we can
+        // attach DontShowText() to that chip's halfway point only — firing on the
+        // first chip was hiding the text while later chips were still sitting there.
+
+        // Maps each winning option → ordered list of (chipData, target) to move
+        Dictionary<OptionPrefab, List<(ChipData chipData, Transform target)>> chipsByOption
+            = new Dictionary<OptionPrefab, List<(ChipData, Transform)>>();
+
         foreach (var payout in payouts)
         {
             Transform target = FindPlayerTransform(payout.username);
             if (target == null)
                 target = TotalPlayer_text.transform;
 
-            // 🔹 Move Main Player Chips
+            IEnumerable<ChipData> chipsForThisPayout;
+
             if (uiManager.MainPlayers.playername.text == payout.username)
             {
-                var chipsToMove = PlayerChips
-                    .Where(x => resultsOptions.Contains(x.betoptions))
-                    .ToList();
-
-                foreach (var chipData in chipsToMove)
-                {
-                    MoveChip(chipData.chip.GetComponent<Chip>(), target, true);
-                }
-
-                uiManager.MainPlayers.playerBalence.text = payout.balance.ToString();
-                socketManager.playerdata.balance = payout.balance;
+                chipsForThisPayout = PlayerChips
+                    .Where(x => resultsOptions.Contains(x.betoptions));
             }
             else
             {
-                // 🔹 Move Other Player Chips
-                var chipsToMove = OtherPlayerChips
+                chipsForThisPayout = OtherPlayerChips
                     .Where(x => x.betId == payout.username &&
-                                resultsOptions.Contains(x.betoptions))
-                    .ToList();
-
-                foreach (var chipData in chipsToMove)
-                {
-                    MoveChip(chipData.chip.GetComponent<Chip>(), target, true);
-                }
+                                resultsOptions.Contains(x.betoptions));
             }
 
+            foreach (var chipData in chipsForThisPayout)
+            {
+                OptionPrefab opt = chipData.betoptions;
+                if (opt == null) continue;
+
+                if (!chipsByOption.ContainsKey(opt))
+                    chipsByOption[opt] = new List<(ChipData, Transform)>();
+
+                chipsByOption[opt].Add((chipData, target));
+            }
+        }
+
+        // ── PASS 2: Animate all chips; only the LAST chip per option fires DontShowText ──
+        foreach (var kvp in chipsByOption)
+        {
+            OptionPrefab opt = kvp.Key;
+            var entries = kvp.Value;
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                ChipData chipData = entries[i].chipData;
+                Transform target = entries[i].target;
+                Chip chip = chipData.chip.GetComponent<Chip>();
+
+                // Only the very last chip for this option carries the halfway callback
+                bool isLast = (i == entries.Count - 1);
+                System.Action halfwayAction = isLast ? () => opt.DontShowText() : null;
+
+                MoveChip(chip, target, true, halfwayAction);
+            }
+        }
+
+        // ── Update balances for all payouts ──
+        foreach (var payout in payouts)
+        {
             if (uiManager.MainPlayers.playername.text == payout.username)
             {
                 uiManager.MainPlayers.playerBalence.text = payout.balance.ToString();
@@ -1804,10 +1830,20 @@ public class GameManager : MonoBehaviour
         chipRT.SetParent(poolParent);
         chipRT.localScale = Vector3.one;
 
-        Vector2 size = op.chiparea.rect.size;
+        Vector2 areaSize = op.chiparea.rect.size;
+
+        // Shrink the usable range by half the chip's own dimensions on every side
+        // so the chip edges never escape the chiparea boundary.
+        Vector2 chipSize = chipRT.rect.size;
+        float halfChipW = chipSize.x * 0.5f;
+        float halfChipH = chipSize.y * 0.5f;
+
+        float maxX = Mathf.Max(0f, areaSize.x * 0.40f - halfChipW);
+        float maxY = Mathf.Max(0f, areaSize.y * 0.40f - halfChipH);
+
         Vector2 randomPos = new Vector2(
-            UnityEngine.Random.Range(-size.x * 0.40f, size.x * 0.40f),
-            UnityEngine.Random.Range(-size.y * 0.40f, size.y * 0.40f)
+            UnityEngine.Random.Range(-maxX, maxX),
+            UnityEngine.Random.Range(-maxY, maxY)
         );
 
         Vector3 worldRandomPos = op.chiparea.TransformPoint(randomPos);
@@ -1928,9 +1964,10 @@ public class GameManager : MonoBehaviour
         return chip;
     }
 
-    private void MoveChip(Chip chip, Transform target, bool returnToPool)
+    private void MoveChip(Chip chip, Transform target, bool returnToPool, System.Action onHalfway = null)
     {
-        chip.transform.DOMove(target.position, 1.2f)
+        float moveDur = 1.2f;
+        chip.transform.DOMove(target.position, moveDur)
             .SetEase(Ease.InOutExpo)
             .OnComplete(() =>
             {
@@ -1939,6 +1976,19 @@ public class GameManager : MonoBehaviour
                     ReturnChip(chip);
                 }
             });
+
+        // Fire the callback at 80% of the move — chip is visually close to the
+        // player already so hiding TotalBetObj feels natural, not premature.
+        if (onHalfway != null)
+        {
+            StartCoroutine(HalfwayCallback(moveDur * 0.5f, onHalfway));
+        }
+    }
+
+    private IEnumerator HalfwayCallback(float delay, System.Action callback)
+    {
+        yield return new WaitForSeconds(delay);
+        callback?.Invoke();
     }
     private Transform FindPlayerTransform(string playerId)
     {
