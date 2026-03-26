@@ -561,11 +561,12 @@ public class UiManager : MonoBehaviour
         ConfirmBtn.onClick.AddListener(delegate { gameManager.OnClickNextroom(); ClosePopup(BetLimitPanel); });
         BetLimitQuitBtn.onClick.RemoveAllListeners();
         BetLimitQuitBtn.onClick.AddListener(delegate { ClosePopup(BetLimitPanel); });
-
+        ClearStats();
         // OnClickDontShow();
         ShowIntroPage();
         //  SpawnDummyStats(30);
         RegisterFullscreenListener();
+      
     }
     private void InitializeAudioButtons()
     {
@@ -1030,12 +1031,33 @@ public class UiManager : MonoBehaviour
         for (int i = 1; i < activeCount; i++)
             LineStats[i].HighBg.SetActive(false);
     }
+    // ADD this new method:
+    private void ClearStats()
+    {
+        // Clear grid: destroy all instantiated GameObjects
+        for (int i = gridStats.Count - 1; i >= 0; i--)
+        {
+            if (gridStats[i] != null)
+                Destroy(gridStats[i].gameObject);
+        }
+        gridStats.Clear();
 
+        // Clear line: hide all pre-assigned slots and reset their data
+        for (int i = 0; i < LineStats.Count; i++)
+        {
+            LineStats[i].gameObject.SetActive(false);
+        }
+    }
     internal void InitializeStatsFromServer(List<string> statsList)
     {
+        // Always clear existing stats first — handles re-join and level-change
+        ClearStats();
+
         if (statsList == null || statsList.Count == 0)
             return;
 
+        // Server sends stats oldest → newest.
+        // We iterate in order so line stats end up newest-first (matching grid visual order).
         foreach (string statString in statsList)
         {
             StatData data = JsonUtility.FromJson<StatData>(statString);
@@ -1043,126 +1065,131 @@ public class UiManager : MonoBehaviour
             if (data == null || data.middleCard == null)
                 continue;
 
-            string cardNo = data.middleCard.rank;     // "10", "A", "K"
-            bool isBlue = data.matchSide == "bahar";  // bahar = blue
+            string cardNo = data.middleCard.rank;
+            bool isBlue = data.matchSide == "bahar";
             string countNo = data.cardsDealt.ToString();
 
             UpdateStats(cardNo, isBlue, countNo);
         }
     }
-
     private void UpdateGridStats(string cardNo, bool isBlue, string countNo)
     {
+        // Cap at MAX_GRID for live play — remove oldest if over limit
         if (gridStats.Count >= MAX_GRID)
         {
-            Destroy(gridStats[0].gameObject);
+            if (gridStats[0] != null)
+                Destroy(gridStats[0].gameObject);
             gridStats.RemoveAt(0);
         }
 
+        // Instantiate the new stat item
         StatsPrefab stat = Instantiate(StatsPref, StatsParent).GetComponent<StatsPrefab>();
         stat.SetData(cardNo, isBlue, true, countNo);
 
+        // Remove highlight from previous newest item
         if (gridStats.Count > 0)
         {
             StatsPrefab last = gridStats[gridStats.Count - 1];
-            last.SetData(last.cardnumber.text,
-                         last.BlueBg.activeSelf,
-                         false,
-                         last.countNumber.text);
+            last.SetData(
+                last.cardnumber.text,
+                last.BlueBg != null && last.BlueBg.activeSelf,
+                false,   // isHighlighted = false
+                last.countNumber.text
+            );
         }
 
         gridStats.Add(stat);
     }
 
-
-
     internal void CalculateAndShowPercentage()
     {
-        var stats = GetStats();
-        int total = stats.Count;
+        // Use gridStats directly — authoritative, no stray children included
+        int total = gridStats.Count;
 
-        if (total == 0) return;
+        if (total == 0)
+        {
+            AndarPercentage.text = "0%";
+            BaharPercentage.text = "0%";
+            FillAb.fillAmount = 0.5f;
+            return;
+        }
 
         int andarCount = 0;
         int baharCount = 0;
 
-        foreach (var s in stats)
+        foreach (var s in gridStats)
         {
-
-            if (s.winner == "andar")
-                andarCount++;
-
-            else if (s.winner == "bahar")
-                baharCount++;
+            if (s == null) continue;
+            if (s.winner == "andar") andarCount++;
+            else if (s.winner == "bahar") baharCount++;
         }
 
+        // Force sum to exactly 100 — bahar gets the remainder to absorb rounding
+        int andarPercent = Mathf.RoundToInt((andarCount * 100f) / total);
+        int baharPercent = 100 - andarPercent;   // guaranteed sum = 100
 
-        float andarPercent = (andarCount * 100f) / total;
-        float baharPercent = (baharCount * 100f) / total;
-
-        AndarPercentage.text = andarPercent.ToString("0") + "%";
-        BaharPercentage.text = baharPercent.ToString("0") + "%";
+        AndarPercentage.text = andarPercent + "%";
+        BaharPercentage.text = baharPercent + "%";
 
         FillAb.fillAmount = andarPercent / 100f;
     }
-
-
-
 
     internal void CalculateStringProbability(string card)
     {
         cardProb.text = card;
 
-        var stats = GetStats();
-        int total = stats.Count;
-
-        if (total == 0)
+        // Use gridStats directly — same authoritative source as CalculateAndShowPercentage
+        if (gridStats.Count == 0)
         {
+            AndarProb.text = "0%";
+            BaharProbab.text = "0%";
             return;
         }
 
         int andarMatch = 0;
         int baharMatch = 0;
 
-        foreach (var s in stats)
+        foreach (var s in gridStats)
         {
-
+            if (s == null) continue;
             if (s.cardnumber.text == card)
             {
-
-                if (s.winner == "andar")
-                    andarMatch++;
-
-                else if (s.winner == "bahar")
-                    baharMatch++;
+                if (s.winner == "andar") andarMatch++;
+                else if (s.winner == "bahar") baharMatch++;
             }
         }
 
+        int cardTotal = andarMatch + baharMatch;
 
-        float andarProbVal = (andarMatch * 100f) / total;
-        float baharProbVal = (baharMatch * 100f) / total;
+        // Card never appeared in last 26 rounds → show 0% - 0%
+        if (cardTotal == 0)
+        {
+            AndarProb.text = "0%";
+            BaharProbab.text = "0%";
+            return;
+        }
 
-        AndarProb.text = andarProbVal.ToString("0") + "%";
-        BaharProbab.text = baharProbVal.ToString("0") + "%";
+        // Divide by how many times THIS CARD appeared, not total rounds
+        // Force sum to exactly 100 using remainder trick
+        int andarProbVal = Mathf.RoundToInt((andarMatch * 100f) / cardTotal);
+        int baharProbVal = 100 - andarProbVal;   // guaranteed sum = 100
 
-        //  Fillprobability.fillAmount = 1 - ((andarProbVal + baharProbVal) / 100f);
+        AndarProb.text = andarProbVal + "%";
+        BaharProbab.text = baharProbVal + "%";
     }
-
-
     private List<StatsPrefab> GetStats()
     {
-        List<StatsPrefab> list = new List<StatsPrefab>();
-
-        for (int i = 0; i < StatsParent.childCount; i++)
+        // Return a clean copy of gridStats, filtering nulls
+        // Using gridStats instead of StatsParent children prevents stray
+        // non-StatsPrefab objects from inflating the count
+        List<StatsPrefab> list = new List<StatsPrefab>(gridStats.Count);
+        foreach (var s in gridStats)
         {
-            var s = StatsParent.GetChild(i).GetComponent<StatsPrefab>();
             if (s != null && s.gameObject.activeSelf)
                 list.Add(s);
         }
-
         return list;
     }
-
     internal void setCoins(bool istrue)
     {
         chipPanel.SetActive(istrue);

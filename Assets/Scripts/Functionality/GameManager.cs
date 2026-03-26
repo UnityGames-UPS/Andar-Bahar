@@ -202,15 +202,56 @@ public class GameManager : MonoBehaviour
         homepage.SetInitHomedata(socketManager.initialData);
         SetPlayerData(socketManager.playerdata);
     }
- 
+
 
 
     internal void OnGameLoaded()
     {
+        // ✅ FIX: Ensure home screen is hidden when game screen activates
+        // This handles cases where game events arrive before room join completes
+        if (HomePage.activeSelf)
+        {
+            HomePage.SetActive(false);
+        }
+
         GamePage.SetActive(true);
 
-      
 
+
+    }
+
+    /// <summary>
+    /// ✅ FIX: Ensures smooth transition from Home → Game screen before chip distribution
+    /// Prevents chips from appearing on home screen when joining mid-round
+    /// </summary>
+    internal void TransitionToGameScreen(RoundState roundState, List<Bet> bets, System.Action onComplete)
+    {
+        StartCoroutine(TransitionToGameScreenCoroutine(roundState, bets, onComplete));
+    }
+
+    private IEnumerator TransitionToGameScreenCoroutine(RoundState roundState, List<Bet> bets, System.Action onComplete)
+    {
+        // Step 1: Hide home screen
+        HomePage.SetActive(false);
+
+        // Step 2: Activate game screen
+        GamePage.SetActive(true);
+
+        // Step 3: Wait for Canvas to rebuild layout (critical for chip positions)
+        yield return null;  // Wait 1 frame for Canvas layout
+        yield return null;  // Wait 1 more frame to ensure RectTransforms are ready
+
+        // Step 4: Now apply mid-round state (if joining mid-round)
+        if (roundState != null)
+        {
+            ApplyMidRoundState(roundState, bets);
+        }
+
+        // Step 5: Wait one more frame to ensure chips have correct positions
+        yield return null;
+
+        // Step 6: Now it's safe to hide loading screen
+        onComplete?.Invoke();
     }
 
 
@@ -900,7 +941,7 @@ public class GameManager : MonoBehaviour
         SpawnPayoutOnWinningOptions(socketManager.CashoutData.payouts);
         ResetAllBetUI();
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1.5f);
 
         // 3️⃣ Move winning chips to players
         MoveWinningChipsToPlayers(socketManager.CashoutData.payouts);
@@ -1461,6 +1502,8 @@ public class GameManager : MonoBehaviour
 
             UpdateTotalBetOnOption(chipdata.betOption, piece);
         }
+
+        audioManager.PlayWLAudio("double");
     }
     /// <summary>
     /// Called from OnRoomEnter when joining mid-round.
@@ -1498,7 +1541,7 @@ public class GameManager : MonoBehaviour
         }
 
         // --- Defer chip spawning by one frame so RectTransform layout is ready ---
-        if (bets != null && bets.Count > 0)
+        if (bets != null && bets.Count > 0 && (roundState.phase == "betting"  || roundState.phase == "dealing"))
         {
             StartCoroutine(SpawnMidRoundChipsNextFrame(bets));
         }
@@ -1573,7 +1616,6 @@ public class GameManager : MonoBehaviour
 
     }
 
-
     GameObject SpawnChip(Sprite sprite, string amount, int chipindex, Transform startPoint, OptionPrefab op, bool isPlayerbet = false, float moveTime = 1f)
     {
         Chip chip = GetChip();
@@ -1584,53 +1626,25 @@ public class GameManager : MonoBehaviour
         chipRT.localScale = Vector3.one;
 
         Vector2 size = op.chiparea.rect.size;
-
         Vector2 randomPos = new Vector2(
-            UnityEngine.Random.Range(-size.x * 0.5f, size.x * 0.5f),
-            UnityEngine.Random.Range(-size.y * 0.5f, size.y * 0.5f)
+            UnityEngine.Random.Range(-size.x * 0.40f, size.x * 0.40f),
+            UnityEngine.Random.Range(-size.y * 0.40f, size.y * 0.40f)
         );
 
         Vector3 worldRandomPos = op.chiparea.TransformPoint(randomPos);
 
         if (!isPlayerbet && startPoint != null)
         {
-            // Animated spawn
             chipRT.position = startPoint.position;
             chipRT.DOMove(worldRandomPos, moveTime);
         }
         else
         {
-            // Direct spawn at correct world position
             chipRT.position = worldRandomPos;
         }
 
         return chip.gameObject;
-
-        // Chip chip = GetChip();
-        // chip.SetData(sprite, amount, chipindex);
-
-        // RectTransform chipRT = chip.GetComponent<RectTransform>();
-        // chipRT.SetParent(poolParent);
-        // chipRT.localScale = Vector3.one;
-
-        // Vector2 size = op.chiparea.rect.size;
-        // Vector2 randomPos = new Vector2(
-        //     UnityEngine.Random.Range(-size.x * 0.5f, size.x * 0.5f),
-        //     UnityEngine.Random.Range(-size.y * 0.5f, size.y * 0.5f)
-        // );
-
-        // if (!isPlayerbet)
-        // {
-        //     chipRT.position = startPoint.position;
-        //     chipRT.DOMove(op.chiparea.TransformPoint(randomPos), moveTime);
-        // }
-        // else chipRT.position = randomPos;
-
-        // return chip.gameObject;
     }
-
-
-
 
 
 

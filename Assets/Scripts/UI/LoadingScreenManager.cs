@@ -25,7 +25,7 @@ public class LoadingScreenManager : MonoBehaviour
         LeavingTable,
         InitWaiting,
         LoadingHistory,
-        Connecting
+        Connecting,
     }
 
     /// <summary>

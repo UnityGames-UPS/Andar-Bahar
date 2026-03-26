@@ -261,9 +261,17 @@ public class SocketIOManager : MonoBehaviour
     private void OnListenTimeEvent(string data)
     {
         Debug.Log("[BROADCAST] game:betting_timer : " + data);
-        gameManager.OnGameLoaded();
-        //  ParseResponse(data);
+
+        // Always store the latest timer data so it's ready when transition completes
         TimeRemaining = JsonUtility.FromJson<Root>(data);
+
+        // If loading screen is still up, we're mid-transition — don't apply yet.
+        // TransitionToGameScreen's onComplete will have already set state via ApplyMidRoundState.
+        // The *next* betting_timer broadcast after loading hides will apply cleanly.
+        if (loadingScreenManager.IsLoading())
+            return;
+
+        gameManager.OnGameLoaded();
         gameManager.SetBetTimer();
     }
     private void OnListenCardEvent(string data)
@@ -662,25 +670,38 @@ public class SocketIOManager : MonoBehaviour
     {
         gameManager.ClearAllBets();
         Debug.Log("[ACK] HOME : " + json);
-        loadingScreenManager.HideLoading();
         ReturnHome = JsonUtility.FromJson<Root>(json);
-        // Player count is updated via lobby_count broadcast, no need to update here
-        // gameManager.SetPlayerCountOnReturn(ReturnHome.payload.lobby, ReturnHome.payload.balance);
         playerdata.balance = ReturnHome.payload.balance;
-        gameManager.GamePage.SetActive(false);
-        gameManager.HomePage.SetActive(true);
-        uiManager.MenuMain_button.gameObject.SetActive(true);
-        uiManager.MenuInGame_button.gameObject.SetActive(false);
-        uiManager.sideMenuePanel.transform.position = new Vector3(uiManager.sideMenuePanel.transform.position.x, 451f, uiManager.sideMenuePanel.transform.position.z);
-        //  Invoke(nameof(Reconnect), 0.2f);
-        if (gameManager.directJump) StartCoroutine(WaitandCallnewRoom());
+
+        if (gameManager.directJump)
+        {
+            // Level-change flow: set currentRoom NOW so OnRoomEnter uses the correct room,
+            // keep the loading screen visible the whole time, skip showing home screen entirely
+            gameManager.directJump = false;
+            gameManager.currentRoom = gameManager.nextRoom;
+            StartCoroutine(JoinNextRoomDirectly());
+        }
+        else
+        {
+            // Normal home flow: show home screen as usual
+            loadingScreenManager.HideLoading();
+            gameManager.GamePage.SetActive(false);
+            gameManager.HomePage.SetActive(true);
+            uiManager.MenuMain_button.gameObject.SetActive(true);
+            uiManager.MenuInGame_button.gameObject.SetActive(false);
+            uiManager.sideMenuePanel.transform.position = new Vector3(
+                uiManager.sideMenuePanel.transform.position.x, 451f,
+                uiManager.sideMenuePanel.transform.position.z);
+        }
     }
-    IEnumerator WaitandCallnewRoom()
+
+    IEnumerator JoinNextRoomDirectly()
     {
-        yield return new WaitForSeconds(4f);
+        // Keep loading screen up, wait one frame for HOME cleanup to settle, then join new room
+        yield return null;
         SendRoomSelection(gameManager.nextRoom);
-        gameManager.currentRoom = gameManager.nextRoom;
     }
+
     void OnHistory(string json)
     {
         Debug.Log("[ACK] BET_HISTORY : " + json);
@@ -748,12 +769,13 @@ public class SocketIOManager : MonoBehaviour
     void OnRoomEnter(string json)
     {
         Debug.Log("[ACK] JOIN_LEVEL : " + json);
-     
+
         roomData = JsonUtility.FromJson<Root>(json);
         if (roomData.success == false)
         {
             gameManager.HomePage.SetActive(true);
             gameManager.GamePage.SetActive(false);
+            loadingScreenManager.HideLoading();
             return;
 
         }
@@ -768,17 +790,14 @@ public class SocketIOManager : MonoBehaviour
         uiManager.Rayid.text = "R.ID: " + roomData.payload.roomId;
         uiManager.InitializeStatsFromServer(roomData.payload.stats);
 
-        
-        // Set correct win ratios and load mid-round bets if roundState exists (joining mid-round)
-        if (roomData.payload.roundState != null)
-        {
-            gameManager.ApplyMidRoundState(
-                roomData.payload.roundState,
-                roomData.payload.bets
-            );
-        }
-        
-        loadingScreenManager.HideLoading();
+
+        // ✅ FIX: Keep loading screen visible until game screen transition is complete
+        // This prevents chips from appearing on home screen during mid-round join
+        gameManager.TransitionToGameScreen(
+            roomData.payload.roundState,
+            roomData.payload.bets,
+            () => loadingScreenManager.HideLoading()  // Hide loading only after transition complete
+        );
     }
 
     void ManageOtherPlayerbets(string data)
