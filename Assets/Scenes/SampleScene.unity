@@ -27060,7 +27060,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &543295579
 RectTransform:
   m_ObjectHideFlags: 0
@@ -27605,8 +27605,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.63, y: 0}
-  m_SizeDelta: {x: 80, y: 78.999}
+  m_AnchoredPosition: {x: -1.57, y: 0}
+  m_SizeDelta: {x: 78.3, y: 78.999}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &557570717
 MonoBehaviour:
@@ -27628,7 +27628,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1000
+  m_text: 50
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6609643559b4146869b985346df12603, type: 2}
   m_sharedMaterial: {fileID: 7985771184582758389, guid: 6609643559b4146869b985346df12603, type: 2}
@@ -27655,17 +27655,17 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 44.45
+  m_fontSize: 60
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 59.48
+  m_fontSizeMax: 60
   m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: -7.85
+  m_characterSpacing: -2.77
   m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
@@ -27694,7 +27694,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 5, y: 5.5, z: 5, w: 0}
+  m_margin: {x: 9, y: 5.5, z: 5, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -59063,7 +59063,7 @@ MonoBehaviour:
   loadingScreenManager: {fileID: 1129492609}
   MultiplierList: []
   JSManager: {fileID: 1519490010}
-  testToken: 7399730c43e84f1384e748fffeae1c19
+  testToken: e95e0acdc47a4829aedd485aa190f173
   RaycastBlocker: {fileID: 1127067818}
 --- !u!4 &1272847617
 Transform:
@@ -92373,7 +92373,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2013153670
 RectTransform:
   m_ObjectHideFlags: 0
@@ -100713,7 +100713,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 500
+  m_text: 750
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6609643559b4146869b985346df12603, type: 2}
   m_sharedMaterial: {fileID: 7985771184582758389, guid: 6609643559b4146869b985346df12603, type: 2}
