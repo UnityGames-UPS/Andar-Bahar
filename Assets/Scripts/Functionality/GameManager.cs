@@ -3044,9 +3044,11 @@ public class GameManager : MonoBehaviour
 
         coinAddText.rectTransform.localPosition = startPoscoin;
         coinAddText.transform.localScale = Vector3.one;
+
         coinAddText.color = startColor;
         coinAddText.gameObject.SetActive(true);
-
+Color tempColor = coinImage.color;
+tempColor.a = 1f;
         float moveDuration = 1.35f;
         float scaleDuration = 0.75f;
 
@@ -3084,7 +3086,9 @@ public class GameManager : MonoBehaviour
                 coinAddText.rectTransform.localPosition = startPoscoin;
                 coinAddText.transform.localScale = Vector3.one;
                 coinAddText.color = startColor;
-            });
+                coinImage.transform.localScale = Vector3.one;
+                coinImage.color = tempColor;
+                        });
 
         ForceCleanupAllChips();
     }
