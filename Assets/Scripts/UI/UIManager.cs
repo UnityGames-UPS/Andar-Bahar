@@ -203,6 +203,8 @@ public class UiManager : MonoBehaviour
     [SerializeField] internal Chip coinSelector;
     [SerializeField] internal Button coinSelectorBtn;
     [SerializeField] internal List<Chip> Coins;
+    [SerializeField] internal List<Image> ChipMiddleImages; // The 5 images between the 6 chips
+
 
     [Header("Chipoptions")]
     [SerializeField] internal GameObject Repeatpanel;
@@ -862,6 +864,7 @@ public class UiManager : MonoBehaviour
         else
             ExpandCoins();
     }
+
     private void ExpandCoins()
     {
         if (audioController)
@@ -873,6 +876,7 @@ public class UiManager : MonoBehaviour
         float spacing = 115f;
         Vector3 center = coinSelector.transform.localPosition;
 
+        // ✅ Animate coins
         for (int i = 0; i < Coins.Count; i++)
         {
             var coin = Coins[i];
@@ -881,7 +885,7 @@ public class UiManager : MonoBehaviour
 
             coin.gameObject.SetActive(true);
 
-            // IMPORTANT: reset to center first
+            // Reset to center first
             coin.transform.localPosition = center;
 
             float offset = (i + 1) * spacing;
@@ -890,6 +894,43 @@ public class UiManager : MonoBehaviour
             coin.transform
                 .DOLocalMove(targetPos, 0.3f)
                 .SetEase(Ease.OutBack);
+        }
+
+        // ✅ NEW: Animate middle images (the separators between chips)
+        if (ChipMiddleImages != null && ChipMiddleImages.Count > 0)
+        {
+            for (int i = 0; i < ChipMiddleImages.Count; i++)
+            {
+                if (ChipMiddleImages[i] == null) continue;
+
+                var middleImg = ChipMiddleImages[i];
+
+                // Kill any existing tweens
+                middleImg.transform.DOKill();
+
+                // Start invisible
+                middleImg.gameObject.SetActive(true);
+                Color startColor = middleImg.color;
+                startColor.a = 0f;
+                middleImg.color = startColor;
+
+                // Position between coin i and coin i+1
+                // Middle image should appear between chips
+                float offset = (i + 0.5f) * spacing; // +1.5 puts it between coins
+                Vector3 targetPos = center + new Vector3(-offset, 0, 0);
+                middleImg.transform.localPosition = targetPos;
+
+                // Fade in with slight delay based on index
+                float delay = i * 0.05f;
+
+                Sequence seq = DOTween.Sequence();
+                seq.AppendInterval(delay);
+                seq.Append(middleImg.DOFade(1f, 0.2f).SetEase(Ease.OutQuad));
+
+                // Optional: Add a small scale animation for polish
+                middleImg.transform.localScale = Vector3.one * 0.5f;
+                seq.Join(middleImg.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack));
+            }
         }
 
         isExpanded = true;
@@ -921,10 +962,13 @@ public class UiManager : MonoBehaviour
     //     isExpanded = true;
     // }
 
+
     internal void RetractCoins()
     {
         Vector3 center = coinSelector.transform.localPosition;
         if (audioController) audioController.PlayWLAudio("coinSelect");
+
+        // ✅ Animate coins retracting
         for (int i = 0; i < Coins.Count; i++)
         {
             var coin = Coins[i];
@@ -937,20 +981,42 @@ public class UiManager : MonoBehaviour
                 });
         }
 
+        // ✅ NEW: Animate middle images fading out
+        if (ChipMiddleImages != null && ChipMiddleImages.Count > 0)
+        {
+            for (int i = 0; i < ChipMiddleImages.Count; i++)
+            {
+                if (ChipMiddleImages[i] == null) continue;
+
+                var middleImg = ChipMiddleImages[i];
+
+                // Kill any existing tweens
+                middleImg.transform.DOKill();
+
+                // Fade out and scale down
+                Sequence seq = DOTween.Sequence();
+                seq.Append(middleImg.DOFade(0f, 0.15f).SetEase(Ease.InQuad));
+                seq.Join(middleImg.transform.DOScale(0.5f, 0.15f).SetEase(Ease.InBack));
+                seq.OnComplete(() =>
+                {
+                    middleImg.gameObject.SetActive(false);
+                    // Reset for next time
+                    middleImg.transform.localScale = Vector3.one;
+                });
+            }
+        }
+
         if (gameManager.currentTotalBet > 0)
         {
             Repeatpanel.SetActive(false);
             SetChipoption(true);
-
         }
         else
         {
             if (gameManager.isRepeatbetActive) Repeatpanel.SetActive(true);
         }
         isExpanded = false;
-    }
-
-
+    }   
 
 
     public void OnCoinSelected(Button selectedCoin)

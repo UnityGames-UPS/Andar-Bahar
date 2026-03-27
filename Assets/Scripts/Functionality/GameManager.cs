@@ -760,7 +760,7 @@ public class GameManager : MonoBehaviour
     IEnumerator ShowRepeatPanelBriefly()
     {
         uiManager.Repeatpanel.SetActive(true);
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(25f);
         uiManager.Repeatpanel.SetActive(false);
         repeatPanelCoroutine = null;
     }
@@ -1001,6 +1001,11 @@ public class GameManager : MonoBehaviour
             int winInt = Mathf.FloorToInt((float)currentWin);
             playtheCoin("+" + winInt);
         }
+        else if (currentWin < 0  )
+        {
+            int winInt = Mathf.FloorToInt((float)currentWin);
+            playtheCoin("" + winInt);
+        }
         currentWin = 0;
 
         yield return new WaitForSeconds(0.7f);
@@ -1144,7 +1149,6 @@ public class GameManager : MonoBehaviour
         Dictionary<OptionPrefab, double> totalWinPerOption = new Dictionary<OptionPrefab, double>();
 
         // Track actual payout.win per option for main player's MyBetText
-        // Key: OptionPrefab, Value: actual win amount from server (not chip-piece sum)
         Dictionary<OptionPrefab, double> playerActualWinPerOption = new Dictionary<OptionPrefab, double>();
 
         foreach (var payout in payouts)
@@ -1153,25 +1157,15 @@ public class GameManager : MonoBehaviour
                 continue;
 
             List<int> roomChips = FindRoom();
-
-            // ✅ FIX 1: Use BreakAmountIntoChips (greedy, largest-first with remainder chip)
-            // instead of BreakAmountIntoMinChips so denominations are correct.
-            // BreakAmountIntoChips already handles remainder: if no chip fits the leftover
-            // it appends the raw remainder value as an extra chip.
             List<int> chipPieces = BreakAmountIntoChips((int)payout.win, roomChips);
 
             bool isMainPlayer = (uiManager.MainPlayers.playername.text == payout.username);
 
-            // ✅ FIX 2: Calculate net win = payout.win − totalBet placed by player.
-            // currentTotalBet tracks every bet placed this round.
-            // Only show win popup if net profit > 0 (i.e. player actually gained money).
             if (isMainPlayer)
             {
                 currentWin = payout.win - currentTotalBet;
             }
 
-            // Track which option receives main-player chips for MyBetText
-            // (used below after the chip loop)
             OptionPrefab firstMainPlayerOption = null;
 
             foreach (int piece in chipPieces)
@@ -1198,7 +1192,6 @@ public class GameManager : MonoBehaviour
                 if (isMainPlayer)
                 {
                     PlayerChips.Add(data);
-                    // Record the first option that receives main-player win chips
                     if (firstMainPlayerOption == null)
                         firstMainPlayerOption = winningOption;
                 }
@@ -1207,7 +1200,7 @@ public class GameManager : MonoBehaviour
                     OtherPlayerChips.Add(data);
                 }
 
-                // Track total wins from ALL players for TotalBetText
+                // ✅ FIX: Track win chips separately from bet chips
                 if (!totalWinPerOption.ContainsKey(winningOption))
                     totalWinPerOption[winningOption] = 0;
                 totalWinPerOption[winningOption] += piece;
@@ -1217,27 +1210,27 @@ public class GameManager : MonoBehaviour
                     resultIndex = 0;
             }
 
-            // ✅ FIX 3: Store actual payout.win (from server) for MyBetText — NOT chip-piece sum.
-            // Chip-piece sum loses the remainder (e.g. win=220, chips=[200,20] → sum=220 ✓
-            // but old BreakAmountIntoMinChips gave [50,50,50,50] → sum=200 → text showed 250).
             if (isMainPlayer && firstMainPlayerOption != null)
             {
                 playerActualWinPerOption[firstMainPlayerOption] = payout.win;
             }
         }
 
-        // Update UI with correct amounts
+        // ✅ FIX: Update UI with ONLY win amounts (not bet + win)
         foreach (var kvp in totalWinPerOption)
         {
             OptionPrefab opt = kvp.Key;
             double totalWinAmount = kvp.Value;
 
-            // TotalBetText: all players' bets + all players' wins on this option
-            double totalBetAndWin = opt.totalBet + totalWinAmount;
+            // ✅ CRITICAL FIX: Show ONLY the win amount, not bet + win
+            // This prevents weird glitchy numbers
             opt.TotalBetObj.SetActive(true);
-            opt.TotalBetText.text = FormatHelper.FormatAmount(totalBetAndWin);
+            opt.TotalBetText.text = FormatHelper.FormatAmount(totalWinAmount);
 
-            // MyBetText: show actual server payout.win (includes original bet return + profit)
+            // Store the win amount temporarily (don't add to totalBet)
+            // We'll restore totalBet after chips move to players
+
+            // MyBetText: show actual server payout.win
             if (playerActualWinPerOption.ContainsKey(opt))
             {
                 opt.MyBetObj.SetActive(true);
@@ -1245,7 +1238,6 @@ public class GameManager : MonoBehaviour
             }
             else if (opt.playerBet > 0)
             {
-                // Player bet here but won on a different option — show their original bet
                 opt.MyBetObj.SetActive(true);
                 opt.MyBetText.text = FormatHelper.FormatAmount(opt.playerBet);
             }
@@ -1435,6 +1427,71 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Ensures all chips are properly removed from bet areas and returned to pool
+    /// Call this at the start of a new round to prevent chips staying in bet areas
+    /// </summary>
+    private void ForceCleanupAllChips()
+    {
+        // Clean up all player chips
+        for (int i = PlayerChips.Count - 1; i >= 0; i--)
+        {
+            if (PlayerChips[i].chip != null)
+            {
+                // Kill any ongoing animations
+                PlayerChips[i].chip.transform.DOKill();
+
+                // Return to pool
+                Chip chipComponent = PlayerChips[i].chip.GetComponent<Chip>();
+                if (chipComponent != null)
+                {
+                    ReturnChip(chipComponent);
+                }
+                else
+                {
+                    // Fallback: just disable it
+                    PlayerChips[i].chip.SetActive(false);
+                }
+            }
+        }
+
+        // Clean up all other player chips
+        for (int i = OtherPlayerChips.Count - 1; i >= 0; i--)
+        {
+            if (OtherPlayerChips[i].chip != null)
+            {
+                // Kill any ongoing animations
+                OtherPlayerChips[i].chip.transform.DOKill();
+
+                // Return to pool
+                Chip chipComponent = OtherPlayerChips[i].chip.GetComponent<Chip>();
+                if (chipComponent != null)
+                {
+                    ReturnChip(chipComponent);
+                }
+                else
+                {
+                    // Fallback: just disable it
+                    OtherPlayerChips[i].chip.SetActive(false);
+                }
+            }
+        }
+
+        // Clear the lists
+        PlayerChips.Clear();
+        OtherPlayerChips.Clear();
+
+        // Extra safety: Find any active chips in the scene and disable them
+        Chip[] allChips = FindObjectsOfType<Chip>();
+        foreach (Chip chip in allChips)
+        {
+            if (chip.gameObject.activeSelf && chip.transform.parent != poolParent && chip.transform.parent != OtherPlayerChipPoolParent)
+            {
+                chip.transform.DOKill();
+                ReturnChip(chip);
+            }
+        }
+    }
 
     void PlayMiddleCardAnim()
     {
@@ -1958,7 +2015,7 @@ public class GameManager : MonoBehaviour
         RectTransform rt = AndarbaharBetReset.GetComponent<RectTransform>();
 
         float startX = rt.anchoredPosition.x;
-        float targetX = -766f;
+        float targetX = -797f;
 
         Sequence seq = DOTween.Sequence();
 
@@ -1970,7 +2027,7 @@ public class GameManager : MonoBehaviour
            {
                // Stop any running animations before starting new ones
                NewRoundAnim.StopAnimation();
-               SparkAnim.StopAnimation();
+              
            })
 
            .AppendInterval(1.5f)
@@ -2018,24 +2075,30 @@ public class GameManager : MonoBehaviour
 
     private void MoveChip(Chip chip, Transform target, bool returnToPool, System.Action onHalfway = null)
     {
+        if (chip == null) return;
+
+        // Kill any existing tweens on this chip
+        chip.transform.DOKill();
+
         float moveDur = 1.2f;
         chip.transform.DOMove(target.position, moveDur)
             .SetEase(Ease.InOutExpo)
             .OnComplete(() =>
             {
-                if (returnToPool)
+                if (returnToPool && chip != null)
                 {
                     ReturnChip(chip);
                 }
             });
 
-        // Fire the callback at 80% of the move — chip is visually close to the
-        // player already so hiding TotalBetObj feels natural, not premature.
+        // Fire the callback at 50% of the move
         if (onHalfway != null)
         {
             StartCoroutine(HalfwayCallback(moveDur * 0.5f, onHalfway));
         }
     }
+
+
 
     private IEnumerator HalfwayCallback(float delay, System.Action callback)
     {
@@ -2509,10 +2572,18 @@ public class GameManager : MonoBehaviour
     }
     internal void ReturnChip(Chip chip)
     {
+        if (chip == null) return;
+
+        // Kill any ongoing animations
+        chip.transform.DOKill();
+
+        // Disable and return to pool
         chip.gameObject.SetActive(false);
         chip.transform.SetParent(poolParent);
-    }
 
+        // Reset position to ensure clean state
+        chip.transform.localPosition = Vector3.zero;
+    }
 
 
 
@@ -3014,6 +3085,8 @@ public class GameManager : MonoBehaviour
                 coinAddText.transform.localScale = Vector3.one;
                 coinAddText.color = startColor;
             });
+
+        ForceCleanupAllChips();
     }
 
 
@@ -3149,6 +3222,7 @@ public class GameManager : MonoBehaviour
             if (opt == null) continue;
             // Skip winning options — they need to keep showing the win total
             if (resultsOptions.Contains(opt)) continue;
+          
             ResetBetUI(opt);
             opt.totalBet = 0;
             opt.playerBet = 0;
