@@ -27628,7 +27628,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 50
+  m_text: 7500
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6609643559b4146869b985346df12603, type: 2}
   m_sharedMaterial: {fileID: 7985771184582758389, guid: 6609643559b4146869b985346df12603, type: 2}
@@ -27655,7 +27655,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 60
+  m_fontSize: 40.45
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -27665,7 +27665,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: -2.77
+  m_characterSpacing: -7.37
   m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
@@ -59063,7 +59063,7 @@ MonoBehaviour:
   loadingScreenManager: {fileID: 1129492609}
   MultiplierList: []
   JSManager: {fileID: 1519490010}
-  testToken: e95e0acdc47a4829aedd485aa190f173
+  testToken: 8c25256c24554ea586b18dd8f5191f7b
   RaycastBlocker: {fileID: 1127067818}
 --- !u!4 &1272847617
 Transform:
