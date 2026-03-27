@@ -1140,9 +1140,12 @@ public class GameManager : MonoBehaviour
         int totalCount = validOptions.Count;
         int resultIndex = 0;
 
-        // ✅ FIXED: Separate tracking for total wins (all players) and player wins (main player only)
+        // Track total wins (all players) for TotalBetText display
         Dictionary<OptionPrefab, double> totalWinPerOption = new Dictionary<OptionPrefab, double>();
-        Dictionary<OptionPrefab, double> playerWinPerOption = new Dictionary<OptionPrefab, double>();
+
+        // Track actual payout.win per option for main player's MyBetText
+        // Key: OptionPrefab, Value: actual win amount from server (not chip-piece sum)
+        Dictionary<OptionPrefab, double> playerActualWinPerOption = new Dictionary<OptionPrefab, double>();
 
         foreach (var payout in payouts)
         {
@@ -1150,10 +1153,26 @@ public class GameManager : MonoBehaviour
                 continue;
 
             List<int> roomChips = FindRoom();
-            List<int> chipPieces =
-                BreakAmountIntoMinChips((int)payout.win, roomChips);
+
+            // ✅ FIX 1: Use BreakAmountIntoChips (greedy, largest-first with remainder chip)
+            // instead of BreakAmountIntoMinChips so denominations are correct.
+            // BreakAmountIntoChips already handles remainder: if no chip fits the leftover
+            // it appends the raw remainder value as an extra chip.
+            List<int> chipPieces = BreakAmountIntoChips((int)payout.win, roomChips);
 
             bool isMainPlayer = (uiManager.MainPlayers.playername.text == payout.username);
+
+            // ✅ FIX 2: Calculate net win = payout.win − totalBet placed by player.
+            // currentTotalBet tracks every bet placed this round.
+            // Only show win popup if net profit > 0 (i.e. player actually gained money).
+            if (isMainPlayer)
+            {
+                currentWin = payout.win - currentTotalBet;
+            }
+
+            // Track which option receives main-player chips for MyBetText
+            // (used below after the chip loop)
+            OptionPrefab firstMainPlayerOption = null;
 
             foreach (int piece in chipPieces)
             {
@@ -1179,56 +1198,54 @@ public class GameManager : MonoBehaviour
                 if (isMainPlayer)
                 {
                     PlayerChips.Add(data);
-                    // FIX 3: Calculate net win here (balance diff = actual win profit)
-                    double newBalance = payout.balance;
-                    double oldBalance = socketManager.playerdata.balance;
-                    currentWin = newBalance - oldBalance;
+                    // Record the first option that receives main-player win chips
+                    if (firstMainPlayerOption == null)
+                        firstMainPlayerOption = winningOption;
                 }
                 else
+                {
                     OtherPlayerChips.Add(data);
+                }
 
-                // ✅ Track total wins from ALL players
+                // Track total wins from ALL players for TotalBetText
                 if (!totalWinPerOption.ContainsKey(winningOption))
                     totalWinPerOption[winningOption] = 0;
                 totalWinPerOption[winningOption] += piece;
-
-                // ✅ Track wins for main player separately
-                if (isMainPlayer)
-                {
-                    if (!playerWinPerOption.ContainsKey(winningOption))
-                        playerWinPerOption[winningOption] = 0;
-                    playerWinPerOption[winningOption] += piece;
-                }
 
                 resultIndex++;
                 if (resultIndex >= totalCount)
                     resultIndex = 0;
             }
+
+            // ✅ FIX 3: Store actual payout.win (from server) for MyBetText — NOT chip-piece sum.
+            // Chip-piece sum loses the remainder (e.g. win=220, chips=[200,20] → sum=220 ✓
+            // but old BreakAmountIntoMinChips gave [50,50,50,50] → sum=200 → text showed 250).
+            if (isMainPlayer && firstMainPlayerOption != null)
+            {
+                playerActualWinPerOption[firstMainPlayerOption] = payout.win;
+            }
         }
 
-        // ✅ FIXED: Update UI with correct bet + win amounts
+        // Update UI with correct amounts
         foreach (var kvp in totalWinPerOption)
         {
             OptionPrefab opt = kvp.Key;
             double totalWinAmount = kvp.Value;
 
-            // TotalBetText shows: total bets from ALL players + total wins from ALL players
+            // TotalBetText: all players' bets + all players' wins on this option
             double totalBetAndWin = opt.totalBet + totalWinAmount;
             opt.TotalBetObj.SetActive(true);
             opt.TotalBetText.text = FormatHelper.FormatAmount(totalBetAndWin);
 
-            // MyBetText shows: player's bet + player's win (only if player bet on this option)
-            if (playerWinPerOption.ContainsKey(opt))
+            // MyBetText: show actual server payout.win (includes original bet return + profit)
+            if (playerActualWinPerOption.ContainsKey(opt))
             {
-                double playerWinAmount = playerWinPerOption[opt];
-                double playerBetAndWin = opt.playerBet + playerWinAmount;
                 opt.MyBetObj.SetActive(true);
-                opt.MyBetText.text = FormatHelper.FormatAmount(playerBetAndWin);
+                opt.MyBetText.text = FormatHelper.FormatAmount(playerActualWinPerOption[opt]);
             }
             else if (opt.playerBet > 0)
             {
-                // Player had a bet here but didn't win on this specific option
-                // Still show their original bet amount
+                // Player bet here but won on a different option — show their original bet
                 opt.MyBetObj.SetActive(true);
                 opt.MyBetText.text = FormatHelper.FormatAmount(opt.playerBet);
             }
