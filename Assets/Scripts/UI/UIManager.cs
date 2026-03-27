@@ -875,7 +875,7 @@ public class UiManager : MonoBehaviour
 
         float spacing = 115f;
         Vector3 center = coinSelector.transform.localPosition;
-
+        coinSelectorBtn.interactable = false;
         // ✅ Animate coins
         for (int i = 0; i < Coins.Count; i++)
         {
@@ -893,7 +893,15 @@ public class UiManager : MonoBehaviour
 
             coin.transform
                 .DOLocalMove(targetPos, 0.3f)
-                .SetEase(Ease.OutBack);
+                .SetEase(Ease.OutBack)
+                .OnComplete(() =>
+                {
+                    if (i == Coins.Count) // re-enable button after last coin animates
+                    {
+                        coinSelectorBtn.interactable = true;
+                    }
+                });
+
         }
 
         // ✅ NEW: Animate middle images (the separators between chips)
@@ -967,10 +975,11 @@ public class UiManager : MonoBehaviour
     {
         Vector3 center = coinSelector.transform.localPosition;
         if (audioController) audioController.PlayWLAudio("coinSelect");
-
+         coinSelectorBtn.interactable = false;
         // ✅ Animate coins retracting
         for (int i = 0; i < Coins.Count; i++)
         {
+          
             var coin = Coins[i];
 
             coin.transform.DOLocalMove(center, 0.2f)
@@ -978,6 +987,10 @@ public class UiManager : MonoBehaviour
                 .OnComplete(() =>
                 {
                     coin.gameObject.SetActive(false);
+                    if (i == Coins.Count) // re-enable button after last coin animates
+                    {
+                        coinSelectorBtn.interactable = true;
+                    }
                 });
         }
 
