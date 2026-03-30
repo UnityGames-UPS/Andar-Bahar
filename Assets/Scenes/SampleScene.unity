@@ -2968,7 +2968,7 @@ MonoBehaviour:
   useSharedMaterial: 1
   doLoopAnimation: 1
   StartOnAwake: 0
-  StartonEnable: 0
+  StartonEnable: 1
   currentAnimationState: 0
   AnimationSpeed: 29
   delayBetweenLoop: 0
@@ -5534,7 +5534,7 @@ MonoBehaviour:
   popEnd: {fileID: 20338828}
   coinAddText: {fileID: 877847970}
   coinImage: {fileID: 1261942998}
-  moveY: 125
+  moveY: 200
   duration: 0.8
   moveDuration: 0.5
   holdDuration: 1
@@ -5544,7 +5544,7 @@ MonoBehaviour:
   BaharBtnHighLight: {fileID: 441553776}
   AndarbaharBetReset: {fileID: 596450518}
   NewRoundAnim: {fileID: 1101693328}
-  SparkAnim: {fileID: 1157350487}
+  SparkAnim: {fileID: 1157350486}
   HandResetSprite: {fileID: 21300000, guid: 60adf8dc5ca4d4786bb9308a09eeef53, type: 3}
   RoundInfoImage: {fileID: 723766972}
   pulseText: {fileID: 22856520}
@@ -11998,7 +11998,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: -10
+  m_characterSpacing: -4.7
   m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
@@ -16438,7 +16438,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &331776580
 RectTransform:
   m_ObjectHideFlags: 0
@@ -16478,7 +16478,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -3906009293693239651, guid: ded57d5f25bcf42aca0396bea4ca09fc, type: 3}
+  m_Sprite: {fileID: 2150838606431529082, guid: 7d9e16899912f4983a13db8e50b9bf5f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -42536,8 +42536,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 223.2, y: 143.81}
-  m_SizeDelta: {x: 434.7874, y: 137.88}
+  m_AnchoredPosition: {x: 166.48, y: 143.81}
+  m_SizeDelta: {x: 548.23, y: 137.88}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &860168130
 MonoBehaviour:
@@ -43242,8 +43242,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: +21
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 12871155e2d8d4c458e92f5ad308f57b, type: 2}
-  m_sharedMaterial: {fileID: 2123351709969840468, guid: 12871155e2d8d4c458e92f5ad308f57b, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1b72ff2f29528417db7791af865a1b1d, type: 2}
+  m_sharedMaterial: {fileID: 2123351709969840468, guid: 1b72ff2f29528417db7791af865a1b1d, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -46725,7 +46725,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: dac8723710c024013931f57c8974ad59, type: 3}
   rendererDelegate: {fileID: 951060760}
   useSharedMaterial: 1
-  doLoopAnimation: 0
+  doLoopAnimation: 1
   StartOnAwake: 0
   StartonEnable: 1
   currentAnimationState: 0
@@ -50547,7 +50547,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1071105519
 RectTransform:
   m_ObjectHideFlags: 0
@@ -52944,7 +52944,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1127067819
 RectTransform:
   m_ObjectHideFlags: 0
@@ -54070,7 +54070,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1157350487
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -54113,9 +54113,9 @@ MonoBehaviour:
   - {fileID: 8186698782235072918, guid: 7ff70d193f7ae424b92057dbf687bdfa, type: 3}
   rendererDelegate: {fileID: 1157350488}
   useSharedMaterial: 1
-  doLoopAnimation: 0
+  doLoopAnimation: 1
   StartOnAwake: 0
-  StartonEnable: 0
+  StartonEnable: 1
   currentAnimationState: 0
   AnimationSpeed: 24
   delayBetweenLoop: 0
@@ -58381,7 +58381,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: -14, y: 0}
+  m_AnchoredPosition: {x: -14, y: -1.56}
   m_SizeDelta: {x: 30, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1261942998
@@ -59214,7 +59214,7 @@ MonoBehaviour:
   loadingScreenManager: {fileID: 1129492609}
   MultiplierList: []
   JSManager: {fileID: 1519490010}
-  testToken: 2e192e1cbb9946378b743e709e0c34df
+  testToken: 5a627ba0496747cfb335e8c99198f977
   RaycastBlocker: {fileID: 1127067818}
 --- !u!4 &1272847617
 Transform:
@@ -84314,7 +84314,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1853188876
 RectTransform:
   m_ObjectHideFlags: 0
@@ -85540,7 +85540,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -433.4, y: -583.4}
+  m_AnchoredPosition: {x: -422.09, y: -583.4}
   m_SizeDelta: {x: 215.3, y: 64.4}
   m_Pivot: {x: 0.38, y: 0.5}
 --- !u!1 &1878602757
@@ -87093,7 +87093,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: -10
+  m_characterSpacing: -4.7
   m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0

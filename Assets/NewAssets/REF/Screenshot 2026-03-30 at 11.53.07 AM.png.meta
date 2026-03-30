@@ -1,28 +1,10 @@
 fileFormatVersion: 2
-guid: b4530878f9c164da68a3d56929d0da23
+guid: 7d9e16899912f4983a13db8e50b9bf5f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2925198321284102905
-    second: AB_UI_brown-24 1_0
-  - first:
-      213: 6214792464197725162
-    second: AB_UI_brown-24 1_1
-  - first:
-      213: -6320942348037601313
-    second: AB_UI_brown-24 1_2
-  - first:
-      213: 3821618036011237439
-    second: AB_UI_brown-24 1_3
-  - first:
-      213: 4641342017305910
-    second: AB_UI_brown-24 1_4
-  - first:
-      213: -5604086945281242481
-    second: AB_UI_brown-24 1_5
-  - first:
-      213: 1849801496117871509
-    second: AB_UI_brown-24 1_6
+      213: 2150838606431529082
+    second: "Screenshot 2026-03-30 at 11.53.07\u202FAM_0"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -115,7 +97,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: WebGL
+    buildTarget: Android
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -128,7 +110,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Android
+    buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -157,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: AB_UI_brown-24 1_1
+      name: "Screenshot 2026-03-30 at 11.53.07\u202FAM_0"
       rect:
         serializedVersion: 2
-        x: 70
-        y: 79
-        width: 1148
-        height: 380
+        x: 23
+        y: 21
+        width: 242
+        height: 433
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -172,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: aeba74d91d06f3650800000000000000
-      internalID: 6214792464197725162
+      spriteID: a782c81215059dd10800000000000000
+      internalID: 2150838606431529082
       vertices: []
       indices: 
       edges: []
@@ -182,7 +164,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 6dc76eb6282d74206a171438213d15c0
     internalID: 0
     vertices: []
     indices: 
@@ -192,13 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      AB_UI_brown-24 1_0: -2925198321284102905
-      AB_UI_brown-24 1_1: 6214792464197725162
-      AB_UI_brown-24 1_2: -6320942348037601313
-      AB_UI_brown-24 1_3: 3821618036011237439
-      AB_UI_brown-24 1_4: 4641342017305910
-      AB_UI_brown-24 1_5: -5604086945281242481
-      AB_UI_brown-24 1_6: 1849801496117871509
+      "Screenshot 2026-03-30 at 11.53.07\u202FAM_0": 2150838606431529082
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -135,7 +135,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject BaharBtnHighLight;
     [SerializeField] private GameObject AndarbaharBetReset;
     [SerializeField] private ImageAnimation NewRoundAnim;
-    [SerializeField] private ImageAnimation SparkAnim;
+    [SerializeField] private GameObject SparkAnim;
     [SerializeField] private Sprite HandResetSprite;
     [Header("Round Info ")]
     [SerializeField] private GameObject RoundInfoImage;
@@ -592,8 +592,10 @@ public class GameManager : MonoBehaviour
         {
             item.BG.SetActive(true);
             item.HighlightedBG.SetActive(false);
-            item.DisableWinRatioText();
         }
+        // Disable all win ratio texts together (including Andar, Bahar, FirstAndar, FirstBahar, FirstThree)
+        DisableAllWinRatioTexts();
+        
         currentTotalBet = 0;
 
         // FIX 1: Keep bet LOCKED at round start. Bet unlock happens only when
@@ -1092,7 +1094,7 @@ public class GameManager : MonoBehaviour
         OtherPlayerChips.Clear();
     }
 
-
+    
     void MoveAllChipstohomeNew()
     {
         foreach (var item in PlayerChips)
@@ -1324,12 +1326,7 @@ public class GameManager : MonoBehaviour
     // }
     void MoveWinningChipsToPlayers(List<Payout> payouts)
     {
-        // ── PASS 1: Collect every (chip, target, opt) triple across ALL payouts ──
-        // We need to know which chip is the LAST one leaving each option so we can
-        // attach DontShowText() to that chip's halfway point only — firing on the
-        // first chip was hiding the text while later chips were still sitting there.
 
-        // Maps each winning option → ordered list of (chipData, target) to move
         Dictionary<OptionPrefab, List<(ChipData chipData, Transform target)>> chipsByOption
             = new Dictionary<OptionPrefab, List<(ChipData, Transform)>>();
 
@@ -1364,7 +1361,7 @@ public class GameManager : MonoBehaviour
                 chipsByOption[opt].Add((chipData, target));
             }
         }
-
+       
         // ── PASS 2: Animate all chips; only the LAST chip per option fires DontShowText ──
         foreach (var kvp in chipsByOption)
         {
@@ -1382,9 +1379,11 @@ public class GameManager : MonoBehaviour
                 System.Action halfwayAction = isLast ? () => opt.DontShowText() : null;
 
                 MoveChip(chip, target, true, halfwayAction);
+               
             }
+            
         }
-
+    
         // ── Update balances for all payouts ──
         foreach (var payout in payouts)
         {
@@ -2011,9 +2010,13 @@ public class GameManager : MonoBehaviour
 
     void PlayResetAnimation()
     {
+        if (SparkAnim.activeSelf)
+        {
+            SparkAnim.SetActive(false);
+        }
         audioManager.PlayGirlAudio("newround");
         RectTransform rt = AndarbaharBetReset.GetComponent<RectTransform>();
-
+   
         float startX = rt.anchoredPosition.x;
         float targetX = -797f;
 
@@ -2027,7 +2030,6 @@ public class GameManager : MonoBehaviour
            {
                // Stop any running animations before starting new ones
                NewRoundAnim.StopAnimation();
-              
            })
 
            .AppendInterval(1.5f)
@@ -2040,22 +2042,25 @@ public class GameManager : MonoBehaviour
                BaharTxt.DontShowText();
                AndarTxt.winAnimation.StopAnimation();
                BaharTxt.winAnimation.StopAnimation();
-
-               // Start NewRound animation but NOT spark yet
-               // Spark will start AFTER slide-out completes
                NewRoundAnim.StartAnimation();
            })
+           .AppendInterval(0.2f)
+           .AppendCallback(() =>
+           {
+               SparkAnim.SetActive(true);
+               Debug.Log("Spark animation triggered at: " + Time.time);
+               
+           })
+
 
            // 2️⃣ Slide OUT slower (0.6f → 0.8f for better visual flow)
            .Append(rt.DOAnchorPosX(startX, 0.8f).SetEase(Ease.InOutSine))
-
-           // 3️⃣ CRITICAL FIX: Start spark animation ONLY AFTER slide-out completes
-           // This prevents the spark from appearing too early during the slide-out
-           .AppendCallback(() =>
+           .OnComplete(() =>
            {
-               SparkAnim.StartAnimation();
+              
+               SparkAnim.SetActive(false);
+               Debug.Log("Reset animation complete at: " + Time.time);
            });
-
         // Reset all option backgrounds
         foreach (var item in AllOptions)
         {
@@ -3273,6 +3278,11 @@ tempColor.a = 1f;
         {
             opt.DisableWinRatioText();
         }
+        // Disable all main bet area win ratio texts
+        AndarTxt.DisableWinRatioText();
+        BaharTxt.DisableWinRatioText();
+        FirstAndarTxt.DisableWinRatioText();
+        FirstBaharTxt.DisableWinRatioText();
         FirstThreeTxt.DisableWinRatioText();
     }
 
@@ -3286,6 +3296,11 @@ tempColor.a = 1f;
         {
             opt.EnableWinRatioText();
         }
+        // Enable main bet area win ratio texts
+        AndarTxt.EnableWinRatioText();
+        BaharTxt.EnableWinRatioText();
+        FirstAndarTxt.EnableWinRatioText();
+        FirstBaharTxt.EnableWinRatioText();
         // Always keep First 3 disabled
         FirstThreeTxt.DisableWinRatioText();
     }
