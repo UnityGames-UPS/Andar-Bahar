@@ -18,6 +18,16 @@ public class Chip : MonoBehaviour
         chipIndex = ChipIndex;
     }
 
+    /// <summary>
+    /// Change the chip sprite dynamically (used during win animations)
+    /// </summary>
+    internal void ChangeSprite(Sprite newSprite)
+    {
+        if (chipImage != null && newSprite != null)
+        {
+            chipImage.sprite = newSprite;
+        }
+    }
 
     private void OnEnable()
     {
@@ -44,4 +54,4 @@ public class Chip : MonoBehaviour
     {
         popTween?.Kill();
     }
-}   
+}

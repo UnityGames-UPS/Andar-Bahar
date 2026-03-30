@@ -595,7 +595,7 @@ public class GameManager : MonoBehaviour
         }
         // Disable all win ratio texts together (including Andar, Bahar, FirstAndar, FirstBahar, FirstThree)
         DisableAllWinRatioTexts();
-        
+
         currentTotalBet = 0;
 
         // FIX 1: Keep bet LOCKED at round start. Bet unlock happens only when
@@ -1003,7 +1003,7 @@ public class GameManager : MonoBehaviour
             int winInt = Mathf.FloorToInt((float)currentWin);
             playtheCoin("+" + winInt);
         }
-        else if (currentWin < 0  )
+        else if (currentWin < 0)
         {
             int winInt = Mathf.FloorToInt((float)currentWin);
             playtheCoin("" + winInt);
@@ -1094,7 +1094,7 @@ public class GameManager : MonoBehaviour
         OtherPlayerChips.Clear();
     }
 
-    
+
     void MoveAllChipstohomeNew()
     {
         foreach (var item in PlayerChips)
@@ -1180,9 +1180,23 @@ public class GameManager : MonoBehaviour
                 data.betId = payout.username;
                 data.amount = piece;
                 data.betoptions = winningOption;
+                data.isWinChip = true; // ✅ Mark as win chip (spawned from dealer)
+
+                // ✅ KEY CHANGE: Only opponents use white sprites for win chips
+                Sprite chipSprite;
+                if (isMainPlayer)
+                {
+                    // PLAYER: Use colored sprites (original behavior)
+                    chipSprite = findChipSprite(piece, roomChips);
+                }
+                else
+                {
+                    // OPPONENT: Use white sprites for Phase 1
+                    chipSprite = findOtherPlayerChipSprite(piece, roomChips);
+                }
 
                 data.chip = SpawnChip(
-                    findChipSprite(piece, roomChips),
+                    chipSprite,
                     FormatHelper.FormatChipAmount(piece),
                     index,
                     RoundInfo_Text.transform,
@@ -1202,7 +1216,7 @@ public class GameManager : MonoBehaviour
                     OtherPlayerChips.Add(data);
                 }
 
-                // ✅ FIX: Track win chips separately from bet chips
+                // Track win chips separately from bet chips
                 if (!totalWinPerOption.ContainsKey(winningOption))
                     totalWinPerOption[winningOption] = 0;
                 totalWinPerOption[winningOption] += piece;
@@ -1218,19 +1232,14 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // ✅ FIX: Update UI with ONLY win amounts (not bet + win)
+        // Update UI with ONLY win amounts (not bet + win)
         foreach (var kvp in totalWinPerOption)
         {
             OptionPrefab opt = kvp.Key;
             double totalWinAmount = kvp.Value;
 
-            // ✅ CRITICAL FIX: Show ONLY the win amount, not bet + win
-            // This prevents weird glitchy numbers
             opt.TotalBetObj.SetActive(true);
             opt.TotalBetText.text = FormatHelper.FormatAmount(totalWinAmount);
-
-            // Store the win amount temporarily (don't add to totalBet)
-            // We'll restore totalBet after chips move to players
 
             // MyBetText: show actual server payout.win
             if (playerActualWinPerOption.ContainsKey(opt))
@@ -1245,7 +1254,6 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
 
     List<OptionPrefab> GetValidWinningOptions()
     {
@@ -1326,9 +1334,49 @@ public class GameManager : MonoBehaviour
     // }
     void MoveWinningChipsToPlayers(List<Payout> payouts)
     {
+        Dictionary<OptionPrefab, List<(ChipData chipData, Transform target, bool isMainPlayer)>> chipsByOption
+            = new Dictionary<OptionPrefab, List<(ChipData, Transform, bool)>>();
 
-        Dictionary<OptionPrefab, List<(ChipData chipData, Transform target)>> chipsByOption
-            = new Dictionary<OptionPrefab, List<(ChipData, Transform)>>();
+        // ✅ FIX ISSUE 2: Disable opponent bet chips from win area BEFORE animation
+        // This prevents duplicate chips (bet chips + win chips) from appearing
+        foreach (var payout in payouts)
+        {
+            bool isMainPlayer = (uiManager.MainPlayers.playername.text == payout.username);
+
+            if (!isMainPlayer) // Only for opponents
+            {
+                // Get all chips for this opponent in winning areas
+                var opponentChips = OtherPlayerChips
+                    .Where(x => x.betId == payout.username &&
+                                resultsOptions.Contains(x.betoptions))
+                    .ToList();
+
+                // Separate bet chips from win chips
+                var betChips = opponentChips.Where(x => !x.isWinChip).ToList();
+                var winChips = opponentChips.Where(x => x.isWinChip).ToList();
+
+                // If we have BOTH bet chips and win chips from dealer:
+                // This means dealer sent total win (win + bet), so disable the original bet chips
+                if (betChips.Count > 0 && winChips.Count > 0)
+                {
+                    foreach (var betChip in betChips)
+                    {
+                        if (betChip.chip != null)
+                        {
+                            // Disable and return bet chip to pool
+                            betChip.chip.SetActive(false);
+                            ReturnChip(betChip.chip.GetComponent<Chip>());
+                        }
+                    }
+
+                    // Remove bet chips from OtherPlayerChips list
+                    OtherPlayerChips.RemoveAll(x => betChips.Contains(x));
+                }
+                // If we only have win chips (no bet chips):
+                // This means dealer sent ONLY extra win amount (cashout scenario)
+                // Keep all win chips and animate them with color change
+            }
+        }
 
         foreach (var payout in payouts)
         {
@@ -1337,14 +1385,16 @@ public class GameManager : MonoBehaviour
                 target = TotalPlayer_text.transform;
 
             IEnumerable<ChipData> chipsForThisPayout;
+            bool isMainPlayer = (uiManager.MainPlayers.playername.text == payout.username);
 
-            if (uiManager.MainPlayers.playername.text == payout.username)
+            if (isMainPlayer)
             {
                 chipsForThisPayout = PlayerChips
                     .Where(x => resultsOptions.Contains(x.betoptions));
             }
             else
             {
+                // For opponents, after cleanup above, only win chips remain
                 chipsForThisPayout = OtherPlayerChips
                     .Where(x => x.betId == payout.username &&
                                 resultsOptions.Contains(x.betoptions));
@@ -1356,13 +1406,13 @@ public class GameManager : MonoBehaviour
                 if (opt == null) continue;
 
                 if (!chipsByOption.ContainsKey(opt))
-                    chipsByOption[opt] = new List<(ChipData, Transform)>();
+                    chipsByOption[opt] = new List<(ChipData, Transform, bool)>();
 
-                chipsByOption[opt].Add((chipData, target));
+                chipsByOption[opt].Add((chipData, target, isMainPlayer));
             }
         }
-       
-        // ── PASS 2: Animate all chips; only the LAST chip per option fires DontShowText ──
+
+        // ── Animate all chips ──
         foreach (var kvp in chipsByOption)
         {
             OptionPrefab opt = kvp.Key;
@@ -1372,18 +1422,30 @@ public class GameManager : MonoBehaviour
             {
                 ChipData chipData = entries[i].chipData;
                 Transform target = entries[i].target;
+                bool isMainPlayer = entries[i].isMainPlayer;
                 Chip chip = chipData.chip.GetComponent<Chip>();
 
-                // Only the very last chip for this option carries the halfway callback
+                // Only the very last chip for this option carries the UI update callback
                 bool isLast = (i == entries.Count - 1);
                 System.Action halfwayAction = isLast ? () => opt.DontShowText() : null;
 
-                MoveChip(chip, target, true, halfwayAction);
-               
+                if (isMainPlayer)
+                {
+                    // ✅ PLAYER: Use original method (no sprite change, stays colored)
+                    MoveChip(chip, target, true, halfwayAction);
+                }
+                else
+                {
+                    // ✅ OPPONENT: Use new method with sprite change (white → color)
+                    List<int> roomChips = FindRoom();
+                    // FIX: Use findChipSprite to get the COLORED sprite for opponents (not white/gray)
+                    Sprite coloredSprite = findChipSprite(chipData.amount, roomChips);
+
+                    MoveChipWithSpriteChange(chip, target, coloredSprite, true, halfwayAction);
+                }
             }
-            
         }
-    
+
         // ── Update balances for all payouts ──
         foreach (var payout in payouts)
         {
@@ -1392,6 +1454,55 @@ public class GameManager : MonoBehaviour
                 uiManager.MainPlayers.playerBalence.text = FormatHelper.FormatAmount(payout.balance);
                 socketManager.playerdata.balance = payout.balance;
             }
+        }
+    }
+
+    private void MoveChipWithSpriteChange(
+    Chip chip,
+    Transform target,
+    Sprite coloredSprite,
+    bool returnToPool,
+    System.Action onHalfway = null)
+    {
+        if (chip == null) return;
+
+        // Kill any existing tweens on this chip
+        chip.transform.DOKill();
+
+        float moveDur = 1.2f;
+        float spriteChangeTime = moveDur * 0.6f; // Change sprite at 60%
+
+        // Start the movement animation
+        chip.transform.DOMove(target.position, moveDur)
+            .SetEase(Ease.InOutExpo)
+            .OnComplete(() =>
+            {
+                if (returnToPool && chip != null)
+                {
+                    ReturnChip(chip);
+                }
+            });
+
+        // ✅ Schedule sprite change from white to color at 60%
+        StartCoroutine(ChangeSpriteAtTime(chip, coloredSprite, spriteChangeTime));
+
+        // Fire the UI update callback at 50% of the move
+        if (onHalfway != null)
+        {
+            StartCoroutine(HalfwayCallback(moveDur * 0.5f, onHalfway));
+        }
+    }
+
+    /// <summary>
+    /// Changes chip sprite after a delay (for opponent chips: white → color)
+    /// </summary>
+    private IEnumerator ChangeSpriteAtTime(Chip chip, Sprite newSprite, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (chip != null && chip.gameObject.activeInHierarchy)
+        {
+            chip.ChangeSprite(newSprite);
         }
     }
 
@@ -1639,6 +1750,7 @@ public class GameManager : MonoBehaviour
             data.betId = socketManager.BetChipData.payload.betId;
             data.amount = chipAmount;
             data.betoptions = FindOption(socketManager.BetChipData.payload.betOption);
+            data.isWinChip = false; // ✅ Mark as bet chip (placed during betting phase)
 
             int index = findChipindex(chipAmount, roomChips);
             string val = FormatHelper.FormatChipAmount(chipAmount);
@@ -1736,6 +1848,7 @@ public class GameManager : MonoBehaviour
             data.betId = chipdata.betId;
             data.amount = piece;
             data.betoptions = targetOption; // ✅ use root-level betOption, not chipdata.payload.betOption
+            data.isWinChip = false; // ✅ Mark as bet chip (placed during betting phase)
 
             data.chip = SpawnChip(
                 findOtherPlayerChipSprite(piece, roomChips),
@@ -1884,6 +1997,7 @@ public class GameManager : MonoBehaviour
                 data.betId = bet.betId;
                 data.amount = piece;
                 data.betoptions = targetOption;
+                data.isWinChip = false; // ✅ Mark as bet chip (mid-round join bets)
 
                 data.chip = SpawnChip(
                     findOtherPlayerChipSprite(piece, roomChips),
@@ -2016,7 +2130,7 @@ public class GameManager : MonoBehaviour
         }
         audioManager.PlayGirlAudio("newround");
         RectTransform rt = AndarbaharBetReset.GetComponent<RectTransform>();
-   
+
         float startX = rt.anchoredPosition.x;
         float targetX = -797f;
 
@@ -2049,7 +2163,7 @@ public class GameManager : MonoBehaviour
            {
                SparkAnim.SetActive(true);
                Debug.Log("Spark animation triggered at: " + Time.time);
-               
+
            })
 
 
@@ -2057,7 +2171,7 @@ public class GameManager : MonoBehaviour
            .Append(rt.DOAnchorPosX(startX, 0.8f).SetEase(Ease.InOutSine))
            .OnComplete(() =>
            {
-              
+
                SparkAnim.SetActive(false);
                Debug.Log("Reset animation complete at: " + Time.time);
            });
@@ -2222,6 +2336,7 @@ public class GameManager : MonoBehaviour
                 data.betId = bet.betId;
                 data.amount = piece;
                 data.betoptions = FindOption(bet.betOption);
+                data.isWinChip = false; // ✅ Mark as bet chip (repeat bet)
 
                 string val = FormatHelper.FormatChipAmount(piece);
                 int index = findChipindex(piece, roomChips);
@@ -2267,6 +2382,7 @@ public class GameManager : MonoBehaviour
                     data.betId = bet.betId;
                     data.amount = piece;
                     data.betoptions = FindOption(bet.betOption);
+                    data.isWinChip = false; // ✅ Mark as bet chip (double bet)
 
                     string val = FormatHelper.FormatChipAmount(piece);
                     int index = findChipindex(piece, roomChips);
@@ -3052,8 +3168,8 @@ public class GameManager : MonoBehaviour
 
         coinAddText.color = startColor;
         coinAddText.gameObject.SetActive(true);
-Color tempColor = coinImage.color;
-tempColor.a = 1f;
+        Color tempColor = coinImage.color;
+        tempColor.a = 1f;
         float moveDuration = 1.35f;
         float scaleDuration = 0.75f;
 
@@ -3093,7 +3209,7 @@ tempColor.a = 1f;
                 coinAddText.color = startColor;
                 coinImage.transform.localScale = Vector3.one;
                 coinImage.color = tempColor;
-                        });
+            });
 
         ForceCleanupAllChips();
     }
@@ -3231,7 +3347,7 @@ tempColor.a = 1f;
             if (opt == null) continue;
             // Skip winning options — they need to keep showing the win total
             if (resultsOptions.Contains(opt)) continue;
-          
+
             ResetBetUI(opt);
             opt.totalBet = 0;
             opt.playerBet = 0;
@@ -3443,4 +3559,5 @@ public class ChipData
     public int amount;
     public OptionPrefab betoptions;
     public GameObject chip;
+    public bool isWinChip; // true = spawned from dealer as win, false = placed as bet
 }
