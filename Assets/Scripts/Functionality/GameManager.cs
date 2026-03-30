@@ -1770,15 +1770,18 @@ public class GameManager : MonoBehaviour
             int index = findChipindex(chipAmount, roomChips);
             string val = FormatHelper.FormatChipAmount(chipAmount);
 
-
+            Sprite coloredSprite = findChipSprite(chipAmount, roomChips);
+            Sprite graySprite = findOtherPlayerChipSprite(chipAmount, roomChips);
             data.chip = SpawnChip(
-                findChipSprite(chipAmount, roomChips),
-                val,
-                index,
-                uiManager.coinSelector.transform,
-                FindOption(socketManager.BetChipData.payload.betOption),
-                true
-            );
+          graySprite,                                                          // appears gray on pop
+          val,
+          index,
+          uiManager.coinSelector.transform,
+          FindOption(socketManager.BetChipData.payload.betOption),
+          true,
+          1f,
+          coloredSprite                                                        // swaps to color after pop
+      );
 
             PlayerChips.Add(data);
             UpdateMyBetOnOption(socketManager.BetChipData.payload.betOption, chipAmount);
@@ -2058,10 +2061,12 @@ public class GameManager : MonoBehaviour
             UpdateTotalBetOnOption("", 0, option);
         }
     }
-    GameObject SpawnChip(Sprite sprite, string amount, int chipindex, Transform startPoint, OptionPrefab op, bool isPlayerbet = false, float moveTime = 1f)
+    GameObject SpawnChip(Sprite sprite, string amount, int chipindex, Transform startPoint, OptionPrefab op, bool isPlayerbet = false, float moveTime = 1f , Sprite postPopSprite = null)
     {
         Chip chip = GetChip();
         chip.SetData(sprite, amount, chipindex);
+        if (postPopSprite != null)
+            chip.postPopSprite = postPopSprite;
 
         RectTransform chipRT = chip.GetComponent<RectTransform>();
         chipRT.SetParent(poolParent);

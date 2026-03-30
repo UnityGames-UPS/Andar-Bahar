@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,7 +10,7 @@ public class Chip : MonoBehaviour
     [SerializeField] internal TMP_Text Chiptext;
     private Tween popTween;
     internal int chipIndex;
-
+    internal Sprite postPopSprite;
     internal void SetData(Sprite chip, string amount, int ChipIndex)
     {
         chipImage.sprite = chip;
@@ -36,9 +36,7 @@ public class Chip : MonoBehaviour
 
     private void PlayPopAnimation()
     {
-        // Kill previous tween if any (important for pooling)
         popTween?.Kill();
-
         transform.localScale = Vector3.zero;
 
         popTween = transform
@@ -46,7 +44,17 @@ public class Chip : MonoBehaviour
             .SetEase(Ease.OutBack)
             .OnComplete(() =>
             {
-                transform.DOScale(1f, 0.08f).SetEase(Ease.InOutSine);
+                transform.DOScale(1f, 0.08f)
+                    .SetEase(Ease.InOutSine)
+                    .OnComplete(() =>
+                    {
+                        // Swap to colored sprite after pop finishes
+                        if (postPopSprite != null)
+                        {
+                            chipImage.sprite = postPopSprite;
+                            postPopSprite = null; // clear so it doesn't re-trigger on re-enable
+                        }
+                    });
             });
     }
 
