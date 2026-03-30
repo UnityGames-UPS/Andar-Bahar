@@ -1445,6 +1445,21 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+        var unmatchedOtherBetChips = OtherPlayerChips
+    .Where(x => !x.isWinChip && resultsOptions.Contains(x.betoptions))
+    .ToList();
+
+        foreach (var chipData in unmatchedOtherBetChips)
+        {
+            if (chipData.chip == null) continue;
+            Chip chip = chipData.chip.GetComponent<Chip>();
+            if (chip == null) continue;
+
+            chipData.chip.SetActive(false);
+
+
+        }
+
 
         // ── Update balances for all payouts ──
         foreach (var payout in payouts)
