@@ -754,8 +754,17 @@ public class SocketIOManager : MonoBehaviour
             playerdata.balance = CancleBetData.payload.balance;
             gameManager.currentTotalBet = 0;
             uiManager.SetChipoption(false);
+
+            // ✅ FIX: Only show repeat bet panel if player has previous round bets to repeat
+            // In first round after joining, isRepeatbetActive is false, so panel stays hidden
+            if (gameManager.isRepeatbetActive)
+            {
+                uiManager.Repeatpanel.SetActive(true);
+            }
+            // If no repeat bet available (first round), chip option panel is already hidden above
         }
     }
+
     void OnUndo(string json)
     {
         Debug.Log("[ACK] UNDO_BET : " + json);
@@ -765,7 +774,19 @@ public class SocketIOManager : MonoBehaviour
         gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
         playerdata.balance = doubleBetData.payload.balance;
         gameManager.currentTotalBet = doubleBetData.payload.totalBet;
-        if (doubleBetData.payload.totalBet == 0) uiManager.SetChipoption(false);
+
+        if (doubleBetData.payload.totalBet == 0)
+        {
+            uiManager.SetChipoption(false);
+
+            // ✅ FIX: Only show repeat bet panel after LAST undo if player has previous round bets
+            // In first round after joining, isRepeatbetActive is false, so panel stays hidden
+            if (gameManager.isRepeatbetActive)
+            {
+                uiManager.Repeatpanel.SetActive(true);
+            }
+            // If no repeat bet available (first round), chip option panel is already hidden above
+        }
     }
     void OnRoomEnter(string json)
     {
@@ -791,6 +812,9 @@ public class SocketIOManager : MonoBehaviour
         uiManager.Rayid.text = "R.ID: " + roomData.payload.roomId;
         uiManager.InitializeStatsFromServer(roomData.payload.stats);
 
+        // ✅ FIX: Reset repeat bet flag on new room entry
+        // This prevents repeat bet from showing in the first round after joining/changing rooms
+        gameManager.isRepeatbetActive = false;
 
         // ✅ FIX: Keep loading screen visible until game screen transition is complete
         // This prevents chips from appearing on home screen during mid-round join
@@ -800,7 +824,6 @@ public class SocketIOManager : MonoBehaviour
             () => loadingScreenManager.HideLoading()  // Hide loading only after transition complete
         );
     }
-
     void ManageOtherPlayerbets(string data)
     {
         Debug.Log("[BROADCAST] game:bet_placed : " + data);

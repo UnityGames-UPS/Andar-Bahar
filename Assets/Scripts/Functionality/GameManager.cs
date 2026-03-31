@@ -751,6 +751,13 @@ public class GameManager : MonoBehaviour
         uiManager.setCoins(false);
         CancelRepeatPanel();
 
+        // ✅ FIX: Set isRepeatbetActive to true ONLY if player has placed bets in this round
+        // This ensures repeat bet is available from NEXT round onwards, not in the first round
+        if (currentTotalBet > 0)
+        {
+            isRepeatbetActive = true;
+        }
+
         RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
         BetBlocker.gameObject.SetActive(true);
     }
@@ -1202,7 +1209,7 @@ public class GameManager : MonoBehaviour
                     RoundInfo_Text.transform,
                     winningOption,
                     false,
-                    1f
+                    1.2f
                 );
 
                 if (isMainPlayer)
@@ -1494,7 +1501,8 @@ public class GameManager : MonoBehaviour
             {
                 if (returnToPool && chip != null)
                 {
-                    ReturnChip(chip);
+                    // ✅ FIX: Add smooth fade-out before disabling chip
+                    FadeOutAndReturnChip(chip);
                 }
             });
 
@@ -1743,7 +1751,8 @@ public class GameManager : MonoBehaviour
         }
         socketManager.BetPlaced(index, optionprefab.VaridontWant, socketManager.initialData.betOptions[optionprefab.Optionindex]);
         uiManager.RetractCoins();
-        isRepeatbetActive = true;
+        // ✅ REMOVED: Don't set isRepeatbetActive here - it should only be set when bets are LOCKED
+        // isRepeatbetActive = true;
         CancelRepeatPanel(); // hide repeat panel once player is actively placing bets
 
     }
@@ -2219,14 +2228,15 @@ public class GameManager : MonoBehaviour
         // Kill any existing tweens on this chip
         chip.transform.DOKill();
 
-        float moveDur = 1.2f;
+        float moveDur = 1.3f;
         chip.transform.DOMove(target.position, moveDur)
             .SetEase(Ease.InOutExpo)
             .OnComplete(() =>
             {
                 if (returnToPool && chip != null)
                 {
-                    ReturnChip(chip);
+                    // ✅ FIX: Add smooth fade-out before disabling chip
+                    FadeOutAndReturnChip(chip);
                 }
             });
 
@@ -2724,6 +2734,60 @@ public class GameManager : MonoBehaviour
 
         // Reset position to ensure clean state
         chip.transform.localPosition = Vector3.zero;
+    }
+
+    /// <summary>
+    /// Fades out a chip smoothly before returning it to the pool
+    /// </summary>
+    private void FadeOutAndReturnChip(Chip chip)
+    {
+        if (chip == null) return;
+
+        // Get the chip's Image component
+        Image chipImage = chip.chipImage;
+        TMP_Text chipText = chip.GetComponentInChildren<TMP_Text>();
+
+        if (chipImage == null)
+        {
+            // Fallback: no image found, just return chip normally
+            ReturnChip(chip);
+            return;
+        }
+
+        // Kill any existing fade tweens
+        chipImage.DOKill();
+        if (chipText != null) chipText.DOKill();
+
+        float fadeDuration = 0.3f; // Smooth fade-out duration
+
+        // Fade out the chip image
+        chipImage.DOFade(0f, fadeDuration)
+            .SetEase(Ease.OutQuad)
+            .OnComplete(() =>
+            {
+                // Reset alpha to 1 for next use
+                if (chipImage != null)
+                {
+                    Color c = chipImage.color;
+                    c.a = 1f;
+                    chipImage.color = c;
+                }
+                if (chipText != null)
+                {
+                    Color tc = chipText.color;
+                    tc.a = 1f;
+                    chipText.color = tc;
+                }
+
+                // Now return chip to pool
+                ReturnChip(chip);
+            });
+
+        // Also fade out the text if present
+        if (chipText != null)
+        {
+            chipText.DOFade(0f, fadeDuration).SetEase(Ease.OutQuad);
+        }
     }
 
 
@@ -3580,4 +3644,4 @@ public class ChipData
     public OptionPrefab betoptions;
     public GameObject chip;
     public bool isWinChip; // true = spawned from dealer as win, false = placed as bet
-}
+}   
