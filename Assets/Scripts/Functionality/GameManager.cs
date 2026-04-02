@@ -2070,7 +2070,7 @@ public class GameManager : MonoBehaviour
             UpdateTotalBetOnOption("", 0, option);
         }
     }
-    GameObject SpawnChip(Sprite sprite, string amount, int chipindex, Transform startPoint, OptionPrefab op, bool isPlayerbet = false, float moveTime = 1f , Sprite postPopSprite = null)
+    GameObject SpawnChip(Sprite sprite, string amount, int chipindex, Transform startPoint, OptionPrefab op, bool isPlayerbet = false, float moveTime = 1f, Sprite postPopSprite = null)
     {
         Chip chip = GetChip();
         chip.SetData(sprite, amount, chipindex);
@@ -2083,6 +2083,13 @@ public class GameManager : MonoBehaviour
 
         Vector2 areaSize = op.chiparea.rect.size;
 
+
+        if (chip.Chiptext != null)
+        {
+            Color tc = chip.Chiptext.color;
+            tc.a = 1f;
+            chip.Chiptext.color = tc;
+        }
         // Shrink the usable range by half the chip's own dimensions on every side
         // so the chip edges never escape the chiparea boundary.
         Vector2 chipSize = chipRT.rect.size;
@@ -3644,4 +3651,4 @@ public class ChipData
     public OptionPrefab betoptions;
     public GameObject chip;
     public bool isWinChip; // true = spawned from dealer as win, false = placed as bet
-}   
+}
