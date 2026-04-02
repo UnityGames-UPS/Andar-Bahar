@@ -19,6 +19,7 @@ public class LoadingScreenManager : MonoBehaviour
     private Coroutine currentLoadingCoroutine;
     private bool isWaitingForAck = false;
     private float minimumLoadingTime = 0.5f;
+    private bool hasLoadedHistoryPageOnce = false;
 
     public enum LoadingType
     {
@@ -34,6 +35,11 @@ public class LoadingScreenManager : MonoBehaviour
     /// </summary>
     public void ShowLoading(LoadingType type, System.Action emitAction)
     {
+        if (type == LoadingType.LoadingHistory && hasLoadedHistoryPageOnce)
+        {
+            emitAction?.Invoke();
+            return;
+        }
         if (currentLoadingCoroutine != null)
         {
             StopCoroutine(currentLoadingCoroutine);
@@ -72,26 +78,38 @@ public class LoadingScreenManager : MonoBehaviour
         HideLoadingScreen();
     }
 
+    /// <summary>
+    /// Reset history loading flag when history panel closes
+    /// </summary>
+    public void ResetHistoryLoadingFlag()
+    {
+        hasLoadedHistoryPageOnce = false;
+    }
     private IEnumerator LoadingSequence(LoadingType type, System.Action emitAction)
     {
         // Step 1: Show loading screen with appropriate text
         ShowLoadingScreen(GetLoadingText(type));
-        
+
         // Step 2: Wait minimum display time (0.5 sec)
         float startTime = Time.time;
         yield return new WaitForSeconds(minimumLoadingTime);
-        
+
         // Step 3: Emit the socket event
         isWaitingForAck = true;
         emitAction?.Invoke();
-        
+
+        // Mark history as loaded after first time
+        if (type == LoadingType.LoadingHistory)
+        {
+            hasLoadedHistoryPageOnce = true;
+        }
+
         // Step 4: Keep loading screen visible until acknowledgment
-        // This loop will continue until HideLoading() is called (sets isWaitingForAck to false)
         while (isWaitingForAck)
         {
             yield return null;
         }
-        
+
         // Step 5: Hide loading screen
         HideLoadingScreen();
         currentLoadingCoroutine = null;

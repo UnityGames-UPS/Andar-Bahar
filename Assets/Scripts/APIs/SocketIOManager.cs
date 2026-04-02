@@ -436,6 +436,7 @@ public class SocketIOManager : MonoBehaviour
     internal void ReactNativeCallOnFailedToConnect() //BackendChanges
     {
         RaycastBlocker.SetActive(true);
+        loadingScreenManager.ShowLoading(LoadingScreenManager.LoadingType.InitWaiting, null);
 #if UNITY_WEBGL && !UNITY_EDITOR
     JSManager.SendCustomMessage("onExit");
 #endif
@@ -660,17 +661,11 @@ public class SocketIOManager : MonoBehaviour
         string json = JsonUtility.ToJson(message);
         Debug.Log("[EMIT] request : BET_HISTORY => " + json);
 
-        if (Pages == 1)
-        {
-            loadingScreenManager.ShowLoading(
-                LoadingScreenManager.LoadingType.LoadingHistory,
-                () => gameSocket.ExpectAcknowledgement<string>(OnHistory).Emit("request", json)
-            );
-        }
-        else
-        {
-            gameSocket.ExpectAcknowledgement<string>(OnHistory).Emit("request", json);
-        }
+        loadingScreenManager.ShowLoading(
+            LoadingScreenManager.LoadingType.LoadingHistory,
+            () => gameSocket.ExpectAcknowledgement<string>(OnHistory).Emit("request", json)
+        );
+
     }
     void OnHome(string json)
     {

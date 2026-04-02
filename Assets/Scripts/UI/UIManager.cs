@@ -15,7 +15,7 @@ public class UiManager : MonoBehaviour
     [SerializeField]
     private SocketIOManager socketManager;
     [SerializeField] private JSFunctCalls jsFunctCalls;
-
+    [SerializeField] private LoadingScreenManager loadingScreenManager;
     [Header("Screens UI")]
     [SerializeField] private GameObject HomeScreen_Object;
     [SerializeField] private GameObject GameScreen_Object;
@@ -523,7 +523,13 @@ public class UiManager : MonoBehaviour
         if (InfoClose_button) InfoClose_button.onClick.AddListener(delegate { PopAndDisable(InfoPopup_Object); IsMenuPanelOpen = false; if (audioController) audioController.PlayButtonAudio(); });
 
         if (HistoryClose_button) HistoryClose_button.onClick.RemoveAllListeners();
-        if (HistoryClose_button) HistoryClose_button.onClick.AddListener(delegate { PopAndDisable(HistoryPopup_Object); IsMenuPanelOpen = false; if (audioController) audioController.PlayButtonAudio(); });
+        if (HistoryClose_button) HistoryClose_button.onClick.AddListener(delegate { 
+            PopAndDisable(HistoryPopup_Object); 
+            IsMenuPanelOpen = false; 
+            if (audioController) audioController.PlayButtonAudio(); 
+            if (loadingScreenManager) loadingScreenManager.ResetHistoryLoadingFlag();
+            
+            });
         SetupHistoryButtons();
 
         Repeatbtn.onClick.RemoveAllListeners();
@@ -754,6 +760,7 @@ public class UiManager : MonoBehaviour
 
     internal void HistorypageOpen()
     {
+        
         socketManager.SendHistory(1);
     }
 
@@ -1648,6 +1655,9 @@ public class UiManager : MonoBehaviour
             {
                 CallOnExitFunction();
                 socketManager.ReactNativeCallOnFailedToConnect();
+                ClosePopup(DisconnectPopup_Object);
+            
+                
             }
             else
             {

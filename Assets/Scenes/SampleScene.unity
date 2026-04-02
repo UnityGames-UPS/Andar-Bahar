@@ -21345,50 +21345,50 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   textureArray:
-  - {fileID: 21300000, guid: ab0152f43f0bc49a1ae0e1e3cda8f85f, type: 3}
-  - {fileID: 21300000, guid: 963b798d83aeb41178871cb1c733d2aa, type: 3}
-  - {fileID: 21300000, guid: 6e4261ee8859643c8aa1866d9d8509e7, type: 3}
-  - {fileID: 21300000, guid: 3bb66898d35624f789f7af1de0109cb6, type: 3}
-  - {fileID: 21300000, guid: 760c71b5c1bd94fa5a9df55073159c0a, type: 3}
-  - {fileID: 21300000, guid: b28a8af19968648d09ae6959fb136a04, type: 3}
-  - {fileID: 21300000, guid: dd8dbce675db34dc7b49ea35178ba3f8, type: 3}
-  - {fileID: 21300000, guid: 28a5a96fd9fbd443e80aca010bf1855c, type: 3}
-  - {fileID: 21300000, guid: 24f4283a8f03d405a8051105f0506d44, type: 3}
-  - {fileID: 21300000, guid: e915068ffa97d4b14b09ce771144e590, type: 3}
-  - {fileID: 21300000, guid: 159781f711f454e86adb0af10c169835, type: 3}
-  - {fileID: 21300000, guid: f748900b59f9b40b9abc15018791a0ca, type: 3}
-  - {fileID: 21300000, guid: 0db4aa1a4c2f04d47b94a788fa821a6d, type: 3}
-  - {fileID: 21300000, guid: 3197a407ae595422ebd27c5023b6c419, type: 3}
-  - {fileID: 21300000, guid: 1b0e5c4976b22437da86bbf0639cfd89, type: 3}
-  - {fileID: 21300000, guid: 48a1f8079a3cf43d291f8a4c6a013752, type: 3}
-  - {fileID: 21300000, guid: 30cda2080a63a421ead30e919fae7eba, type: 3}
-  - {fileID: 21300000, guid: d9869a9d105a3405ba8800cc30cf8780, type: 3}
-  - {fileID: 21300000, guid: 222fd70f194c04414abeef9e4db564bc, type: 3}
-  - {fileID: 21300000, guid: adab42acca4754e1289df55a1c496270, type: 3}
-  - {fileID: 21300000, guid: 613599b9c6f634b7c988c5a93284abc9, type: 3}
-  - {fileID: 21300000, guid: b085d79dbd15b418bbca437205605074, type: 3}
-  - {fileID: 21300000, guid: ddbaa9da888b4477fb08fb490ffa2fa6, type: 3}
-  - {fileID: 21300000, guid: 65751ffa40e21479e8fad814db966405, type: 3}
-  - {fileID: 21300000, guid: 95adc9533a76741419e218fb8d651ff9, type: 3}
-  - {fileID: 21300000, guid: c1fe02912d5714347ba0ea7b9fdaf7b7, type: 3}
-  - {fileID: 21300000, guid: 46a7ffcaa72eb4255a94b2edea1f36e3, type: 3}
-  - {fileID: 21300000, guid: ce98fd0fcd6a44c3ab92c699d63d11e2, type: 3}
-  - {fileID: 21300000, guid: c781e6b1b1f424e92b1290b1ef841d0a, type: 3}
-  - {fileID: 21300000, guid: 7350ef0f98f8f44a3a09c408dc46686c, type: 3}
-  - {fileID: 21300000, guid: c027ca7f4ea174ca5b53e38d4b9801ba, type: 3}
-  - {fileID: 21300000, guid: 80cf105179f6c4d6db3dff737b8a00fc, type: 3}
-  - {fileID: 21300000, guid: 78d3834f8f7554d0b96129aba89d05c6, type: 3}
-  - {fileID: 21300000, guid: 64b4559bb1fab469bb96835652681086, type: 3}
-  - {fileID: 21300000, guid: 8054e74d123df48508de67f8aa11f1ca, type: 3}
-  - {fileID: 21300000, guid: 0272612fe502f40e2b365efbc0d84b88, type: 3}
-  - {fileID: 21300000, guid: 4571a98352db3452fbc8136f6981be7f, type: 3}
+  - {fileID: 21300000, guid: 36376c685d79f43199592adace553c24, type: 3}
+  - {fileID: 21300000, guid: f93be4051ef284fb3838c8102ff8f507, type: 3}
+  - {fileID: 21300000, guid: 8f4121b2af2dc48b78909175fb3ee154, type: 3}
+  - {fileID: 21300000, guid: ea8c81aad6c18496d9d28072b980184e, type: 3}
+  - {fileID: 21300000, guid: da92f2755da63444c94a8933c8f1b17c, type: 3}
+  - {fileID: 21300000, guid: d7799b654b28d4505ae4ee78b39605d5, type: 3}
+  - {fileID: 21300000, guid: 12c1dd90b975d43c1abc8ede63ce1235, type: 3}
+  - {fileID: 21300000, guid: 96334b3a32fbd4ca99ce049f083d5d38, type: 3}
+  - {fileID: 21300000, guid: d6539042ab5aa4629becd1e288626f07, type: 3}
+  - {fileID: 21300000, guid: f14f9a7718d9648ec9ab0aef185de1a3, type: 3}
+  - {fileID: 21300000, guid: af81eed3177e54c8ca093752f9384112, type: 3}
+  - {fileID: 21300000, guid: 128915a38e6d7406eb879fce575f0319, type: 3}
+  - {fileID: 21300000, guid: d2775cde897404a2aa2fd29d38b132c6, type: 3}
+  - {fileID: 21300000, guid: bf0d4086dd82d41b4a0eaa636cdef908, type: 3}
+  - {fileID: 21300000, guid: 09e646bdf3255482993b59a57e210697, type: 3}
+  - {fileID: 21300000, guid: 460664cd9e0cc4cf7bd1ec582c03cb8a, type: 3}
+  - {fileID: 21300000, guid: a4537f12d7b81420e9562a774820be95, type: 3}
+  - {fileID: 21300000, guid: 152b318ed6b6546d09e8254b4ff519f1, type: 3}
+  - {fileID: 21300000, guid: 2906d86b0caa7459d8cf9d9852da0e99, type: 3}
+  - {fileID: 21300000, guid: c0624e9a2ea7f49e4a43ae21903060c9, type: 3}
+  - {fileID: 21300000, guid: b9904e531b456490d856a0424fd61a9b, type: 3}
+  - {fileID: 21300000, guid: b587d32d773c74d31b54f413b9fbe10c, type: 3}
+  - {fileID: 21300000, guid: c9d7a78ec453b4105b157507b6a16d20, type: 3}
+  - {fileID: 21300000, guid: 98a6bf36dbe924c60b8d2dc9ed33b850, type: 3}
+  - {fileID: 21300000, guid: 0d1e18cad930d4b17b50ef31f98102f3, type: 3}
+  - {fileID: 21300000, guid: 06e36b624be8847ca969ed3c665291a2, type: 3}
+  - {fileID: 21300000, guid: 7969a6346c3984487b24c1c6800f44ab, type: 3}
+  - {fileID: 21300000, guid: 7ad312553262547e6b9f009e06672cc3, type: 3}
+  - {fileID: 21300000, guid: b5fc1abe264894f04bd0567fe713aa8c, type: 3}
+  - {fileID: 21300000, guid: 5df55134e29304cee9d7d9d6db280fc6, type: 3}
+  - {fileID: 21300000, guid: adaa792e51bc64bb1907566782fc8e55, type: 3}
+  - {fileID: 21300000, guid: f16e5aeb098be49e49f3ea3e4f033284, type: 3}
+  - {fileID: 21300000, guid: a4ad5b4ab938e432e9a92a33b218d443, type: 3}
+  - {fileID: 21300000, guid: 0cbdb29a1ab9a4108bdb0bce029f4eaa, type: 3}
+  - {fileID: 21300000, guid: c4842bc86637040b085684f6f8106a97, type: 3}
+  - {fileID: 21300000, guid: b4b2a55825896465d99835ff5adcf5f7, type: 3}
+  - {fileID: 21300000, guid: 807404485dc6441b6b4e97b7ce1b987b, type: 3}
   rendererDelegate: {fileID: 416070307}
   useSharedMaterial: 1
   doLoopAnimation: 1
   StartOnAwake: 0
   StartonEnable: 1
   currentAnimationState: 0
-  AnimationSpeed: 24
+  AnimationSpeed: 29
   delayBetweenLoop: 0
 --- !u!114 &416070307
 MonoBehaviour:
@@ -27060,7 +27060,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &543295579
 RectTransform:
   m_ObjectHideFlags: 0
@@ -92789,7 +92789,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2013153670
 RectTransform:
   m_ObjectHideFlags: 0
@@ -97486,6 +97486,7 @@ MonoBehaviour:
   audioController: {fileID: 1508872095}
   socketManager: {fileID: 1272847616}
   jsFunctCalls: {fileID: 1519490010}
+  loadingScreenManager: {fileID: 1129492609}
   HomeScreen_Object: {fileID: 403466690}
   GameScreen_Object: {fileID: 653036171}
   MinBet: {fileID: 1968970102}
