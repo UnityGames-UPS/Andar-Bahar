@@ -59214,7 +59214,7 @@ MonoBehaviour:
   loadingScreenManager: {fileID: 1129492609}
   MultiplierList: []
   JSManager: {fileID: 1519490010}
-  testToken: 11d3b4f468ee4baa935028425c48e5e4
+  testToken: 2f358f03ba174efeb219b8ae91067f88
   RaycastBlocker: {fileID: 1127067818}
 --- !u!4 &1272847617
 Transform:
@@ -81401,8 +81401,8 @@ RectTransform:
   - {fileID: 233022744}
   - {fileID: 449065139}
   - {fileID: 1972887049}
-  - {fileID: 421163771}
   - {fileID: 1202000560}
+  - {fileID: 421163771}
   - {fileID: 1127067819}
   - {fileID: 331776580}
   m_Father: {fileID: 28159799}

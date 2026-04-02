@@ -248,7 +248,6 @@ public class SocketIOManager : MonoBehaviour
         Debug.LogWarning("[DISCONNECT] Socket disconnected from server.");
         isConnected = false;
         uiManager.DisconnectionPopup();
-        RaycastBlocker.SetActive(true);
         ResetPingRoutine();
     } //Back2 end
     private void OnError(Error err)
@@ -436,6 +435,7 @@ public class SocketIOManager : MonoBehaviour
 
     internal void ReactNativeCallOnFailedToConnect() //BackendChanges
     {
+        RaycastBlocker.SetActive(true);
 #if UNITY_WEBGL && !UNITY_EDITOR
     JSManager.SendCustomMessage("onExit");
 #endif
@@ -443,7 +443,6 @@ public class SocketIOManager : MonoBehaviour
 
     internal IEnumerator CloseSocket() //Back2 Start
     {
-        RaycastBlocker.SetActive(true);
         ResetPingRoutine();
 
         Debug.Log("[CONNECT] Closing socket...");
@@ -661,10 +660,17 @@ public class SocketIOManager : MonoBehaviour
         string json = JsonUtility.ToJson(message);
         Debug.Log("[EMIT] request : BET_HISTORY => " + json);
 
-        loadingScreenManager.ShowLoading(
-            LoadingScreenManager.LoadingType.LoadingHistory,
-            () => gameSocket.ExpectAcknowledgement<string>(OnHistory).Emit("request", json)
-        );
+        if (Pages == 1)
+        {
+            loadingScreenManager.ShowLoading(
+                LoadingScreenManager.LoadingType.LoadingHistory,
+                () => gameSocket.ExpectAcknowledgement<string>(OnHistory).Emit("request", json)
+            );
+        }
+        else
+        {
+            gameSocket.ExpectAcknowledgement<string>(OnHistory).Emit("request", json);
+        }
     }
     void OnHome(string json)
     {
@@ -706,7 +712,10 @@ public class SocketIOManager : MonoBehaviour
     void OnHistory(string json)
     {
         Debug.Log("[ACK] BET_HISTORY : " + json);
-        loadingScreenManager.HideLoading();
+        if (loadingScreenManager.IsLoading())
+        {
+            loadingScreenManager.HideLoading();
+        }
         HistoryPageData = JsonUtility.FromJson<Root>(json);
         uiManager.SetHistoryPage(HistoryPageData.payload);
     }
