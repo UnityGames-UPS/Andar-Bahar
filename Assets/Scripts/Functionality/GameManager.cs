@@ -231,7 +231,12 @@ public class GameManager : MonoBehaviour
 
         GamePage.SetActive(true);
 
-
+        // 🔹 FIX ISSUE 2: Force chip panel to correct state after screen transition
+        // This prevents chip panel from getting stuck disabled after tab switches
+        if (uiManager != null)
+        {
+            uiManager.ForceChipPanelState();
+        }
 
     }
 
@@ -989,6 +994,8 @@ public class GameManager : MonoBehaviour
         ResetOptionPrefabs();
         yield return new WaitForSeconds(3f);
 
+       
+
         // 2️⃣ Spawn payout chips on winning options
         // currentWin is set inside SpawnPayoutOnWinningOptions for the main player
         SpawnPayoutOnWinningOptions(socketManager.CashoutData.payouts);
@@ -1005,6 +1012,18 @@ public class GameManager : MonoBehaviour
         // FIX 3: Show win coin popup after chips finish moving to player (moveDur = 1.2f)
         // currentWin holds net profit (win - bet) set during SpawnPayoutOnWinningOptions
         yield return new WaitForSeconds(1.3f);
+         // 🔹 FIX ISSUE 1: Update player balance BEFORE spawning win chips
+        // This ensures the balance updates when win chips start moving, not at cashout
+        foreach (var payout in socketManager.CashoutData.payouts)
+        {
+            if (uiManager.MainPlayers.playername.text == payout.username)
+            {
+                uiManager.MainPlayers.playerBalence.text = FormatHelper.FormatAmount(payout.balance);
+                homepage.PlayerBalance.text = payout.balance.ToString("F2");
+                socketManager.playerdata.balance = payout.balance;
+                break;
+            }
+        }
         if (currentWin >= 1)
         {
             int winInt = Mathf.FloorToInt((float)currentWin);
@@ -1467,16 +1486,9 @@ public class GameManager : MonoBehaviour
 
         }
 
-
         // ── Update balances for all payouts ──
-        foreach (var payout in payouts)
-        {
-            if (uiManager.MainPlayers.playername.text == payout.username)
-            {
-                uiManager.MainPlayers.playerBalence.text = FormatHelper.FormatAmount(payout.balance);
-                socketManager.playerdata.balance = payout.balance;
-            }
-        }
+        // 🔹 Balance update moved to ManagePayout (before spawning win chips)
+        // This section can be removed or left as a safety fallback
     }
 
     private void MoveChipWithSpriteChange(
@@ -1958,6 +1970,9 @@ public class GameManager : MonoBehaviour
                 if (repeatPanelCoroutine != null) StopCoroutine(repeatPanelCoroutine);
                 repeatPanelCoroutine = StartCoroutine(ShowRepeatPanelBriefly());
             }
+            
+            // 🔹 FIX ISSUE 2: Force chip panel state after phase setup
+            uiManager.ForceChipPanelState();
         }
         else if (roundState.phase == "dealing")
         {
@@ -1971,6 +1986,9 @@ public class GameManager : MonoBehaviour
             RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
             pulseText.gameObject.SetActive(false);
             RoundInfoAnim(1);   // "Bet Locked" sprite
+            
+            // 🔹 FIX ISSUE 2: Force chip panel state after phase setup
+            uiManager.ForceChipPanelState();
         }
         else
         {
@@ -1984,6 +2002,9 @@ public class GameManager : MonoBehaviour
             RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
             pulseText.gameObject.SetActive(false);
             RoundInfoAnim(1);
+            
+            // 🔹 FIX ISSUE 2: Force chip panel state after phase setup
+            uiManager.ForceChipPanelState();
         }
 
         // --- Defer chip spawning by one frame so RectTransform layout is ready ---

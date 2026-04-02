@@ -180,6 +180,9 @@ public class UiManager : MonoBehaviour
     internal bool isExpanded = false;
     public float duration = 0.5f;
 
+    // 🔹 FIX ISSUE 2: Track chip panel state explicitly to prevent race conditions
+    private bool _chipPanelShouldBeActive = false;
+
 
 
     [Header("stats")]
@@ -1271,7 +1274,33 @@ public class UiManager : MonoBehaviour
     }
     internal void setCoins(bool istrue)
     {
-        chipPanel.SetActive(istrue);
+        // 🔹 FIX ISSUE 2: Explicit state tracking prevents race conditions during tab switching
+        _chipPanelShouldBeActive = istrue;
+        
+        // Force state consistency even if called multiple times
+        if (chipPanel != null)
+        {
+            chipPanel.SetActive(istrue);
+        }
+        
+        // Ensure coin selector button is also properly managed
+        if (coinSelectorBtn != null)
+        {
+            coinSelectorBtn.interactable = istrue;
+        }
+    }
+    
+    // 🔹 NEW METHOD: Force chip panel to expected state (call after tab switches/room changes)
+    internal void ForceChipPanelState()
+    {
+        if (chipPanel != null)
+        {
+            chipPanel.SetActive(_chipPanelShouldBeActive);
+        }
+        if (coinSelectorBtn != null)
+        {
+            coinSelectorBtn.interactable = _chipPanelShouldBeActive;
+        }
     }
     internal void SetNetBetPanel(bool istrue, string totalbet = "-1")
     {
