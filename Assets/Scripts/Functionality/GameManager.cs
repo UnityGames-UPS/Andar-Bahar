@@ -2167,7 +2167,7 @@ public class GameManager : MonoBehaviour
         audioManager.PlayGirlAudio("newround");
         RectTransform rt = AndarbaharBetReset.GetComponent<RectTransform>();
 
-        float startX = rt.anchoredPosition.x;
+        float startX = 259f;
         float targetX = -797f;
 
         Sequence seq = DOTween.Sequence();
