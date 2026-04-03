@@ -251,6 +251,11 @@ public class UiManager : MonoBehaviour
     [SerializeField] private List<Sprite> QuitEndSprits;
     [SerializeField] private Button HomePageHistoryBtn;
 
+
+
+    private bool isChipAnimating = false;
+    private Coroutine expandAnimationCoroutine = null;
+    private Coroutine retractAnimationCoroutine = null;
     private void Start()
     {
         RetractCoins();
@@ -523,13 +528,14 @@ public class UiManager : MonoBehaviour
         if (InfoClose_button) InfoClose_button.onClick.AddListener(delegate { PopAndDisable(InfoPopup_Object); IsMenuPanelOpen = false; if (audioController) audioController.PlayButtonAudio(); });
 
         if (HistoryClose_button) HistoryClose_button.onClick.RemoveAllListeners();
-        if (HistoryClose_button) HistoryClose_button.onClick.AddListener(delegate { 
-            PopAndDisable(HistoryPopup_Object); 
-            IsMenuPanelOpen = false; 
-            if (audioController) audioController.PlayButtonAudio(); 
+        if (HistoryClose_button) HistoryClose_button.onClick.AddListener(delegate
+        {
+            PopAndDisable(HistoryPopup_Object);
+            IsMenuPanelOpen = false;
+            if (audioController) audioController.PlayButtonAudio();
             if (loadingScreenManager) loadingScreenManager.ResetHistoryLoadingFlag();
-            
-            });
+
+        });
         SetupHistoryButtons();
 
         Repeatbtn.onClick.RemoveAllListeners();
@@ -577,7 +583,7 @@ public class UiManager : MonoBehaviour
         ShowIntroPage();
         //  SpawnDummyStats(30);
         RegisterFullscreenListener();
-      
+
     }
     private void InitializeAudioButtons()
     {
@@ -760,7 +766,7 @@ public class UiManager : MonoBehaviour
 
     internal void HistorypageOpen()
     {
-        
+
         socketManager.SendHistory(1);
     }
 
@@ -869,14 +875,20 @@ public class UiManager : MonoBehaviour
 
     private void ToggleCoins()
     {
+        if (isChipAnimating) return;
+
         if (isExpanded)
             RetractCoins();
         else
             ExpandCoins();
     }
 
+
     private void ExpandCoins()
     {
+        // ✅ Prevent spam - ignore if already animating
+        if (isChipAnimating) return;
+
         if (audioController)
             audioController.PlayWLAudio("coinSelect");
 
@@ -885,36 +897,24 @@ public class UiManager : MonoBehaviour
 
         float spacing = 115f;
         Vector3 center = coinSelector.transform.localPosition;
+
+        // ✅ Disable button immediately and set animating flag
         coinSelectorBtn.interactable = false;
-        // ✅ Animate coins
-        for (int i = 0; i < Coins.Count; i++)
+        isChipAnimating = true;
+
+        // Cancel any existing animation coroutine
+        if (expandAnimationCoroutine != null)
         {
-            var coin = Coins[i];
-
-            coin.transform.DOKill(true); // stop old tween safely
-
-            coin.gameObject.SetActive(true);
-
-            // Reset to center first
-            coin.transform.localPosition = center;
-
-            float offset = (i + 1) * spacing;
-            Vector3 targetPos = center + new Vector3(-offset, 0, 0);
-
-            coin.transform
-                .DOLocalMove(targetPos, 0.3f)
-                .SetEase(Ease.OutBack)
-                .OnComplete(() =>
-                {
-                    if (i == Coins.Count) // re-enable button after last coin animates
-                    {
-                        coinSelectorBtn.interactable = true;
-                    }
-                });
-
+            StopCoroutine(expandAnimationCoroutine);
         }
 
-        // ✅ NEW: Animate middle images (the separators between chips)
+        // ✅ Calculate total animation time
+        // Middle images: delay (0.05f * 4) + fade duration (0.2f) + scale duration (0.3f) = ~0.5f
+        // Coins: move duration (0.3f)
+        // Add small buffer for safety
+        float totalAnimationTime = 0.6f;
+
+        // ✅ Animate middle images (the separators between chips)
         if (ChipMiddleImages != null && ChipMiddleImages.Count > 0)
         {
             for (int i = 0; i < ChipMiddleImages.Count; i++)
@@ -933,8 +933,7 @@ public class UiManager : MonoBehaviour
                 middleImg.color = startColor;
 
                 // Position between coin i and coin i+1
-                // Middle image should appear between chips
-                float offset = (i + 0.5f) * spacing; // +1.5 puts it between coins
+                float offset = (i + 0.5f) * spacing;
                 Vector3 targetPos = center + new Vector3(-offset, 0, 0);
                 middleImg.transform.localPosition = targetPos;
 
@@ -945,66 +944,68 @@ public class UiManager : MonoBehaviour
                 seq.AppendInterval(delay);
                 seq.Append(middleImg.DOFade(1f, 0.2f).SetEase(Ease.OutQuad));
 
-                // Optional: Add a small scale animation for polish
+                // Add a small scale animation for polish
                 middleImg.transform.localScale = Vector3.one * 0.5f;
                 seq.Join(middleImg.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack));
             }
         }
 
+        // ✅ Animate coins
+        for (int i = 0; i < Coins.Count; i++)
+        {
+            var coin = Coins[i];
+
+            coin.transform.DOKill(true); // stop old tween safely
+
+            coin.gameObject.SetActive(true);
+
+            // Reset to center first
+            coin.transform.localPosition = center;
+
+            float offset = (i + 1) * spacing;
+            Vector3 targetPos = center + new Vector3(-offset, 0, 0);
+
+            coin.transform
+                .DOLocalMove(targetPos, 0.3f)
+                .SetEase(Ease.OutBack);
+        }
+
+        // ✅ Start coroutine to re-enable button after all animations complete
+        expandAnimationCoroutine = StartCoroutine(EnableButtonAfterDelay(totalAnimationTime));
+
         isExpanded = true;
     }
 
-    // private void ExpandCoins()
-    // {
-    //     if (audioController) audioController.PlayWLAudio("coinSelect");
-    //     SetChipoption(false);
-    //     Repeatpanel.SetActive(false);
-    //     float spacing = 90f; // distance between coins
-    //     Vector3 center = coinSelector.transform.localPosition;
 
-    //     for (int i = 0; i < Coins.Count; i++)
-    //     {
-    //         var coin = Coins[i];
-
-    //         coin.gameObject.SetActive(true);
-
-    //         // Each coin moves left by (i + 1) * spacing
-    //         float offset = (i + 1) * spacing;
-
-    //         Vector3 targetPos = center + new Vector3(-offset, 0, 0);
-
-    //         coin.transform.DOLocalMove(targetPos, duration)
-    //             .SetEase(Ease.OutBack);
-    //     }
-
-    //     isExpanded = true;
-    // }
-
+    // ========================================
+    // REPLACE YOUR RetractCoins() METHOD WITH THIS
+    // ========================================
 
     internal void RetractCoins()
     {
+        // ✅ Prevent spam - ignore if already animating
+        if (isChipAnimating) return;
+
         Vector3 center = coinSelector.transform.localPosition;
         if (audioController) audioController.PlayWLAudio("coinSelect");
-         coinSelectorBtn.interactable = false;
-        // ✅ Animate coins retracting
-        for (int i = 0; i < Coins.Count; i++)
-        {
-          
-            var coin = Coins[i];
 
-            coin.transform.DOLocalMove(center, 0.2f)
-                .SetEase(Ease.InBack)
-                .OnComplete(() =>
-                {
-                    coin.gameObject.SetActive(false);
-                    if (i == Coins.Count) // re-enable button after last coin animates
-                    {
-                        coinSelectorBtn.interactable = true;
-                    }
-                });
+        // ✅ Disable button immediately and set animating flag
+        coinSelectorBtn.interactable = false;
+        isChipAnimating = true;
+
+        // Cancel any existing animation coroutine
+        if (retractAnimationCoroutine != null)
+        {
+            StopCoroutine(retractAnimationCoroutine);
         }
 
-        // ✅ NEW: Animate middle images fading out
+        // ✅ Calculate total animation time
+        // Middle images: fade duration (0.15f) + scale duration (0.15f) = 0.15f
+        // Coins: move duration (0.2f)
+        // Add small buffer for safety
+        float totalAnimationTime = 0.35f;
+
+        // ✅ Animate middle images fading out
         if (ChipMiddleImages != null && ChipMiddleImages.Count > 0)
         {
             for (int i = 0; i < ChipMiddleImages.Count; i++)
@@ -1029,6 +1030,22 @@ public class UiManager : MonoBehaviour
             }
         }
 
+        // ✅ Animate coins retracting
+        for (int i = 0; i < Coins.Count; i++)
+        {
+            var coin = Coins[i];
+
+            coin.transform.DOLocalMove(center, 0.2f)
+                .SetEase(Ease.InBack)
+                .OnComplete(() =>
+                {
+                    coin.gameObject.SetActive(false);
+                });
+        }
+
+        // ✅ Start coroutine to re-enable button after all animations complete
+        retractAnimationCoroutine = StartCoroutine(EnableButtonAfterDelay(totalAnimationTime));
+
         if (gameManager.currentTotalBet > 0)
         {
             Repeatpanel.SetActive(false);
@@ -1038,8 +1055,26 @@ public class UiManager : MonoBehaviour
         {
             if (gameManager.isRepeatbetActive) Repeatpanel.SetActive(true);
         }
+
         isExpanded = false;
-    }   
+    }
+
+
+    // ========================================
+    // ADD THIS NEW METHOD TO YOUR CLASS
+    // ========================================
+
+    // ✅ NEW: Coroutine to re-enable button after animation completes
+    private IEnumerator EnableButtonAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        // Re-enable the main chip button after all animations settle
+        coinSelectorBtn.interactable = true;
+        isChipAnimating = false;
+    }
+
+
 
 
     public void OnCoinSelected(Button selectedCoin)
@@ -1283,20 +1318,30 @@ public class UiManager : MonoBehaviour
     {
         // 🔹 FIX ISSUE 2: Explicit state tracking prevents race conditions during tab switching
         _chipPanelShouldBeActive = istrue;
-        
+
         // Force state consistency even if called multiple times
         if (chipPanel != null)
         {
             chipPanel.SetActive(istrue);
         }
-        
+
         // Ensure coin selector button is also properly managed
         if (coinSelectorBtn != null)
         {
             coinSelectorBtn.interactable = istrue;
         }
+
+        if (!istrue)
+        {
+            // If hiding the panel, also reset any expanded state to prevent hidden active coins
+            if (isExpanded)
+            {
+                isExpanded = false;
+                RetractCoins();
+            }
+        }
     }
-    
+
     // 🔹 NEW METHOD: Force chip panel to expected state (call after tab switches/room changes)
     internal void ForceChipPanelState()
     {
@@ -1656,8 +1701,8 @@ public class UiManager : MonoBehaviour
                 CallOnExitFunction();
                 socketManager.ReactNativeCallOnFailedToConnect();
                 ClosePopup(DisconnectPopup_Object);
-            
-                
+
+
             }
             else
             {

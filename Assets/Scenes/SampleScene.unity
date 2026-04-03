@@ -44155,7 +44155,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.49998856, y: 0}
+  m_AnchoredPosition: {x: 0.5, y: 0}
   m_SizeDelta: {x: 40, y: 67}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &901126582
@@ -59214,7 +59214,7 @@ MonoBehaviour:
   loadingScreenManager: {fileID: 1129492609}
   MultiplierList: []
   JSManager: {fileID: 1519490010}
-  testToken: 2f358f03ba174efeb219b8ae91067f88
+  testToken: 64d74e8e48464bb48f8a4a3b729899ba
   RaycastBlocker: {fileID: 1127067818}
 --- !u!4 &1272847617
 Transform:
@@ -67810,7 +67810,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -233.00002, y: 0}
+  m_AnchoredPosition: {x: -233, y: 0}
   m_SizeDelta: {x: 40, y: 67}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1462995382
@@ -82776,7 +82776,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -14.6, y: -3.42865}
+  m_AnchoredPosition: {x: -14.600006, y: -3.42865}
   m_SizeDelta: {x: 506, y: 67}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1806792500
