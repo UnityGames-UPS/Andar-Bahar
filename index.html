@@ -416,6 +416,27 @@
                         );
                     }
                 }
+                if (event.data.type === "SocketError") 
+                {
+                    const errorMsg = event.data.message;
+
+                    console.log("Socket Error:", errorMsg);
+
+                    // Send to Unity
+                    if (applicationInstance) 
+                    {
+                        applicationInstance.SendMessage(
+                            "SocketManager",
+                            "OnDisconnected",   // Create this method in Unity C#
+                            errorMsg
+                        );
+                        applicationInstance.SendMessage(
+                            "SocketManager",
+                            "CloseSocket",   // Create this method in Unity C#
+                            errorMsg
+                        );
+                    }
+                }
 
             });
 
