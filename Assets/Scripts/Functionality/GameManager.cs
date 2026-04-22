@@ -1762,7 +1762,7 @@ public class GameManager : MonoBehaviour
             }
         }
         socketManager.BetPlaced(index, optionprefab.VaridontWant, socketManager.initialData.betOptions[optionprefab.Optionindex]);
-        uiManager.RetractCoins();
+        uiManager.RetractCoins(false);
         // ✅ REMOVED: Don't set isRepeatbetActive here - it should only be set when bets are LOCKED
         // isRepeatbetActive = true;
         CancelRepeatPanel(); // hide repeat panel once player is actively placing bets
@@ -2025,12 +2025,22 @@ public class GameManager : MonoBehaviour
 
         foreach (var bet in bets)
         {
-            if (string.IsNullOrEmpty(bet.username) || bet.username == mainPlayerName)
+            if (string.IsNullOrEmpty(bet.username))
                 continue;
 
-            Transform spawnFrom = FindPlayerTransform(bet.username);
-            if (spawnFrom == null)
-                spawnFrom = TotalPlayer_text.transform;
+            bool isMainPlayer = (bet.username == mainPlayerName);
+
+            Transform spawnFrom;
+            if (isMainPlayer)
+            {
+                spawnFrom = uiManager.coinSelector.transform;
+            }
+            else
+            {
+                spawnFrom = FindPlayerTransform(bet.username);
+                if (spawnFrom == null)
+                    spawnFrom = TotalPlayer_text.transform;
+            }
 
             int totalAmount = bet.amount;
             List<int> chipPieces = BreakAmountIntoChips(totalAmount, roomChips);
@@ -2047,17 +2057,37 @@ public class GameManager : MonoBehaviour
                 data.betoptions = targetOption;
                 data.isWinChip = false; // ✅ Mark as bet chip (mid-round join bets)
 
-                data.chip = SpawnChip(
-                    findOtherPlayerChipSprite(piece, roomChips),
-                    val,
-                    index,
-                    spawnFrom,
-                    targetOption
-                );
+                if (isMainPlayer)
+                {
+                    data.chip = SpawnChip(
+                        findChipSprite(piece, roomChips),
+                        val,
+                        index,
+                        spawnFrom,
+                        targetOption,
+                        true, // isPlayerBet
+                        1f
+                    );
+                    
+                    PlayerChips.Add(data);
+                    UpdateMyBetOnOption(bet.betOption, piece);
+                    UpdateTotalBetOnOption(bet.betOption, piece);
+                    currentTotalBet += piece; // Update total bet for the player
+                }
+                else
+                {
+                    data.chip = SpawnChip(
+                        findOtherPlayerChipSprite(piece, roomChips),
+                        val,
+                        index,
+                        spawnFrom,
+                        targetOption
+                    );
 
-                data.chip.transform.SetParent(OtherPlayerChipPoolParent);
-                OtherPlayerChips.Add(data);
-                UpdateTotalBetOnOption(bet.betOption, piece);
+                    data.chip.transform.SetParent(OtherPlayerChipPoolParent);
+                    OtherPlayerChips.Add(data);
+                    UpdateTotalBetOnOption(bet.betOption, piece);
+                }
             }
         }
     }

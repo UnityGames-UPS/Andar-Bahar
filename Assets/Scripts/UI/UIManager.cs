@@ -981,13 +981,13 @@ public class UiManager : MonoBehaviour
     // REPLACE YOUR RetractCoins() METHOD WITH THIS
     // ========================================
 
-    internal void RetractCoins()
+    internal void RetractCoins(bool playSound = true)
     {
         // ✅ Prevent spam - ignore if already animating
         if (isChipAnimating) return;
 
         Vector3 center = coinSelector.transform.localPosition;
-        if (audioController) audioController.PlayWLAudio("coinSelect");
+        if (playSound && audioController) audioController.PlayWLAudio("coinSelect");
 
         // ✅ Disable button immediately and set animating flag
         coinSelectorBtn.interactable = false;
