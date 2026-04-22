@@ -1331,7 +1331,14 @@ public class UiManager : MonoBehaviour
             coinSelectorBtn.interactable = istrue;
         }
 
-        if (!istrue)
+        if (istrue)
+        {
+            // ✅ FIX: When enabling chips, force-clear any stuck animation state
+            // This handles the case where EnableButtonAfterDelay coroutine didn't complete
+            // (e.g. app went off-focus during chip retract animation)
+            ResetChipAnimationState();
+        }
+        else
         {
             // If hiding the panel, also reset any expanded state to prevent hidden active coins
             if (isExpanded)
@@ -1353,6 +1360,34 @@ public class UiManager : MonoBehaviour
         {
             coinSelectorBtn.interactable = _chipPanelShouldBeActive;
         }
+
+        // ✅ FIX: Always reset stuck animation state when forcing chip panel
+        // This prevents isChipAnimating from staying true after off-focus returns
+        if (_chipPanelShouldBeActive)
+        {
+            ResetChipAnimationState();
+        }
+    }
+
+    /// <summary>
+    /// ✅ FIX: Clears any stuck chip animation state that can occur when the app
+    /// goes off-focus during a chip expand/retract animation. The EnableButtonAfterDelay
+    /// coroutine may not complete while off-focus, leaving isChipAnimating=true permanently,
+    /// which causes ToggleCoins() to early-return and makes chip selection unresponsive.
+    /// </summary>
+    private void ResetChipAnimationState()
+    {
+        if (expandAnimationCoroutine != null)
+        {
+            StopCoroutine(expandAnimationCoroutine);
+            expandAnimationCoroutine = null;
+        }
+        if (retractAnimationCoroutine != null)
+        {
+            StopCoroutine(retractAnimationCoroutine);
+            retractAnimationCoroutine = null;
+        }
+        isChipAnimating = false;
     }
     internal void SetNetBetPanel(bool istrue, string totalbet = "-1")
     {

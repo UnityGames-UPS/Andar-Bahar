@@ -52,38 +52,61 @@ public class AudioManager : MonoBehaviour
 
     #region Audio Playback Methods
 
+    private float lastBetSoundTime = 0f;
+    private const float BET_SOUND_COOLDOWN = 0.15f;
+
     internal void PlayWLAudio(string type)
     {
-        audioPlayer_wl.loop = false;
         int index = 0;
+        bool useBetSource = true; // Use separate source for SFX to avoid interrupting timer/voice
+
         switch (type)
         {
             case "betDone":
                 index = 0;
-                audioPlayer_wl.loop = true;
+                audioBet_button.loop = true;
                 break;
             case "betSelect":
                 index = 1;
+                audioBet_button.loop = false;
                 break;
             case "numberchange":
                 index = 2;
+                audioBet_button.loop = false;
                 break;
             case "coinSelect":
                 index = 3;
+                audioBet_button.loop = false;
                 break;
-            case "double":
+            case "double": // Bet placement sound
                 index = 4;
+                audioBet_button.loop = false;
+                // Add cooldown to prevent spam from multiple opponent bets
+                if (Time.time - lastBetSoundTime < BET_SOUND_COOLDOWN) return;
+                lastBetSoundTime = Time.time;
                 break;
             case "cards":
                 index = 5;
+                audioBet_button.loop = false;
                 break;
             case "midCard":
                 index = 6;
+                audioBet_button.loop = false;
                 break;
         }
-        StopWLAaudio();
-        audioPlayer_wl.clip = clips[index];
-        audioPlayer_wl.Play();
+
+        if (useBetSource)
+        {
+            if (audioBet_button.loop)
+            {
+                audioBet_button.clip = clips[index];
+                audioBet_button.Play();
+            }
+            else
+            {
+                audioBet_button.PlayOneShot(clips[index]);
+            }
+        }
     }
 
     internal void PlayButtonAudio()

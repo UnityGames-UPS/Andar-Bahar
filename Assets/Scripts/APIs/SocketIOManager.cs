@@ -778,29 +778,41 @@ public class SocketIOManager : MonoBehaviour
             }
             // If no repeat bet available (first round), chip option panel is already hidden above
         }
+        else
+        {
+            gameManager.PlayPopup(CancleBetData.payload.message);
+        }
     }
 
     void OnUndo(string json)
     {
         Debug.Log("[ACK] UNDO_BET : " + json);
         doubleBetData = JsonUtility.FromJson<Root>(json);
-        // StartCoroutine(gameManager.UnduBets(doubleBetData.payload.bet.betId));
-        gameManager.UndoBetsFast(doubleBetData.payload.bet.betId);
-        gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
-        playerdata.balance = doubleBetData.payload.balance;
-        gameManager.currentTotalBet = doubleBetData.payload.totalBet;
 
-        if (doubleBetData.payload.totalBet == 0)
+        if (doubleBetData.success)
         {
-            uiManager.SetChipoption(false);
+            // StartCoroutine(gameManager.UnduBets(doubleBetData.payload.bet.betId));
+            gameManager.UndoBetsFast(doubleBetData.payload.bet.betId);
+            gameManager.UpdatePlayerbalance(doubleBetData.payload.balance.ToString());
+            playerdata.balance = doubleBetData.payload.balance;
+            gameManager.currentTotalBet = doubleBetData.payload.totalBet;
 
-            // ✅ FIX: Only show repeat bet panel after LAST undo if player has previous round bets
-            // In first round after joining, isRepeatbetActive is false, so panel stays hidden
-            if (gameManager.isRepeatbetActive)
+            if (doubleBetData.payload.totalBet == 0)
             {
-                uiManager.Repeatpanel.SetActive(true);
+                uiManager.SetChipoption(false);
+
+                // ✅ FIX: Only show repeat bet panel after LAST undo if player has previous round bets
+                // In first round after joining, isRepeatbetActive is false, so panel stays hidden
+                if (gameManager.isRepeatbetActive)
+                {
+                    uiManager.Repeatpanel.SetActive(true);
+                }
+                // If no repeat bet available (first round), chip option panel is already hidden above
             }
-            // If no repeat bet available (first round), chip option panel is already hidden above
+        }
+        else
+        {
+            gameManager.PlayPopup(doubleBetData.payload.message);
         }
     }
     void OnRoomEnter(string json)
