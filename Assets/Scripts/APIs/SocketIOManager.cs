@@ -252,7 +252,7 @@ public class SocketIOManager : MonoBehaviour
     } //Back2 end
     private void OnError(Error err)
     {
-        Debug.LogError("[ERROR] Socket error: " + err); 
+        Debug.LogError("[ERROR] Socket error: " + err);
         if (!string.IsNullOrEmpty(err.message) && err.message.Contains("Session expired"))
         {
             Debug.LogWarning("Session expired detected");
@@ -341,6 +341,15 @@ public class SocketIOManager : MonoBehaviour
             {
                 StopCoroutine(focusCheckCoroutine);
                 focusCheckCoroutine = null;
+            }
+
+            // ✅ FIX: Force chip panel state when user returns from tab switch
+            // This handles the case where user switches tabs mid-round and returns during betting phase
+            // The chip panel may have been disabled when they left, but should be re-enabled
+            // if the betting phase is still active when they return
+            if (uiManager != null && gameManager != null)
+            {
+                uiManager.ForceChipPanelState();
             }
         }
     }

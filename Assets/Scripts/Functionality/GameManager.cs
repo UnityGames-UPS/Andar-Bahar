@@ -108,7 +108,7 @@ public class GameManager : MonoBehaviour
     private readonly List<GameObject> pool = new List<GameObject>();
 
     [Header("popup")]
-    [SerializeField] private Button BetBlocker;
+    [SerializeField] internal Button BetBlocker;
     [SerializeField] private GameObject BlockerObj;
     [SerializeField] private TMP_Text BlockerText;
     [SerializeField] private Transform popStart;
@@ -678,6 +678,12 @@ public class GameManager : MonoBehaviour
         // FIX 1: Unlock bets here - this fires when betting timer starts
         BetBlocker.gameObject.SetActive(false);
         uiManager.setCoins(true);
+
+        // ✅ CRITICAL FIX: Force chip panel state after setCoins to recover from any stuck state
+        // This ensures that even if the chip panel was stuck disabled from a previous round
+        // (e.g., user was off-focus during transitions), it WILL be enabled in this new round
+        uiManager.ForceChipPanelState();
+
         // Repeat panel is NOT shown here - it only appears at time==25 for 5 sec
         RoundInfo_Text.gameObject.SetActive(true);
         animHand.MiddleCard.sprite = CardSet(socketManager.TimeRemaining.middleCard.suit, socketManager.TimeRemaining.middleCard.rank);
@@ -994,7 +1000,7 @@ public class GameManager : MonoBehaviour
         ResetOptionPrefabs();
         yield return new WaitForSeconds(3f);
 
-       
+
 
         // 2️⃣ Spawn payout chips on winning options
         // currentWin is set inside SpawnPayoutOnWinningOptions for the main player
@@ -1012,7 +1018,7 @@ public class GameManager : MonoBehaviour
         // FIX 3: Show win coin popup after chips finish moving to player (moveDur = 1.2f)
         // currentWin holds net profit (win - bet) set during SpawnPayoutOnWinningOptions
         yield return new WaitForSeconds(1.3f);
-         // 🔹 FIX ISSUE 1: Update player balance BEFORE spawning win chips
+        // 🔹 FIX ISSUE 1: Update player balance BEFORE spawning win chips
         // This ensures the balance updates when win chips start moving, not at cashout
         foreach (var payout in socketManager.CashoutData.payouts)
         {
@@ -1970,7 +1976,7 @@ public class GameManager : MonoBehaviour
                 if (repeatPanelCoroutine != null) StopCoroutine(repeatPanelCoroutine);
                 repeatPanelCoroutine = StartCoroutine(ShowRepeatPanelBriefly());
             }
-            
+
             // 🔹 FIX ISSUE 2: Force chip panel state after phase setup
             uiManager.ForceChipPanelState();
         }
@@ -1986,7 +1992,7 @@ public class GameManager : MonoBehaviour
             RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
             pulseText.gameObject.SetActive(false);
             RoundInfoAnim(1);   // "Bet Locked" sprite
-            
+
             // 🔹 FIX ISSUE 2: Force chip panel state after phase setup
             uiManager.ForceChipPanelState();
         }
@@ -2002,7 +2008,7 @@ public class GameManager : MonoBehaviour
             RoundInfo_Text.text = "<size=30>BET LOCKED!</size>";
             pulseText.gameObject.SetActive(false);
             RoundInfoAnim(1);
-            
+
             // 🔹 FIX ISSUE 2: Force chip panel state after phase setup
             uiManager.ForceChipPanelState();
         }
@@ -2068,7 +2074,7 @@ public class GameManager : MonoBehaviour
                         true, // isPlayerBet
                         1f
                     );
-                    
+
                     PlayerChips.Add(data);
                     UpdateMyBetOnOption(bet.betOption, piece);
                     UpdateTotalBetOnOption(bet.betOption, piece);
@@ -2496,6 +2502,10 @@ public class GameManager : MonoBehaviour
     }
     internal void ClearAllBets()
     {
+        // ✅ FIX: Reset currentTotalBet when clearing all bets during room switch
+        // This prevents the old bet amount from the previous room from showing in the new room
+        currentTotalBet = 0;
+
         StartCoroutine(CancleBets());
         foreach (var chips in OtherPlayerChips)
         {
@@ -3685,6 +3695,10 @@ public class GameManager : MonoBehaviour
             isRepeatbetActive = false;
             BonusObject.gameObject.SetActive(false);
             animHand.MiddleCard.gameObject.SetActive(false);
+
+            // ✅ FIX: Reset currentTotalBet when switching rooms
+            // This ensures the bet total from previous room doesn't carry over
+            currentTotalBet = 0;
         }
         else
         {

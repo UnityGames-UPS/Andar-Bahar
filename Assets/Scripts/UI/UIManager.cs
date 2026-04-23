@@ -1352,18 +1352,30 @@ public class UiManager : MonoBehaviour
     // 🔹 NEW METHOD: Force chip panel to expected state (call after tab switches/room changes)
     internal void ForceChipPanelState()
     {
+        // ✅ CRITICAL FIX: Only activate chip panel if betting is actually allowed
+        // Check BetBlocker state - if it's active, betting is blocked
+        // This prevents chips from being enabled during card dealing or result phases
+        bool bettingAllowed = gameManager != null &&
+                             gameManager.BetBlocker != null &&
+                             !gameManager.BetBlocker.gameObject.activeSelf;
+
+        // Only force chip panel to active if BOTH conditions are true:
+        // 1. _chipPanelShouldBeActive is true (last known state from SetCoin)
+        // 2. BetBlocker is NOT active (betting is currently allowed)
+        bool shouldBeActive = _chipPanelShouldBeActive && bettingAllowed;
+
         if (chipPanel != null)
         {
-            chipPanel.SetActive(_chipPanelShouldBeActive);
+            chipPanel.SetActive(shouldBeActive);
         }
         if (coinSelectorBtn != null)
         {
-            coinSelectorBtn.interactable = _chipPanelShouldBeActive;
+            coinSelectorBtn.interactable = shouldBeActive;
         }
 
         // ✅ FIX: Always reset stuck animation state when forcing chip panel
         // This prevents isChipAnimating from staying true after off-focus returns
-        if (_chipPanelShouldBeActive)
+        if (shouldBeActive)
         {
             ResetChipAnimationState();
         }
