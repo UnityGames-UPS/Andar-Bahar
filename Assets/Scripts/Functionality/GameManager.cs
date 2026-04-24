@@ -141,6 +141,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject RoundInfoImage;
     [SerializeField] private TMP_Text pulseText;
     [SerializeField] private List<Sprite> roundInfoSprites;
+    private int currentRoundInfoIndex = -1;
     [Header("Bonus  ")]
     [SerializeField] internal GameObject BonusObject;
 
@@ -617,6 +618,7 @@ public class GameManager : MonoBehaviour
         FirstBaharTxt.HighlightedBG.SetActive(false);
         RoundInfo_Text.gameObject.SetActive(false);
         pulseText.text = "";
+        currentRoundInfoIndex = -1;
         animHand.LeftCard.gameObject.SetActive(false);
         animHand.RightCard.gameObject.SetActive(false);
 
@@ -704,29 +706,36 @@ public class GameManager : MonoBehaviour
         int time = socketManager.TimeRemaining.timeRemaining;
         if (time > 5)
         {
-            // RoundInfo_Text.text = "<size=30>Place bet Now</size>\n " + "<size=50><color=yellow>" + time + "</color></size>";
+            // ✅ FIX: Explicitly set sprite to index 0 ("Place Bet Now") for timer > 5
+            RoundInfoAnim(0);
             RoundInfo_Text.text = "<size=30>Place Bet Now</size>\n ";
             pulseText.text = "<color=yellow>" + time.ToString() + "</color>";
             pulseText.gameObject.SetActive(true);
         }
-        else
+        else if (time == 5)
         {
+            // ✅ Set sprite to index 2 ("Time is Running") when time == 5
+            RoundInfoAnim(2);
+            RoundInfo_Text.text = "<size=30>Place Bet Now</size>\n ";
+            pulseText.text = "<color=yellow>" + time.ToString() + "</color>";
+            pulseText.gameObject.SetActive(true);
+            audioManager.PlayGirlAudio("timeisrunning");
+        }
+        else if (time > 1 && time < 5)
+        {
+            // ✅ FIX: Continue showing "Time is Running" sprite for time 2-4
+            RoundInfoAnim(2);
             RoundInfo_Text.text = "<size=30>Place Bet Now</size>\n ";
             pulseText.text = "<color=yellow>" + time.ToString() + "</color>";
             pulseText.gameObject.SetActive(true);
             PopTMP(pulseText);
-
-        }
-        if (time == 5)
-        {
-            RoundInfoAnim(2);
-            audioManager.PlayGirlAudio("timeisrunning");
         }
         else if (time == 1)
         {
             StartCoroutine(WaitForBetLocked(1f));
         }
-        else if (time == 25)
+        
+        if (time == 25)
         {
             EnableAllWinRatioTexts();
             audioManager.PlayGirlAudio("placeyourbet");
@@ -919,7 +928,16 @@ public class GameManager : MonoBehaviour
         // ✅ ADD WIN SOUNDS HERE:
         if (socketManager.gameLoopData.matchSide == "andar")
         {
-            uiManager.UpdateStats(socketManager.gameLoopData.middleCard.rank, true, delivered.ToString());
+            // ✅ FIX: Add null check before UpdateStats to prevent ArgumentNullException
+            if (socketManager.gameLoopData.middleCard != null && 
+                !string.IsNullOrEmpty(socketManager.gameLoopData.middleCard.rank))
+            {
+                uiManager.UpdateStats(socketManager.gameLoopData.middleCard.rank, true, delivered.ToString());
+            }
+            else
+            {
+                Debug.LogWarning("Middle card or rank is null in round_end data - skipping UpdateStats");
+            }
 
             // ✅ NEW: Play Andar win sound
             if (audioManager != null)
@@ -949,7 +967,17 @@ public class GameManager : MonoBehaviour
                 FirstBaharTxt.HighlightedBG.SetActive(true);
                 resultsOptions.Add(FirstBaharTxt);
             }
-            uiManager.UpdateStats(socketManager.gameLoopData.middleCard.rank, false, delivered.ToString());
+            
+            // ✅ FIX: Add null check before UpdateStats to prevent ArgumentNullException
+            if (socketManager.gameLoopData.middleCard != null && 
+                !string.IsNullOrEmpty(socketManager.gameLoopData.middleCard.rank))
+            {
+                uiManager.UpdateStats(socketManager.gameLoopData.middleCard.rank, false, delivered.ToString());
+            }
+            else
+            {
+                Debug.LogWarning("Middle card or rank is null in round_end data - skipping UpdateStats");
+            }
         }
 
         uiManager.CalculateAndShowPercentage();
@@ -985,6 +1013,7 @@ public class GameManager : MonoBehaviour
     }
     internal void RestRoundText()
     {
+        // ✅ FIX: Explicitly set sprite to index 0 at round start
         RoundInfoAnim(0);
         RoundInfo_Text.text = "  ";
         pulseText.text = " ";
@@ -2871,6 +2900,12 @@ public class GameManager : MonoBehaviour
     #region cardSelection
     internal Sprite CardSet(string suit, string value)
     {
+        // ✅ FIX: Add null/empty checks to prevent ArgumentNullException
+        if (string.IsNullOrEmpty(suit) || string.IsNullOrEmpty(value))
+        {
+            Debug.LogWarning($"CardSet called with null/empty parameters: suit='{suit}', value='{value}'");
+            return null;
+        }
 
         Sprite tempSprite = null;
         switch (suit.ToUpper())
@@ -2896,6 +2931,12 @@ public class GameManager : MonoBehaviour
 
     internal Sprite CardSetHIS(string suit, string value)
     {
+        // ✅ FIX: Add null/empty checks to prevent ArgumentNullException
+        if (string.IsNullOrEmpty(suit) || string.IsNullOrEmpty(value))
+        {
+            Debug.LogWarning($"CardSetHIS called with null/empty parameters: suit='{suit}', value='{value}'");
+            return null;
+        }
 
         Sprite tempSprite = null;
         switch (suit.ToUpper())
@@ -2922,6 +2963,13 @@ public class GameManager : MonoBehaviour
     // Helper function to get the correct sprite from a sprite list based on value
     private Sprite GetCardSprite(List<Sprite> spriteList, string value)
     {
+        // ✅ FIX: Add null/empty check to prevent ArgumentNullException
+        if (string.IsNullOrEmpty(value))
+        {
+            Debug.LogWarning($"GetCardSprite called with null/empty value");
+            return null;
+        }
+
         switch (value.ToUpper())
         {
             case "A": return spriteList[0];
@@ -3665,6 +3713,11 @@ public class GameManager : MonoBehaviour
         RectTransform rect = RoundInfoImage.GetComponent<RectTransform>();
         if (spriteIndex < 0 || spriteIndex >= roundInfoSprites.Count)
             return;
+
+        if (currentRoundInfoIndex == spriteIndex)
+            return;
+
+        currentRoundInfoIndex = spriteIndex;
 
 
         img.sprite = roundInfoSprites[spriteIndex];
