@@ -45,6 +45,8 @@
   <Project Path="Unity.PlasticSCM.Editor.Assistant.csproj" />
   <Project Path="Unity.2D.Sprite.Editor.csproj" />
   <Project Path="Unity.2D.PixelPerfect.Editor.csproj" />
+  <Project Path="com.Tivadar.Best.HTTP.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="com.Tivadar.Best.SocketIO.csproj" />
   <Project Path="Unity.Multiplayer.Center.Common.csproj" />
   <Project Path="Assembly-CSharp-firstpass.csproj" />
