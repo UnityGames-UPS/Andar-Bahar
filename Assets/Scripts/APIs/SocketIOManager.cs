@@ -137,6 +137,7 @@ public class SocketIOManager : MonoBehaviour
         //   Application.ExternalCall("window.parent.postMessage", "authToken", "*");
 
 #if UNITY_WEBGL && !UNITY_EDITOR
+        JSManager.RegisterAuthTokenListener(gameObject.name); // listen for host's TokenReceived before asking
         JSManager.SendCustomMessage("authToken");
         StartCoroutine(WaitForAuthToken(options));
 #else
@@ -583,14 +584,6 @@ public class SocketIOManager : MonoBehaviour
         isLoaded = true;
         gameManager.SetInitialData();
         RaycastBlocker.SetActive(false);
-        Application.ExternalCall("window.parent.postMessage", "OnEnter", "*");
-#if UNITY_WEBGL && !UNITY_EDITOR //BackendChanges
-            Application.ExternalEval(@"
-            if(window.ReactNativeWebView){
-            window.ReactNativeWebView.postMessage('OnEnter');
-            }
-            ");
-#endif
     }
 
     internal void SendRoomSelection(string Room)
