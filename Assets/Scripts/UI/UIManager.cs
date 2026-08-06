@@ -250,12 +250,26 @@ public class UiManager : MonoBehaviour
     [SerializeField] private List<Sprite> QuitStartSprits;
     [SerializeField] private List<Sprite> QuitEndSprits;
     [SerializeField] private Button HomePageHistoryBtn;
-
-
-
     private bool isChipAnimating = false;
     private Coroutine expandAnimationCoroutine = null;
     private Coroutine retractAnimationCoroutine = null;
+
+    private void Awake()
+    {
+        if (jsFunctCalls != null)
+        {
+            jsFunctCalls.RegisterVisibilityListener(gameObject.name);
+        }
+    }
+
+    public void OnFocusChanged(string value)
+    {
+        bool focused = value == "1";
+        Debug.Log("UNITY FOCUS CHANGED: " + value + " (focused: " + focused + ")");
+        audioController?.SetMuteAll(!focused);
+        socketManager?.HandleFocusChange(focused);
+    }
+
     private void Start()
     {
         RetractCoins();

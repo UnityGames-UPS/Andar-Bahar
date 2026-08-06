@@ -81,12 +81,24 @@ public class SocketIOManager : MonoBehaviour
     private Coroutine PingRoutine; //Back2 end
     [SerializeField] private GameObject RaycastBlocker;
 
+    private bool hasFocus = true;
+    private float focusLostTime = 0f;
+    private Coroutine focusCheckRoutine;
+    private float maxBackgroundTime = 60f;
+    private bool isExiting = false;
+    private bool isBeingDestroyed = false;
+
     private void Awake()
     {
         Application.runInBackground = true;
         isLoaded = false;
         SetInit = false;
 
+    }
+
+    private void OnDestroy()
+    {
+        isBeingDestroyed = true;
     }
 
     private void Start()
@@ -205,6 +217,7 @@ public class SocketIOManager : MonoBehaviour
         gameSocket.On<string>("game:betting_timer", OnListenTimeEvent);
         gameSocket.On<string>("game:flush_result", OnListenFlush);
         gameSocket.On<string>("game:card_dealt", OnListenCardEvent);
+        gameSocket.On<string>("balance:sync", OnBalanceSync);
         gameSocket.On<bool>("socketState", OnSocketState);
         gameSocket.On<string>("internalError", OnSocketError);
         gameSocket.On<string>("alert", OnSocketAlert);
@@ -317,36 +330,38 @@ public class SocketIOManager : MonoBehaviour
     private void OnSocketAlert(string data)
     {
     }
-    private bool isFocused = true;
-    private Coroutine focusCheckCoroutine;
-    private bool disconnectionShown = false;   // <- NEW
-
-    void OnApplicationFocus(bool focus)
+    private void OnBalanceSync(string data)
     {
-        isFocused = focus;
+        BalanceSyncPayload syncPayload = JsonConvert.DeserializeObject<BalanceSyncPayload>(data);
+        if (syncPayload == null) return;
+
+        if (playerdata == null) playerdata = new Player();
+        playerdata.balance = syncPayload.balance;
+
+        if (gameManager != null)
+        {
+            gameManager.UpdatePlayerbalance(syncPayload.balance.ToString());
+        }
+    }
+
+    internal void HandleFocusChange(bool focus)
+    {
+        hasFocus = focus;
 
         if (!focus)
         {
-            // Start checking after losing focus
-            if (focusCheckCoroutine == null && !disconnectionShown)
-                focusCheckCoroutine = StartCoroutine(IsNotInFocus());
+            focusLostTime = Time.time;
+            if (focusCheckRoutine == null && !isExiting && !isBeingDestroyed)
+                focusCheckRoutine = StartCoroutine(FocusTimeoutCheck());
         }
         else
         {
-            // If popup already shown, do NOT cancel anything
-            if (disconnectionShown) return;
-
-            // Otherwise cancel coroutine when focus returns
-            if (focusCheckCoroutine != null)
+            if (focusCheckRoutine != null)
             {
-                StopCoroutine(focusCheckCoroutine);
-                focusCheckCoroutine = null;
+                StopCoroutine(focusCheckRoutine);
+                focusCheckRoutine = null;
             }
 
-            // ✅ FIX: Force chip panel state when user returns from tab switch
-            // This handles the case where user switches tabs mid-round and returns during betting phase
-            // The chip panel may have been disabled when they left, but should be re-enabled
-            // if the betting phase is still active when they return
             if (uiManager != null && gameManager != null)
             {
                 uiManager.ForceChipPanelState();
@@ -354,18 +369,31 @@ public class SocketIOManager : MonoBehaviour
         }
     }
 
-    IEnumerator IsNotInFocus()
+    private IEnumerator FocusTimeoutCheck()
     {
-        yield return new WaitForSeconds(120f); // 2 seconds, change as required
-
-        // If still not focused AND popup not shown
-        if (!isFocused && !disconnectionShown)
+        while (!hasFocus && !isExiting && !isBeingDestroyed)
         {
-            // disconnectionShown = true;  // Prevent future runs
-            //  uiManager.DisconnectionPopup();
+            if (Time.time - focusLostTime >= maxBackgroundTime)
+            {
+                Debug.LogWarning("[SOCKET] Background timeout — closing connection");
+                isConnected = false;
+                ResetPingRoutine();
+
+                if (manager != null)
+                {
+                    try { manager.Close(); }
+                    catch (Exception e) { Debug.LogWarning($"[SOCKET] Focus close error: {e.Message}"); }
+                }
+
+                if (uiManager != null) uiManager.DisconnectionPopup();
+                focusCheckRoutine = null;
+                yield break;
+            }
+
+            yield return new WaitForSecondsRealtime(1f);
         }
 
-        focusCheckCoroutine = null;
+        focusCheckRoutine = null;
     }
 
     private void OnSocketOtherDevice(string data)
@@ -1007,6 +1035,12 @@ public class SocketIOManager : MonoBehaviour
 
     }
 
+}
+
+[Serializable]
+public class BalanceSyncPayload
+{
+    public double balance;
 }
 
 [Serializable]

@@ -293,69 +293,41 @@ public class AudioManager : MonoBehaviour
 
     #endregion
 
-    #region Application Focus Handling
+    #region Application Focus & Focus Muting
 
-    private void OnApplicationFocus(bool hasFocus)
+    private bool isForceMuted = false;
+
+    /// <summary>
+    /// Mutes/unmutes all audio sources based on focus state.
+    /// Uses a reentrancy guard (isForceMuted) to ensure duplicate blur/focus calls
+    /// from JS bridge and native OnApplicationFocus do not corrupt saved user preferences.
+    /// </summary>
+    internal void SetMuteAll(bool forceMute)
     {
-        if (hasFocus)
+        if (forceMute == isForceMuted) return;
+        isForceMuted = forceMute;
+
+        if (forceMute)
         {
-            // ✅ FIXED: Restore to user's preference, not force unmute
-            OnApplicationGainedFocus();
+            if (bg_adudio) bg_adudio.mute = true;
+            if (audioPlayer_button) audioPlayer_button.mute = true;
+            if (audioBet_button) audioBet_button.mute = true;
+            if (audioPlayer_wl) audioPlayer_wl.mute = true;
+            if (audioWin) audioWin.mute = true;
         }
         else
         {
-            // ✅ FIXED: Just pause, don't change mute state
-            OnApplicationLostFocus();
+            if (bg_adudio) bg_adudio.mute = userMusicMuted;
+            if (audioPlayer_button) audioPlayer_button.mute = userSoundMuted;
+            if (audioBet_button) audioBet_button.mute = userSoundMuted;
+            if (audioPlayer_wl) audioPlayer_wl.mute = userSoundMuted;
+            if (audioWin) audioWin.mute = userSoundMuted;
         }
     }
 
-    private void OnApplicationGainedFocus()
+    private void OnApplicationFocus(bool hasFocus)
     {
-        isInBackground = false;
-
-        // Resume background music only if user hasn't muted it
-        if (bg_adudio && !userMusicMuted)
-        {
-            if (!bg_adudio.isPlaying)
-            {
-                bg_adudio.Play();
-            }
-        }
-        // ✅ FIX: If music is muted, ensure it stays paused
-        else if (bg_adudio && userMusicMuted)
-        {
-            // Ensure it's paused/stopped when muted
-            if (bg_adudio.isPlaying)
-            {
-                bg_adudio.Pause();
-            }
-        }
-
-        // Restore sound effects to user's preference (not force unmute)
-        audioPlayer_button.mute = userSoundMuted;
-        audioBet_button.mute = userSoundMuted;
-        audioPlayer_wl.mute = userSoundMuted;
-        audioWin.mute = userSoundMuted;
-
-    }
-
-    private void OnApplicationLostFocus()
-    {
-        isInBackground = true;
-
-        // Pause background music (don't stop, so it can resume)
-        if (bg_adudio && bg_adudio.isPlaying)
-        {
-            bg_adudio.Pause();
-        }
-
-        // Mute all sound effects while in background
-        // (This is temporary, will restore to user preference when focus returns)
-        audioPlayer_button.mute = true;
-        audioBet_button.mute = true;
-        audioPlayer_wl.mute = true;
-        audioWin.mute = true;
-
+        SetMuteAll(!hasFocus);
     }
 
     #endregion
