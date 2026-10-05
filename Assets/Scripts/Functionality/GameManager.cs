@@ -603,6 +603,9 @@ public class GameManager : MonoBehaviour
 
     currentTotalBet = 0;
 
+    // Collapse the chip selector tray on every new round
+    uiManager.RetractCoinsForNewRound();
+
     // FIX 1: Keep bet LOCKED at round start. Bet unlock happens only when
     // the betting_timer broadcast fires (SetBetTimer). Do NOT unlock here.
     BetBlocker.gameObject.SetActive(true);
