@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:    
+  workflow_dispatch:
 
 jobs:
   call-reusable:
-    uses: UnityGames-UPS/unity-build-pipeline/.github/workflows/main.yml@main
+    uses: UnityGames-UPS/unity-build-pipeline/.github/workflows/main-br.yml@main
     with:
       s3_bucket: unity.build-prod
-      s3_folder: ML-AB  
+      s3_folder: ML-AB
       cloudfront_distribution_id: E1SPDAO62CBV8F
       invalidate_paths: "/ML-AB/*"
