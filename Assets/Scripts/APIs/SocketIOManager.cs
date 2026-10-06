@@ -118,7 +118,10 @@ public class SocketIOManager : MonoBehaviour
         var data = JsonUtility.FromJson<AuthTokenData>(jsonData);
         SocketURI = data.socketURL;
         myAuth = data.cookie;
-        nameSpace = data.nameSpace;
+        //nameSpace = data.nameSpace;
+        Debug.Log("[JS] Received socketURL: " + SocketURI);
+        Debug.Log("[JS] Received authToken: " + myAuth);
+        Debug.Log("[JS] Received nameSpace: " + nameSpace);
         // Proceed with connecting to the server using myAuth and socketURL
     }
 
