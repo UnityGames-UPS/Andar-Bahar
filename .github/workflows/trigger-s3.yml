@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - dev-build
-  workflow_dispatch:    
+  workflow_dispatch:
 
 jobs:
   call-reusable:
-    uses: UnityGames-UPS/unity-build-pipeline/.github/workflows/main.yml@main
+    uses: UnityGames-UPS/unity-build-pipeline/.github/workflows/main-br.yml@main
     with:
       s3_bucket: unity.build-dev
       s3_folder: ML-AB
