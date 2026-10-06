@@ -995,10 +995,11 @@ public class UiManager : MonoBehaviour
     // REPLACE YOUR RetractCoins() METHOD WITH THIS
     // ========================================
 
-    internal void RetractCoins(bool playSound = true)
+    internal void RetractCoins(bool playSound = true, bool force = false)
     {
-        // ✅ Prevent spam - ignore if already animating
-        if (isChipAnimating) return;
+        // ✅ Prevent spam - ignore if already animating (unless forced, e.g. new round)
+        if (force) ResetChipAnimationState();
+        else if (isChipAnimating) return;
 
         Vector3 center = coinSelector.transform.localPosition;
         if (playSound && audioController) audioController.PlayWLAudio("coinSelect");
@@ -1077,6 +1078,15 @@ public class UiManager : MonoBehaviour
     // ========================================
     // ADD THIS NEW METHOD TO YOUR CLASS
     // ========================================
+
+    // Collapses the chip selector tray at the start of every round, even if an animation is in flight
+    internal void RetractCoinsForNewRound()
+    {
+        bool anyCoinActive = Coins.Any(c => c != null && c.gameObject.activeSelf);
+        if (!isExpanded && !anyCoinActive) return;
+
+        RetractCoins(false, true);
+    }
 
     // ✅ NEW: Coroutine to re-enable button after animation completes
     private IEnumerator EnableButtonAfterDelay(float delay)
